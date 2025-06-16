@@ -92,7 +92,7 @@ const testimonialData = [
     {
         rating: 5,
         title: "Cửa hàng giày tốt nhất!",
-        description: "Tôi rất hài lòng với dịch vụ của StreetSneaker. Sản phẩm chất lượng, giao hàng nhanh chóng và nhân viên phục vụ rất nhiệt tình.",
+        description: "Tôi rất hài lòng với dịch vụ của AllwearStudio. Sản phẩm chất lượng, giao hàng nhanh chóng và nhân viên phục vụ rất nhiệt tình.",
         image: "https://templatekits.themewarrior.com/champz/wp-content/uploads/sites/45/elementor/thumbs/testimo-1-pjspfmypsvn72mv2l3cj4mhf4j0bl9ruu9jw5bh1eo.jpg",
         name: "Tom Robertson",
         role: "Cầu thủ bóng đá"
@@ -100,7 +100,7 @@ const testimonialData = [
     {
         rating: 5,
         title: "Trải nghiệm tuyệt vời!",
-        description: "Mua sắm tại StreetSneaker là một trải nghiệm tuyệt vời. Sản phẩm đa dạng, giá cả phải chăng và dịch vụ chăm sóc khách hàng rất tốt.",
+        description: "Mua sắm tại AllwearStudio là một trải nghiệm tuyệt vời. Sản phẩm đa dạng, giá cả phải chăng và dịch vụ chăm sóc khách hàng rất tốt.",
         image: "https://templatekits.themewarrior.com/champz/wp-content/uploads/sites/45/elementor/thumbs/testimo-2-pjspfoue6jprpusca45s9m0cbar20nzbiiuv3ve928.jpg",
         name: "Amelia Robinson",
         role: "Cầu thủ bóng đá"
@@ -108,7 +108,7 @@ const testimonialData = [
     {
         rating: 5,
         title: "Chất lượng đáng tin cậy",
-        description: "Những đôi giày tôi mua từ StreetSneaker luôn bền đẹp và thoải mái. Tôi đã giới thiệu cửa hàng cho tất cả bạn bè của mình.",
+        description: "Những đôi giày tôi mua từ AllwearStudio luôn bền đẹp và thoải mái. Tôi đã giới thiệu cửa hàng cho tất cả bạn bè của mình.",
         image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
         name: "Michael Johnson",
         role: "Huấn luyện viên thể thao"
@@ -116,7 +116,7 @@ const testimonialData = [
     {
         rating: 4,
         title: "Dịch vụ tận tâm",
-        description: "Nhân viên tại StreetSneaker luôn nhiệt tình và am hiểu về sản phẩm. Họ giúp tôi chọn được đôi giày phù hợp nhất với nhu cầu của mình.",
+        description: "Nhân viên tại AllwearStudio luôn nhiệt tình và am hiểu về sản phẩm. Họ giúp tôi chọn được đôi giày phù hợp nhất với nhu cầu của mình.",
         image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
         name: "Sarah Miller",
         role: "Người yêu thể thao"
@@ -132,7 +132,7 @@ const testimonialData = [
     {
         rating: 5,
         title: "Sản phẩm chính hãng",
-        description: "Rất yên tâm khi mua sắm tại StreetSneaker vì họ chỉ bán hàng chính hãng. Giá cả hợp lý và chất lượng đảm bảo.",
+        description: "Rất yên tâm khi mua sắm tại AllwearStudio vì họ chỉ bán hàng chính hãng. Giá cả hợp lý và chất lượng đảm bảo.",
         image: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHVzZXJ8ZW58MHx8MHx8fDA%3D",
         name: "Emily Parker",
         role: "Người mẫu"
@@ -147,7 +147,7 @@ export const AboutUs = () => {
                 <div className="absolute inset-0">
                     <img
                         src="https://templatekits.themewarrior.com/champz/wp-content/uploads/sites/45/2022/01/hero-about.jpg"
-                        alt="StreetSneaker Banner"
+                        alt="AllwearStudio Banner"
                         className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-[#2C8B3D]/50 via-[#88C140]/50 to-[#F2A024]/70"></div>
@@ -171,7 +171,7 @@ export const AboutUs = () => {
                             </span>
                             <br />
                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F2A024] to-[#88C140] font-extrabold">
-                                StreetSneaker
+                                AllwearStudio
                             </span>
                         </motion.h1>
                         <motion.p 
@@ -213,7 +213,7 @@ export const AboutUs = () => {
                         >
                             <h2 className="text-4xl font-bold text-maintext dark:text-white mb-8">Câu chuyện của chúng tôi</h2>
                             <p className="text-lg text-maintext dark:text-maintext mb-8">
-                                StreetSneaker được thành lập với sứ mệnh mang đến cho khách hàng những sản phẩm giày chất lượng cao với giá cả phải chăng. Chúng tôi tin rằng mỗi người đều xứng đáng được sở hữu những đôi giày thoải mái và thời trang.
+                                AllwearStudio được thành lập với sứ mệnh mang đến cho khách hàng những sản phẩm giày chất lượng cao với giá cả phải chăng. Chúng tôi tin rằng mỗi người đều xứng đáng được sở hữu những đôi giày thoải mái và thời trang.
                             </p>
                             <p className="text-lg text-maintext dark:text-maintext mb-8">
                                 Với hơn 5 năm kinh nghiệm trong ngành, chúng tôi đã xây dựng được mạng lưới cung cấp sản phẩm rộng khắp, đảm bảo luôn có sẵn các mẫu giày mới nhất và phổ biến nhất trên thị trường.
@@ -255,7 +255,7 @@ export const AboutUs = () => {
                             <div className="absolute inset-0 bg-gradient-to-br from-[#2C8B3D] to-[#F2A024] opacity-20"></div>
                             <img
                                 src="https://templatekits.themewarrior.com/champz/wp-content/uploads/sites/45/elementor/thumbs/about-sect-pjs7cmwyucho7hy38akr4ok276qbcwtfp44ksgi1sa.jpg"
-                                alt="StreetSneaker Store"
+                                alt="AllwearStudio Store"
                                 className="object-cover"
                             />
                         </motion.div>
@@ -273,7 +273,7 @@ export const AboutUs = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <h2 className="text-4xl font-bold text-maintext dark:text-white mb-4">Tại sao chọn StreetSneaker?</h2>
+                        <h2 className="text-4xl font-bold text-maintext dark:text-white mb-4">Tại sao chọn AllwearStudio?</h2>
                         <p className="text-lg text-maintext dark:text-maintext max-w-2xl mx-auto">
                             Chúng tôi cam kết mang đến trải nghiệm mua sắm tốt nhất cho khách hàng với những dịch vụ và sản phẩm chất lượng cao.
                         </p>
@@ -315,7 +315,7 @@ export const AboutUs = () => {
                     >
                         <h2 className="text-4xl font-bold text-maintext dark:text-white mb-4">Đội ngũ của chúng tôi</h2>
                         <p className="text-lg text-maintext dark:text-maintext max-w-2xl mx-auto">
-                            StreetSneaker được vận hành bởi một đội ngũ trẻ trung, năng động và đầy nhiệt huyết. Chúng tôi luôn nỗ lực để mang đến những sản phẩm và dịch vụ tốt nhất cho khách hàng.
+                            AllwearStudio được vận hành bởi một đội ngũ trẻ trung, năng động và đầy nhiệt huyết. Chúng tôi luôn nỗ lực để mang đến những sản phẩm và dịch vụ tốt nhất cho khách hàng.
                         </p>
                     </motion.div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">

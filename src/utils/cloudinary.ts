@@ -6,7 +6,7 @@ export const createFormData = (file: File) => {
   formData.append("file", file);
   formData.append("upload_preset", "ml_default");
   formData.append("cloud_name", "dv4iqmqrm");
-  formData.append("folder", "street-sneaker");
+  formData.append("folder", "clothes");
   return formData;
 };
 
@@ -32,7 +32,7 @@ export const generateUniqueFileName = (originalName: string) => {
  * Tạo đường dẫn thư mục lưu trữ
  */
 export const generateUploadPath = (resourceType: string, fileName: string) => {
-  return `street-sneaker/${resourceType}s/${fileName}`;
+  return `clothes/${resourceType}s/${fileName}`;
 };
 
 /**

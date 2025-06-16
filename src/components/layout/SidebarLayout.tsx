@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@mdi/react';
@@ -8,46 +8,60 @@ import { MenuItem, SubMenuItem } from '@/interface/types';
 import { menuItems } from './menuItems';
 import AdminHeader from '../Common/AdminHeader';
 import { useMenuSidebar } from '@/stores/useMenuSidebar';
+import { useStableCallback } from '@/hooks/usePerformance';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
 }
 
-const SidebarLayout = React.memo(function SidebarLayout({ children }: SidebarLayoutProps) {
+const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutProps) {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const [hoverMenu, setHoverMenu] = useState<string | null>(null);
   const location = useLocation();
   const pathname = location.pathname;
   const { isOpen } = useMenuSidebar();
 
-  const toggleSubMenu = useCallback((menuId: string) => {
+  // Use stable callbacks to prevent unnecessary re-renders
+  const toggleSubMenu = useStableCallback((menuId: string) => {
     setOpenMenus((prev) => ({
       ...prev,
       [menuId]: !prev[menuId],
     }));
-  }, []);
+  });
 
-  const isMenuActive = useCallback((menu: MenuItem) => {
-    if (menu.path && pathname === menu.path) return true;
-    if (menu.subMenu) {
-      return menu.subMenu.some((sub) => pathname === sub.path);
-    }
-    return false;
+  const isMenuActive = useMemo(() => {
+    const activeMenuCache = new Map<string, boolean>();
+    return (menu: MenuItem) => {
+      const cacheKey = `${menu.id}-${pathname}`;
+      if (activeMenuCache.has(cacheKey)) {
+        return activeMenuCache.get(cacheKey);
+      }
+      
+      let isActive = false;
+      if (menu.path && pathname === menu.path) {
+        isActive = true;
+      } else if (menu.subMenu) {
+        isActive = menu.subMenu.some((sub) => pathname === sub.path);
+      }
+      
+      activeMenuCache.set(cacheKey, isActive);
+      return isActive;
+    };
   }, [pathname]);
 
-  const isSubMenuActive = useCallback((path: string) => {
+  const isSubMenuActive = useStableCallback((path: string) => {
     return pathname === path;
-  }, [pathname]);
+  });
 
-  const handleMouseEnter = useCallback((menuId: string) => {
+  const handleMouseEnter = useStableCallback((menuId: string) => {
     if (!isOpen) {
       setHoverMenu(menuId);
     }
-  }, [isOpen]);
+  });
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useStableCallback(() => {
     setHoverMenu(null);
-  }, []);
+  });
 
   // Memoize menu items to prevent unnecessary re-renders
   const memoizedMenuItems = useMemo(() => menuItems, []);
@@ -65,7 +79,7 @@ const SidebarLayout = React.memo(function SidebarLayout({ children }: SidebarLay
           <div className={cn("p-4 border-b !max-h-16", isOpen ? "" : "justify-center")}>
             {isOpen ? (
               <h1 className="text-2xl  text-primary !font-bold select-none cursor-pointer">
-                Street<span className="text-extra">Sneaker</span>
+                Street<span className="text-extra">AllwearStudio</span>
               </h1>
             ) : (
               <h1 className="text-2xl text-primary !font-bold select-none cursor-pointer text-center">

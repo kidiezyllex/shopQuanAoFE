@@ -12,6 +12,7 @@ import { checkImageUrl } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useColors, useSizes } from '@/hooks/attributes';
+import { getSizeLabel } from '@/utils/sizeMapping';
 
 interface ProductVariantFormProps {
   variant: IProductVariant;
@@ -124,7 +125,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             <SelectContent>
               {(sizesData?.data || []).map(size => (
                 <SelectItem key={size._id} value={size._id}>
-                  {size.value}
+                  {getSizeLabel(size.value)}
                 </SelectItem>
               ))}
             </SelectContent>

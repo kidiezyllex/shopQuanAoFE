@@ -41,25 +41,24 @@ export default defineConfig({
           ],
           'query-vendor': ['@tanstack/react-query', 'axios'],
           'icons-vendor': ['@mdi/react', '@mdi/js', 'lucide-react', '@tabler/icons-react'],
-          'heavy-vendor': [
-            'framer-motion',
-            'antd',
-            'recharts',
-            'yet-another-react-lightbox',
-            'html5-qrcode',
-            'jspdf',
-            'xlsx'
-          ],
+          'framer-motion': ['framer-motion'],
+          'antd': ['antd'],
+          'charts': ['recharts'],
+          'lightbox': ['yet-another-react-lightbox'],
+          'pdf-export': ['jspdf', 'jspdf-autotable'],
+          'excel': ['xlsx'],
+          'qr-scanner': ['html5-qrcode'],
           'utils-vendor': ['lodash', 'dayjs', 'moment', 'date-fns', 'zod']
         }
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
       }
     }
   },
@@ -74,7 +73,10 @@ export default defineConfig({
     exclude: [
       'framer-motion',
       'antd',
-      'recharts'
+      'jspdf',
+      'xlsx',
+      'html5-qrcode',
+      'yet-another-react-lightbox'
     ]
   }
 }) 

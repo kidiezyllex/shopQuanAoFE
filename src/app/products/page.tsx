@@ -12,6 +12,7 @@ import { mdiCartOutline, mdiHeartOutline, mdiEye, mdiFilterOutline, mdiClose, md
 import { useProducts, useSearchProducts } from "@/hooks/product"
 import { usePromotions } from "@/hooks/promotion"
 import { applyPromotionsToProducts, calculateProductDiscount } from "@/lib/promotions"
+import { getSizeLabel } from "@/utils/sizeMapping"
 import type { IProductFilter } from "@/interface/request/product"
 import {
   Breadcrumb,
@@ -283,7 +284,7 @@ export default function ProductsPage() {
       colorId: firstVariant.colorId?._id || '',
       sizeId: firstVariant.sizeId?._id || '',
       colorName: firstVariant.colorId?.name || 'Default',
-      sizeName: firstVariant.sizeId?.value || firstVariant.sizeId?.code || ''
+      sizeName: firstVariant.sizeId?.value ? getSizeLabel(firstVariant.sizeId.value) : (firstVariant.sizeId?.code || '')
     };
 
     addToCart(cartItem, 1);
@@ -856,7 +857,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
                     {Array.from(
                       new Set(
                         product.variants.map((v: any) =>
-                          typeof v.sizeId === "object" ? v.sizeId.value : v.sizeId
+                          typeof v.sizeId === "object" ? getSizeLabel(v.sizeId.value) : getSizeLabel(v.sizeId)
                         )
                       )
                     ).join(", ")}
@@ -1129,7 +1130,7 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
               className={`px-2 py-1 border rounded text-sm transition-all duration-300 ${filters.size === size._id ? "bg-primary text-white border-primary" : "border-gray-300 hover:border-primary"}`}
               onClick={() => handleSizeChange(size._id)}
             >
-              {size.value ? `EU ${size.value}` : size.name || size._id}
+              {size.value ? getSizeLabel(size.value) : size.name || size._id}
             </button>
           ))}
         </div>

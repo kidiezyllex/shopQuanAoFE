@@ -1,4 +1,3 @@
-import _, { toNumber } from "lodash";
 import { KeyboardEvent } from "react";
 import dayjs from "dayjs";
 import { numericRegex } from "@/regex";

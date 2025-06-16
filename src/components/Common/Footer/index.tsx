@@ -8,7 +8,7 @@ export const Footer = () => {
   const socialLinks = [
     { 
       name: 'linkedin', 
-      href: 'https://www.linkedin.com/company/street-sneakers/', 
+      href: 'https://www.linkedin.com/company/clothess/', 
       src: '/images/linkedin.png', 
       width: 60, 
       height: 60,
@@ -32,7 +32,7 @@ export const Footer = () => {
     },
     { 
       name: 'facebook', 
-      href: 'https://www.facebook.com/street-sneakers', 
+      href: 'https://www.facebook.com/clothess', 
       src: '/images/facebook.png', 
       width: 60, 
       height: 60,
@@ -40,7 +40,7 @@ export const Footer = () => {
     },
     { 
       name: 'tiktok', 
-      href: 'https://www.tiktok.com/@street-sneakers', 
+      href: 'https://www.tiktok.com/@clothess', 
       src: '/images/tiktok.png', 
       width: 60, 
       height: 60,

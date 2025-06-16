@@ -41,4 +41,21 @@ export const LazyComponentLoader: React.FC<LazyComponentLoaderProps> = ({
   );
 };
 
+// Simple loading component for quick loads
+export const SimpleLoader = () => (
+  <div className="flex items-center justify-center py-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
+// Loading component for heavy operations
+export const HeavyLoader = () => (
+  <div className="flex items-center justify-center min-h-[200px]">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <p className="text-sm text-muted-foreground">Đang tải thư viện...</p>
+    </div>
+  </div>
+);
+
 export default LazyComponentLoader; 

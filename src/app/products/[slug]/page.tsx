@@ -45,6 +45,7 @@ if (typeof document !== 'undefined') {
 import { useProductDetail, useProducts } from '@/hooks/product';
 import { usePromotions } from '@/hooks/promotion';
 import { calculateProductDiscount, formatPrice as formatPromotionPrice, applyPromotionsToProducts } from '@/lib/promotions';
+import { getSizeLabel } from '@/utils/sizeMapping';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Icon } from '@mdi/react';
@@ -148,8 +149,6 @@ const ImageZoom = ({ src, alt, className }: { src: string; alt: string; classNam
           alt={alt}
           draggable="false"
           className="object-contain p-4 transition-transform duration-300"
-          priority
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
         />
         
         {/* Zoom Lens - Desktop only */}
@@ -341,7 +340,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
       colorId: firstVariant.colorId?._id || '',
       sizeId: firstVariant.sizeId?._id || '',
       colorName: firstVariant.colorId?.name || 'Default',
-      sizeName: firstVariant.sizeId?.name || firstVariant.sizeId?.code || ''
+      sizeName: firstVariant.sizeId?.value ? getSizeLabel(firstVariant.sizeId.value) : (firstVariant.sizeId?.name || firstVariant.sizeId?.code || '')
     };
 
     addToCart(cartItem, 1);
@@ -591,7 +590,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
                   <div className="flex gap-1 text-maintext text-sm">
                     {Array.from(
                       new Set(
-                        product.variants.map((v: any) => (typeof v.sizeId === "object" ? v.sizeId.value : v.sizeId))
+                        product.variants.map((v: any) => (typeof v.sizeId === "object" ? getSizeLabel(v.sizeId.value) : getSizeLabel(v.sizeId)))
                       )
                     ).join(", ")}
                   </div>
@@ -608,8 +607,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
   );
 };
 
-export default function ProductDetail() {
-  const params = useParams();
+export default function ProductDetail({ params }: { params: { slug: string } }) {
   const slug = params.slug;
   const [productId, setProductId] = useState<string>('');
   const { data: productData, isLoading } = useProductDetail(productId);
@@ -741,7 +739,7 @@ export default function ProductDetail() {
       colorId: selectedVariant.colorId._id,
       sizeId: selectedVariant.sizeId._id,
       colorName: selectedVariant.colorId.name,
-      sizeName: selectedVariant.sizeId.name || selectedVariant.sizeId.code || ''
+      sizeName: selectedVariant.sizeId.value ? getSizeLabel(selectedVariant.sizeId.value) : (selectedVariant.sizeId.name || selectedVariant.sizeId.code || '')
     };
 
     addToCart(cartItem, quantity);
@@ -876,7 +874,7 @@ export default function ProductDetail() {
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-white border shadow-lg">
               {selectedVariant && selectedVariant.images && selectedVariant.images.length > 0 ? (
                 <>
-                  <imgZoom
+                  <ImageZoom
                     src={checkImageUrl(selectedVariant.images[currentImageIndex])}
                     alt={product.name}
                     className="aspect-square"
@@ -1094,7 +1092,7 @@ export default function ProductDetail() {
                 </div>
                 {selectedVariant?.sizeId && (
                   <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {(selectedVariant.sizeId as any).value}
+                    {getSizeLabel((selectedVariant.sizeId as any).value)}
                   </span>
                 )}
               </div>
@@ -1117,7 +1115,7 @@ export default function ProductDetail() {
                         className={!isAvailable ? "opacity-50 cursor-not-allowed" : ""}
                         title={!isAvailable ? "Không có sẵn cho màu này" : ""}
                       >
-                        {(sizeVariant?.sizeId as any)?.value}
+                        {getSizeLabel((sizeVariant?.sizeId as any)?.value)}
                       </Button>
                     );
                   })}

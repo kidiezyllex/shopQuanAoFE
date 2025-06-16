@@ -3,7 +3,7 @@ import {
   mdiChartBar,
   mdiTagMultiple,
   mdiRestart,
-  mdiArrowRight,
+  mdiHanger,
   mdiDesk,
   mdiOrderBoolDescendingVariant,
   mdiAccount,
@@ -32,7 +32,7 @@ export const menuItems: MenuItem[] = [
     id: 'products',
     name: 'Quản lý sản phẩm',
     path: '/admin/products',
-    icon: mdiArrowRight,
+    icon: mdiHanger,
     subMenu: [
       {
         id: 'products-list',

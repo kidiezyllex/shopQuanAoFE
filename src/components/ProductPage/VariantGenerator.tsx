@@ -9,8 +9,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Icon } from '@mdi/react';
+import { mdiAutoFix } from '@mdi/js';
+import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
 import { useColors, useSizes } from '@/hooks/attributes';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getSizeLabel } from '@/utils/sizeMapping';
 interface VariantGeneratorProps {
   baseVariant: IProductVariant;
   onGenerate: (variants: IProductVariant[]) => void;
@@ -57,7 +60,7 @@ const VariantGenerator: React.FC<VariantGeneratorProps> = ({
             images: baseVariant.images ? [...baseVariant.images] : [], // tất cả dùng chung images với biến thể #1
             selected: true, // Mặc định chọn tất cả
             colorName: color.name,
-            sizeName: `Size ${size.value}`,
+            sizeName: getSizeLabel(size.value),
             sizeValue: size.value
           });
         });

@@ -139,7 +139,7 @@ export const HeroBanner = () => {
                         >
                             <img
                                 src={"/images/banner.png"} 
-                                alt="Sneaker Collection"
+                                alt="AllwearStudio Collection"
                                 width={1000}
                                 height={1000}
                                draggable={false}

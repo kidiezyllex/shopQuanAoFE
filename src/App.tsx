@@ -3,18 +3,23 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ReactQueryClientProvider } from '@/provider/ReactQueryClientProvider'
 import { UserProvider } from '@/context/useUserContext'
 import { ToastContainer } from 'react-toastify'
+import { LazyComponentLoader } from '@/components/Common/LazyComponentLoader'
 
 // Layout components
 import RootLayout from '@/layouts/RootLayout'
 import AdminLayout from '@/layouts/AdminLayout'
 
-// Lazy load page components
+// Lazy load page components with route-based code splitting
 const HomePage = React.lazy(() => import('@/pages/HomePage'))
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'))
 const AboutUsPage = React.lazy(() => import('@/pages/AboutUsPage'))
 const AccountPage = React.lazy(() => import('@/pages/AccountPage'))
+
+// Auth pages
 const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'))
 const RegisterPage = React.lazy(() => import('@/pages/auth/RegisterPage'))
+
+// Public pages
 const ProductsPage = React.lazy(() => import('@/pages/ProductsPage'))
 const ProductDetailPage = React.lazy(() => import('@/pages/ProductDetailPage'))
 const ProfilePage = React.lazy(() => import('@/pages/ProfilePage'))
@@ -26,11 +31,16 @@ const CheckoutShippingPage = React.lazy(() => import('@/pages/CheckoutShippingPa
 const CheckoutSuccessPage = React.lazy(() => import('@/pages/CheckoutSuccessPage'))
 const PaymentResultPage = React.lazy(() => import('@/pages/PaymentResultPage'))
 
-// Lazy load admin pages
+// Admin pages - grouped by functionality for better code splitting
 const AdminDashboardPage = React.lazy(() => import('@/pages/admin/AdminDashboardPage'))
+const AdminStatisticsPage = React.lazy(() => import('@/pages/admin/AdminStatisticsPage'))
+
+// Admin Account Management
 const AdminAccountsPage = React.lazy(() => import('@/pages/admin/AdminAccountsPage'))
 const AdminAccountCreatePage = React.lazy(() => import('@/pages/admin/AdminAccountCreatePage'))
 const AdminAccountEditPage = React.lazy(() => import('@/pages/admin/AdminAccountEditPage'))
+
+// Admin Discounts Management
 const AdminDiscountsPage = React.lazy(() => import('@/pages/admin/AdminDiscountsPage'))
 const AdminPromotionsPage = React.lazy(() => import('@/pages/admin/AdminPromotionsPage'))
 const AdminPromotionCreatePage = React.lazy(() => import('@/pages/admin/AdminPromotionCreatePage'))
@@ -38,11 +48,17 @@ const AdminPromotionEditPage = React.lazy(() => import('@/pages/admin/AdminPromo
 const AdminVouchersPage = React.lazy(() => import('@/pages/admin/AdminVouchersPage'))
 const AdminVoucherCreatePage = React.lazy(() => import('@/pages/admin/AdminVoucherCreatePage'))
 const AdminVoucherEditPage = React.lazy(() => import('@/pages/admin/AdminVoucherEditPage'))
+
+// Admin Orders Management
 const AdminOrdersPage = React.lazy(() => import('@/pages/admin/AdminOrdersPage'))
 const AdminOrderDetailPage = React.lazy(() => import('@/pages/admin/AdminOrderDetailPage'))
 const AdminOrderCreatePage = React.lazy(() => import('@/pages/admin/AdminOrderCreatePage'))
 const AdminOrderEditPage = React.lazy(() => import('@/pages/admin/AdminOrderEditPage'))
+
+// Admin POS
 const AdminPosPage = React.lazy(() => import('@/pages/admin/AdminPosPage'))
+
+// Admin Products Management
 const AdminProductsPage = React.lazy(() => import('@/pages/admin/AdminProductsPage'))
 const AdminProductBrandsPage = React.lazy(() => import('@/pages/admin/AdminProductBrandsPage'))
 const AdminProductCategoriesPage = React.lazy(() => import('@/pages/admin/AdminProductCategoriesPage'))
@@ -51,17 +67,18 @@ const AdminProductCreatePage = React.lazy(() => import('@/pages/admin/AdminProdu
 const AdminProductEditPage = React.lazy(() => import('@/pages/admin/AdminProductEditPage'))
 const AdminProductMaterialsPage = React.lazy(() => import('@/pages/admin/AdminProductMaterialsPage'))
 const AdminProductSizesPage = React.lazy(() => import('@/pages/admin/AdminProductSizesPage'))
+
+// Admin Returns Management
 const AdminReturnsPage = React.lazy(() => import('@/pages/admin/AdminReturnsPage'))
 const AdminReturnCreatePage = React.lazy(() => import('@/pages/admin/AdminReturnCreatePage'))
 const AdminReturnEditPage = React.lazy(() => import('@/pages/admin/AdminReturnEditPage'))
-const AdminStatisticsPage = React.lazy(() => import('@/pages/admin/AdminStatisticsPage'))
 
-// Loading component
+// Optimized loading component with better UX
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
     <div className="flex flex-col items-center space-y-4">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      <p className="text-sm text-muted-foreground">Đang tải...</p>
+      <p className="text-sm text-muted-foreground animate-pulse">Đang tải trang...</p>
     </div>
   </div>
 )
@@ -82,78 +99,253 @@ function App() {
             draggable 
             pauseOnHover 
             theme="light" 
+            limit={3}
           />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Public routes with main layout */}
-              <Route path="/" element={<RootLayout />}>
-                <Route index element={<HomePage />} />
-                <Route path="about-us" element={<AboutUsPage />} />
-                <Route path="account" element={<AccountPage />} />
-                <Route path="products" element={<ProductsPage />} />
-                <Route path="products/:slug" element={<ProductDetailPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="profile/change-password" element={<ChangePasswordPage />} />
-                <Route path="orders" element={<OrdersPage />} />
-                <Route path="orders/:id" element={<OrderDetailPage />} />
-                <Route path="returns" element={<ReturnsPage />} />
-                <Route path="checkout/shipping" element={<CheckoutShippingPage />} />
-                <Route path="checkout/success" element={<CheckoutSuccessPage />} />
-                <Route path="payment-result" element={<PaymentResultPage />} />
-              </Route>
+          <Routes>
+            {/* Public routes with main layout */}
+            <Route path="/" element={<RootLayout />}>
+              <Route index element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <HomePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="about-us" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AboutUsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="account" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AccountPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <ProductsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/:slug" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <ProductDetailPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="profile" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <ProfilePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="profile/change-password" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <ChangePasswordPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="orders" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <OrdersPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="orders/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <OrderDetailPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="returns" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <ReturnsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="checkout/shipping" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <CheckoutShippingPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="checkout/success" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <CheckoutSuccessPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="payment-result" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <PaymentResultPage />
+                </LazyComponentLoader>
+              } />
+            </Route>
 
-              {/* Auth routes (no layout) */}
-              <Route path="auth/login" element={<LoginPage />} />
-              <Route path="auth/register" element={<RegisterPage />} />
+            {/* Auth routes (no layout) */}
+            <Route path="auth/login" element={
+              <LazyComponentLoader fallback={<PageLoader />}>
+                <LoginPage />
+              </LazyComponentLoader>
+            } />
+            <Route path="auth/register" element={
+              <LazyComponentLoader fallback={<PageLoader />}>
+                <RegisterPage />
+              </LazyComponentLoader>
+            } />
 
-              {/* Admin routes with admin layout */}
-              <Route path="admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboardPage />} />
-                <Route path="statistics" element={<AdminStatisticsPage />} />
-                
-                {/* Accounts */}
-                <Route path="accounts" element={<AdminAccountsPage />} />
-                <Route path="accounts/create" element={<AdminAccountCreatePage />} />
-                <Route path="accounts/edit/:id" element={<AdminAccountEditPage />} />
-                
-                {/* Discounts */}
-                <Route path="discounts" element={<AdminDiscountsPage />} />
-                <Route path="discounts/promotions" element={<AdminPromotionsPage />} />
-                <Route path="discounts/promotions/create" element={<AdminPromotionCreatePage />} />
-                <Route path="discounts/promotions/edit/:id" element={<AdminPromotionEditPage />} />
-                <Route path="discounts/vouchers" element={<AdminVouchersPage />} />
-                <Route path="discounts/vouchers/create" element={<AdminVoucherCreatePage />} />
-                <Route path="discounts/vouchers/edit/:id" element={<AdminVoucherEditPage />} />
-                
-                {/* Orders */}
-                <Route path="orders" element={<AdminOrdersPage />} />
-                <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
-                <Route path="orders/create" element={<AdminOrderCreatePage />} />
-                <Route path="orders/edit/:id" element={<AdminOrderEditPage />} />
-                
-                {/* POS */}
-                <Route path="pos" element={<AdminPosPage />} />
-                
-                {/* Products */}
-                <Route path="products" element={<AdminProductsPage />} />
-                <Route path="products/brands" element={<AdminProductBrandsPage />} />
-                <Route path="products/categories" element={<AdminProductCategoriesPage />} />
-                <Route path="products/colors" element={<AdminProductColorsPage />} />
-                <Route path="products/create" element={<AdminProductCreatePage />} />
-                <Route path="products/edit/:id" element={<AdminProductEditPage />} />
-                <Route path="products/materials" element={<AdminProductMaterialsPage />} />
-                <Route path="products/sizes" element={<AdminProductSizesPage />} />
-                
-                {/* Returns */}
-                <Route path="returns" element={<AdminReturnsPage />} />
-                <Route path="returns/create" element={<AdminReturnCreatePage />} />
-                <Route path="returns/edit/:id" element={<AdminReturnEditPage />} />
-              </Route>
+            {/* Admin routes with admin layout */}
+            <Route path="admin" element={<AdminLayout />}>
+              <Route index element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminDashboardPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="statistics" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminStatisticsPage />
+                </LazyComponentLoader>
+              } />
+              
+              {/* Accounts */}
+              <Route path="accounts" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminAccountsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="accounts/create" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminAccountCreatePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="accounts/edit/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminAccountEditPage />
+                </LazyComponentLoader>
+              } />
+              
+              {/* Discounts */}
+              <Route path="discounts" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminDiscountsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="discounts/promotions" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminPromotionsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="discounts/promotions/create" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminPromotionCreatePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="discounts/promotions/edit/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminPromotionEditPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="discounts/vouchers" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminVouchersPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="discounts/vouchers/create" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminVoucherCreatePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="discounts/vouchers/edit/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminVoucherEditPage />
+                </LazyComponentLoader>
+              } />
+              
+              {/* Orders */}
+              <Route path="orders" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminOrdersPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="orders/:orderId" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminOrderDetailPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="orders/create" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminOrderCreatePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="orders/edit/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminOrderEditPage />
+                </LazyComponentLoader>
+              } />
+              
+              {/* POS */}
+              <Route path="pos" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminPosPage />
+                </LazyComponentLoader>
+              } />
+              
+              {/* Products */}
+              <Route path="products" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/brands" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductBrandsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/categories" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductCategoriesPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/colors" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductColorsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/create" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductCreatePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/edit/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductEditPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/materials" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductMaterialsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="products/sizes" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminProductSizesPage />
+                </LazyComponentLoader>
+              } />
+              
+              {/* Returns */}
+              <Route path="returns" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminReturnsPage />
+                </LazyComponentLoader>
+              } />
+              <Route path="returns/create" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminReturnCreatePage />
+                </LazyComponentLoader>
+              } />
+              <Route path="returns/edit/:id" element={
+                <LazyComponentLoader fallback={<PageLoader />}>
+                  <AdminReturnEditPage />
+                </LazyComponentLoader>
+              } />
+            </Route>
 
-              {/* 404 page */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
+            {/* 404 page */}
+            <Route path="*" element={
+              <LazyComponentLoader fallback={<PageLoader />}>
+                <NotFoundPage />
+              </LazyComponentLoader>
+            } />
+          </Routes>
         </UserProvider>
       </Router>
     </ReactQueryClientProvider>

@@ -105,6 +105,7 @@ import { usePOSCartStore, POSCartItem } from '@/stores/usePOSCartStore';
 import { usePendingCartsStore, PendingCart } from '@/stores/usePendingCartsStore';
 import { useAccounts } from '@/hooks/account';
 import { IAccount } from '@/interface/response/account';
+import { getSizeLabel } from '@/utils/sizeMapping';
 
 import jsPDF from "jspdf";
 import { CustomScrollArea } from '@/components/ui/custom-scroll-area';
@@ -478,7 +479,7 @@ export default function POSPage() {
       name: product.name,
       colorName: variant.colorId?.name || 'N/A',
       colorCode: variant.colorId?.code,
-      sizeName: variant.sizeId?.name || variant.sizeId?.value || 'N/A',
+                  sizeName: variant.sizeId?.name || (variant.sizeId?.value ? getSizeLabel(Number(variant.sizeId.value)) : 'N/A'),
       price: finalPrice,
       originalPrice: (product as any).hasDiscount ? (product as any).originalPrice : undefined,
       discountPercent: (product as any).hasDiscount ? (product as any).discountPercent : undefined,
@@ -839,7 +840,7 @@ export default function POSPage() {
             name: 'Clothes Shop',
             address: 'Địa chỉ shop: 20 Hồ Tùng Mậu, Cầu Giấy, Hà Nội',
             phone: '0123 456 789',
-            email: 'info@street-sneaker.com'
+            email: 'info@clothes.com'
           },
           customerInfo: {
             name: customerName || 'Khách vãng lai',
@@ -1390,7 +1391,7 @@ export default function POSPage() {
                           <h3 className="text-base font-semibold text-maintext">Kích thước</h3>
                           {selectedApiVariant?.sizeId && (
                             <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                              {selectedApiVariant.sizeId.name || selectedApiVariant.sizeId.value}
+                              {selectedApiVariant.sizeId.name || (selectedApiVariant.sizeId.value ? getSizeLabel(Number(selectedApiVariant.sizeId.value)) : 'N/A')}
                             </Badge>
                           )}
                         </div>
@@ -1410,7 +1411,7 @@ export default function POSPage() {
                                 onClick={() => handleSizeSelectFromDetail(size._id)}
                                 disabled={stockForThisSize === 0}
                               >
-                                {size.name || size.value}
+                                {size.name || (size.value ? getSizeLabel(Number(size.value)) : 'N/A')}
                                 {stockForThisSize === 0 && ' (Hết hàng)'}
                               </Button>
                             );
