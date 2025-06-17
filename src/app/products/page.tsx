@@ -107,7 +107,7 @@ export default function ProductsPage() {
     if (filters.brands && filters.brands.length > 0) {
       const brandsArray = Array.isArray(filters.brands) ? filters.brands : [filters.brands]
       filteredProducts = filteredProducts.filter((product) => {
-        const brandId = typeof product.brand === "object" ? product.(brand as any)?.id : product.brand
+        const brandId = typeof product.brand === "object" ? (product.brand as any).id : product.brand
         return brandsArray.includes(brandId)
       })
     }
