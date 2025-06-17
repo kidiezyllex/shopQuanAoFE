@@ -78,10 +78,10 @@ export default function CreateOrderPage() {
 
   const handleAddProduct = (product: any) => {
     const newProduct: OrderItemType = {
-      product: product._id,
+      product: (product as any)?.id,
       variant: {
-        colorId: product.variants?.[0]?.color?._id || '',
-        sizeId: product.variants?.[0]?.size?._id || '',
+        colorId: product.variants?.[0]?.color?.id || '',
+        sizeId: product.variants?.[0]?.size?.id || '',
       },
       quantity: 1,
       price: product.salePrice || product.regularPrice,
@@ -533,7 +533,7 @@ export default function CreateOrderPage() {
                   </TableHeader>
                   <TableBody>
                     {productsData.data.products.map((product: any) => (
-                      <TableRow key={product._id}>
+                      <TableRow key={(product as any)?.id}>
                         <TableCell>
                           <div className="flex items-center space-x-4">
                             {product.images?.[0] && (

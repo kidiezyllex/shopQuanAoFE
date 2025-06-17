@@ -111,7 +111,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       setUploading(true);
       const formData = createFormData(file);
       const result = await uploadImage.mutateAsync(formData);
-      const variant = productData?.data.variants.find(v => v._id === variantId);
+      const variant = productData?.data.variants.find(v => v.id === variantId);
       if (!variant) {
         toast.error('Không tìm thấy biến thể');
         return;
@@ -142,7 +142,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   const handleRemoveImage = async (variantId: string, imageIndex: number) => {
     try {
       // Xác định biến thể cần cập nhật ảnh
-      const variant = productData?.data.variants.find(v => v._id === variantId);
+      const variant = productData?.data.variants.find(v => v.id === variantId);
       if (!variant) {
         toast.error('Không tìm thấy biến thể');
         return;
@@ -434,7 +434,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <AnimatePresence>
                 {product.variants.map((variant) => (
                   <motion.div
-                    key={variant._id}
+                    key={variant.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
@@ -457,10 +457,10 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="space-y-2">
-                        <Label htmlFor={`stock-${variant._id}`} className="text-maintext">Số lượng tồn kho</Label>
+                        <Label htmlFor={`stock-${variant.id}`} className="text-maintext">Số lượng tồn kho</Label>
                         <div className="flex gap-2">
                           <Input
-                            id={`stock-${variant._id}`}
+                            id={`stock-${variant.id}`}
                             type="number"
                             min="0"
                             defaultValue={variant.stock}
@@ -470,11 +470,11 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                             type="button"
                             onClick={(e) => {
                               const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                              handleUpdateStock(variant._id, parseInt(input.value) || 0);
+                              handleUpdateStock(variant.id, parseInt(input.value) || 0);
                             }}
                             disabled={updateProductStock.isPending}
                           >
-                            {updateProductStock.isPending && updateProductStock.variables?.payload.variantUpdates[0]?.variantId === variant._id ? (
+                            {updateProductStock.isPending && updateProductStock.variables?.payload.variantUpdates[0]?.variantId === variant.id ? (
                               <Icon path={mdiLoading} size={0.7} className="animate-spin" />
                             ) : (
                               'Cập nhật'
@@ -490,11 +490,11 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                         <div className="flex items-center gap-2">
                           <Input
                             type="file"
-                            id={`file-upload-${variant._id}`}
+                            id={`file-upload-${variant.id}`}
                             onChange={(e) => {
                               const files = e.target.files;
                               if (files && files.length > 0) {
-                                handleImageUpload(files[0], variant._id);
+                                handleImageUpload(files[0], variant.id);
                                 e.target.value = '';
                               }
                             }}
@@ -504,7 +504,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => document.getElementById(`file-upload-${variant._id}`)?.click()}
+                            onClick={() => document.getElementById(`file-upload-${variant.id}`)?.click()}
                             disabled={uploading || updateProductImages.isPending}
                             className="flex items-center gap-2"
                           >
@@ -541,7 +541,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                                     variant="destructive"
                                     size="icon"
                                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => handleRemoveImage(variant._id, index)}
+                                    onClick={() => handleRemoveImage(variant.id, index)}
                                     disabled={updateProductImages.isPending}
                                   >
                                     {updateProductImages.isPending ? (

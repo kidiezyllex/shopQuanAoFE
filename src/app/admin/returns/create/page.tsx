@@ -153,7 +153,7 @@ export default function CreateReturnPage() {
   };
 
   const handleOrderSelect = (orderId: string) => {
-    const order = orders.find(o => o._id === orderId);
+    const order = orders.find(o => o.id === orderId);
     setSelectedOrder(order || null);
     setSelectedItems([]);
   };
@@ -161,7 +161,7 @@ export default function CreateReturnPage() {
   const handleItemSelect = (item: OrderItem, checked: boolean) => {
     if (checked) {
       const newItem: SelectedItem = {
-        product: item.product._id,
+        product: item.(product as any)?.id,
         variant: item.variant,
         quantity: 1,
         maxQuantity: item.quantity,
@@ -171,7 +171,7 @@ export default function CreateReturnPage() {
       setSelectedItems(prev => [...prev, newItem]);
     } else {
       setSelectedItems(prev => prev.filter(selected => 
-        !(selected.product === item.product._id && 
+        !(selected.product === item.(product as any)?.id && 
           selected.variant.colorId === item.variant.colorId && 
           selected.variant.sizeId === item.variant.sizeId)
       ));
@@ -192,7 +192,7 @@ export default function CreateReturnPage() {
 
   const isItemSelected = (item: OrderItem) => {
     return selectedItems.some(selected => 
-      selected.product === item.product._id && 
+      selected.product === item.(product as any)?.id && 
       selected.variant.colorId === item.variant.colorId && 
       selected.variant.sizeId === item.variant.sizeId
     );
@@ -217,8 +217,8 @@ export default function CreateReturnPage() {
     setIsSubmitting(true);
     try {
       const payload: IReturnCreate = {
-        originalOrder: selectedOrder._id,
-        customer: selectedCustomer._id,
+        originalOrder: selectedOrder.id,
+        customer: selectedCustomer.id,
         items: selectedItems.map(item => ({
           product: item.product,
           variant: item.variant,
@@ -299,7 +299,7 @@ export default function CreateReturnPage() {
                 <div className="border rounded-lg max-h-60 overflow-y-auto">
                   {customers.map((customer) => (
                     <div
-                      key={customer._id}
+                      key={customer.id}
                       className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
                       onClick={() => handleCustomerSelect(customer)}
                     >
@@ -351,7 +351,7 @@ export default function CreateReturnPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {orders.map((order) => (
-                      <SelectItem key={order._id} value={order._id}>
+                      <SelectItem key={order.id} value={order.id}>
                         <div className="flex flex-col">
                           <span>#{order.code}</span>
                           <span className="text-sm text-maintext">
@@ -413,7 +413,7 @@ export default function CreateReturnPage() {
                               size="sm"
                               onClick={() => {
                                 const selectedIndex = selectedItems.findIndex(selected => 
-                                  selected.product === item.product._id && 
+                                  selected.product === item.(product as any)?.id && 
                                   selected.variant.colorId === item.variant.colorId && 
                                   selected.variant.sizeId === item.variant.sizeId
                                 );
@@ -429,13 +429,13 @@ export default function CreateReturnPage() {
                               min="1"
                               max={item.quantity}
                               value={selectedItems.find(selected => 
-                                selected.product === item.product._id && 
+                                selected.product === item.(product as any)?.id && 
                                 selected.variant.colorId === item.variant.colorId && 
                                 selected.variant.sizeId === item.variant.sizeId
                               )?.quantity || 1}
                               onChange={(e) => {
                                 const selectedIndex = selectedItems.findIndex(selected => 
-                                  selected.product === item.product._id && 
+                                  selected.product === item.(product as any)?.id && 
                                   selected.variant.colorId === item.variant.colorId && 
                                   selected.variant.sizeId === item.variant.sizeId
                                 );
@@ -450,7 +450,7 @@ export default function CreateReturnPage() {
                               size="sm"
                               onClick={() => {
                                 const selectedIndex = selectedItems.findIndex(selected => 
-                                  selected.product === item.product._id && 
+                                  selected.product === item.(product as any)?.id && 
                                   selected.variant.colorId === item.variant.colorId && 
                                   selected.variant.sizeId === item.variant.sizeId
                                 );
@@ -470,13 +470,13 @@ export default function CreateReturnPage() {
                         <Textarea
                           placeholder="Nhập lý do trả hàng..."
                           value={selectedItems.find(selected => 
-                            selected.product === item.product._id && 
+                            selected.product === item.(product as any)?.id && 
                             selected.variant.colorId === item.variant.colorId && 
                             selected.variant.sizeId === item.variant.sizeId
                           )?.reason || ''}
                           onChange={(e) => {
                             const selectedIndex = selectedItems.findIndex(selected => 
-                              selected.product === item.product._id && 
+                              selected.product === item.(product as any)?.id && 
                               selected.variant.colorId === item.variant.colorId && 
                               selected.variant.sizeId === item.variant.sizeId
                             );
@@ -515,7 +515,7 @@ export default function CreateReturnPage() {
               <TableBody>
                 {selectedItems.map((item, index) => {
                   const orderItem = selectedOrder?.items.find(oi => 
-                    oi.product._id === item.product &&
+                    oi.(product as any)?.id === item.product &&
                     oi.variant.colorId === item.variant.colorId &&
                     oi.variant.sizeId === item.variant.sizeId
                   );

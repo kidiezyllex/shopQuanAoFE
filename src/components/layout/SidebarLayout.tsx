@@ -83,7 +83,7 @@ const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutPro
               </h1>
             ) : (
               <h1 className="text-2xl text-primary !font-bold select-none cursor-pointer text-center">
-                S<span className="text-extra">S</span>
+                A<span className="text-extra">S</span>
               </h1>
             )}
           </div>

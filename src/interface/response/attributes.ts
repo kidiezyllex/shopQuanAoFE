@@ -1,6 +1,6 @@
 // Common attribute properties
 interface IAttributeBase {
-  _id: string;
+  id: number;
   status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
   createdAt: string;
   updatedAt: string;

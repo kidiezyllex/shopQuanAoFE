@@ -44,7 +44,7 @@ const VouchersListDialog = ({
   onSelectVoucher: (code: string) => void; 
 }) => {
   const { profile } = useUser();
-  const userId = profile?.data?._id;
+  const userId = profile?.data?.id;
   const { data: vouchersData, isLoading, isError } = useAvailableVouchersForUser(userId || '', {});
 
   const handleCopyCode = (code: string) => {
@@ -113,7 +113,7 @@ const VouchersListDialog = ({
 
                 return (
                   <div
-                    key={voucher._id}
+                    key={voucher.id}
                     className={`relative flex flex-col overflow-hidden border rounded-lg p-4 transition-all hover:shadow-md ${
                       isDisabled ? 'bg-muted/30 border-dashed opacity-60' : 'bg-card border-primary/20 hover:border-primary/50'
                     }`}
@@ -195,7 +195,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
   const location = useLocation(); const pathname = location.pathname;
   const { showToast } = useToast();
   const { profile } = useUser();
-  const userId = profile?.data?._id;
+  const userId = profile?.data?.id;
   const { 
     items, 
     removeFromCart, 
@@ -352,7 +352,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
         setAppliedVoucher({
           code: voucherData.code,
           discount: result.data.discountValue,
-          voucherId: voucherData._id,
+          voucherId: voucherData.id,
           type: voucherData.type,
           value: voucherData.value,
           maxDiscount: voucherData.maxDiscount

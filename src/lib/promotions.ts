@@ -47,7 +47,7 @@ export const calculateProductDiscount = (
       if (typeof p === 'string') {
         promotionProductId = p;
       } else if (p && typeof p === 'object') {
-        promotionProductId = p._id || p.id;
+        promotionProductId = p.id || p.id;
       } else {
         return false;
       }
@@ -105,7 +105,7 @@ export const applyPromotionsToProducts = (
     }
 
     const discountInfo = calculateProductDiscount(
-      product._id,
+      (product as any)?.id,
       basePrice,
       activePromotions
     );

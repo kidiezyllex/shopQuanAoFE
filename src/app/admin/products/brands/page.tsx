@@ -17,7 +17,7 @@ import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 export default function BrandsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<IBrandFilter>({});
@@ -91,7 +91,7 @@ export default function BrandsPage() {
 
             <Card className="mb-4">
                 <CardContent className="py-4">
-                    <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+                    <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
                         <div className="relative flex-1 max-w-4xl">
                             <Icon
                                 path={mdiMagnify}
@@ -206,9 +206,9 @@ export default function BrandsPage() {
                             <TableBody>
                                 {filteredBrands?.length ? (
                                     filteredBrands.map((brand) => (
-                                        <TableRow key={brand._id} className="hover:bg-gray-50">
+                                        <TableRow key={(brand as any)?.id} className="hover:bg-gray-50">
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
-                                                {brand._id}
+                                                {(brand as any)?.id}
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-maintext">{brand.name}</div>
@@ -226,7 +226,7 @@ export default function BrandsPage() {
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                                                 <div className="flex items-center justify-end space-x-2">
-                                                    <Dialog open={isEditDialogOpen && brandToEdit === brand._id} onOpenChange={(open) => {
+                                                    <Dialog open={isEditDialogOpen && brandToEdit === (brand as any)?.id} onOpenChange={(open) => {
                                                         setIsEditDialogOpen(open);
                                                         if (!open) setBrandToEdit(null);
                                                     }}>
@@ -236,16 +236,16 @@ export default function BrandsPage() {
                                                                 size="icon"
                                                                 title="Sửa"
                                                                 onClick={() => {
-                                                                    setBrandToEdit(brand._id);
+                                                                    setBrandToEdit((brand as any)?.id);
                                                                     setIsEditDialogOpen(true);
                                                                 }}
                                                             >
                                                                 <Icon path={mdiPencilCircle} size={0.7} />
                                                             </Button>
                                                         </DialogTrigger>
-                                                        {brandToEdit === brand._id && (
+                                                        {brandToEdit === (brand as any)?.id && (
                                                             <EditBrandDialog
-                                                                brandId={brand._id}
+                                                                brandId={(brand as any)?.id}
                                                                 isOpen={isEditDialogOpen}
                                                                 onClose={() => {
                                                                     setIsEditDialogOpen(false);
@@ -254,13 +254,13 @@ export default function BrandsPage() {
                                                             />
                                                         )}
                                                     </Dialog>
-                                                    <Dialog open={isDeleteDialogOpen && brandToDelete === brand._id} onOpenChange={setIsDeleteDialogOpen}>
+                                                    <Dialog open={isDeleteDialogOpen && brandToDelete === (brand as any)?.id} onOpenChange={setIsDeleteDialogOpen}>
                                                         <DialogTrigger asChild>
                                                             <Button
                                                                 variant="outline"
                                                                 size="icon"
                                                                 onClick={() => {
-                                                                    setBrandToDelete(brand._id);
+                                                                    setBrandToDelete((brand as any)?.id);
                                                                     setIsDeleteDialogOpen(true);
                                                                 }}
                                                                 title="Xóa"

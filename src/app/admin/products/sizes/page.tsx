@@ -20,14 +20,6 @@ export default function SizesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<ISizeFilter>({});
     const { data, isLoading, isError } = useSizes(filters);
-    
-    // Debug log to check data structure
-    React.useEffect(() => {
-        if (data?.data) {
-            console.log('Sizes data from API:', data.data);
-            console.log('First size object:', data.data[0]);
-        }
-    }, [data]);
     const deleteSizeMutation = useDeleteSize();
     const queryClient = useQueryClient();
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -47,18 +39,24 @@ export default function SizesPage() {
     }, [data?.data, searchQuery]);
 
     const handleDeleteSize = async (sizeId: string) => {
-        console.log('handleDeleteSize called with sizeId:', sizeId);
         
         if (!sizeId) {
-            console.error('Size ID is undefined or null');
+            console.error('sizeId is undefined, null or empty:', sizeId);
             toast.error('Lỗi: Không tìm thấy ID kích cỡ');
             return;
         }
         
         try {
-            await deleteSizeMutation.mutateAsync(sizeId);
-            toast.success('Đã xóa kích cỡ thành công');
-            queryClient.invalidateQueries({ queryKey: ['sizes'] });
+            await deleteSizeMutation.mutateAsync(sizeId, {
+                onSuccess: () => {
+                    toast.success('Đã xóa kích cỡ thành công');
+                    queryClient.invalidateQueries({ queryKey: ['sizes'] });
+                },
+                onError: (error) => {
+                    console.error('Delete error:', error);
+                    toast.error('Xóa kích cỡ thất bại');
+                }
+            });
         } catch (error) {
             console.error('Delete error:', error);
             toast.error('Xóa kích cỡ thất bại');
@@ -180,13 +178,10 @@ export default function SizesPage() {
                             </TableHeader>
                             <TableBody>
                                 {filteredSizes?.length ? (
-                                    filteredSizes.map((size) => {
-                                        console.log('Rendering size:', size); // Debug log
-                                        const sizeId = size._id || (size as any).id;
-                                        return (
-                                        <TableRow key={sizeId} className="hover:bg-gray-50">
+                                    filteredSizes.map((size, index) => (
+                                        <TableRow key={(size as any)?.id || `size-${index}`} className="hover:bg-gray-50">
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
-                                                {sizeId}
+                                                {(size as any)?.id}
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
@@ -213,14 +208,15 @@ export default function SizesPage() {
                                                 <div className="flex items-center justify-end space-x-2">
                                                     <DeleteSizeDialog 
                                                         size={size}
-                                                        onDelete={() => handleDeleteSize(sizeId)}
+                                                        onDelete={() => {
+                                                            handleDeleteSize((size as any)?.id);
+                                                        }}
                                                         isDeleting={deleteSizeMutation.isPending}
                                                     />
                                                 </div>
                                             </TableCell>
                                         </TableRow>
-                                        );
-                                    })
+                                    ))
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-8 text-maintext">

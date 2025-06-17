@@ -52,9 +52,9 @@ const VariantGenerator: React.FC<VariantGeneratorProps> = ({
         sizesData.data.forEach(size => {
           const calculatedPrice = calculatePriceBySize(baseVariant.price, size.value);
           variants.push({
-            id: `${color._id}-${size._id}`,
-            colorId: color._id,
-            sizeId: size._id,
+            id: `${color.id}-${size.id}`,
+            colorId: color.id,
+            sizeId: size.id,
             price: calculatedPrice,
             stock: 10, // Tạm thời set tất cả là 10, sẽ điều chỉnh sau khi sắp xếp
             images: baseVariant.images ? [...baseVariant.images] : [], // tất cả dùng chung images với biến thể #1
@@ -131,7 +131,7 @@ const VariantGenerator: React.FC<VariantGeneratorProps> = ({
   };
 
   const getColorById = (colorId: string) => {
-    return colorsData?.data?.find(c => c._id === colorId);
+    return colorsData?.data?.find(c => c.id === colorId);
   };
 
   return (

@@ -308,7 +308,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
     // Check if promotions data is available and calculate discount
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
-        product._id,
+        (product as any)?.id,
         firstVariant.price,
         promotionsData.data.promotions
       );
@@ -322,8 +322,8 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
     }
 
     const cartItem = {
-      id: firstVariant._id, // Use variant ID as main ID
-      productId: product._id, // Separate product ID
+      id: firstVariant.id, // Use variant ID as main ID
+      productId: (product as any)?.id, // Separate product ID
       name: product.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -337,8 +337,8 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
       colors: [firstVariant.colorId?.name || 'Default'],
       stock: firstVariant.stock,
       // New variant information
-      colorId: firstVariant.colorId?._id || '',
-      sizeId: firstVariant.sizeId?._id || '',
+      colorId: firstVariant.colorId?.id || '',
+      sizeId: firstVariant.sizeId?.id || '',
       colorName: firstVariant.colorId?.name || 'Default',
       sizeName: firstVariant.sizeId?.value ? getSizeLabel(firstVariant.sizeId.value) : (firstVariant.sizeId?.name || firstVariant.sizeId?.code || '')
     };
@@ -348,7 +348,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
   };
 
   const handleQuickView = () => {
-    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product._id}`;
+    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`;
   };
 
   const handleAddToWishlist = () => {
@@ -366,7 +366,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
       <Card className="group overflow-hidden border rounded-lg hover:shadow-2xl shadow-lg transition-all duration-500 h-full flex flex-col transform hover:-translate-y-3 bg-white relative backdrop-blur-sm">
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl">
-          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product._id}`} className="block">
+          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`} className="block">
             <div className="aspect-square overflow-hidden relative flex items-center justify-center">
               <motion.div
                 className="w-full h-full relative"
@@ -400,7 +400,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
               // Calculate discount from promotions data if available
               if (promotionsData?.data?.promotions && product.variants?.[0]) {
                 const discount = calculateProductDiscount(
-                  product._id,
+                  (product as any)?.id,
                   product.variants[0].price,
                   promotionsData.data.promotions
                 );
@@ -489,7 +489,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
           </div>
 
           <a
-            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product._id}`}
+            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`}
             className="hover:text-primary transition-colors group/a"
           >
             <h3 className="font-bold text-base mb-3 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
@@ -509,7 +509,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
                   // Calculate discount from promotions data if available
                   if (promotionsData?.data?.promotions && product.variants?.[0]) {
                     const discount = calculateProductDiscount(
-                      product._id,
+                      (product as any)?.id,
                       product.variants[0].price,
                       promotionsData.data.promotions
                     );
@@ -526,7 +526,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
                 // Show original price if there's a discount
                 if (promotionsData?.data?.promotions && product.variants?.[0]) {
                   const discount = calculateProductDiscount(
-                    product._id,
+                    (product as any)?.id,
                     product.variants[0].price,
                     promotionsData.data.promotions
                   );
@@ -551,12 +551,12 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
                   <div className="flex gap-1 text-sm">
                     {Array.from(
                       new Set(
-                        product.variants.map((v: any) => v.colorId?._id).filter(Boolean)
+                        product.variants.map((v: any) => v.colorId?.id).filter(Boolean)
                       )
                     )
                       .slice(0, 4)
                       .map((colorId: unknown, index: number) => {
-                        const variant = product.variants.find((v: any) => v.colorId?._id === colorId);
+                        const variant = product.variants.find((v: any) => v.colorId?.id === colorId);
                         const color = variant?.colorId || { code: "#000000", name: "Default" };
 
                         return (
@@ -573,14 +573,14 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
 
                     {Array.from(
                       new Set(
-                        product.variants.map((v: any) => v.colorId?._id).filter(Boolean)
+                        product.variants.map((v: any) => v.colorId?.id).filter(Boolean)
                       )
                     ).length > 4 && (
                         <motion.span
                           className="text-xs text-maintext ml-1 bg-gray-100 px-2 py-1 rounded-full font-medium"
                           whileHover={{ scale: 1.1 }}
                         >
-                          +{Array.from(new Set(product.variants.map((v: any) => v.colorId?._id).filter(Boolean))).length - 4}
+                          +{Array.from(new Set(product.variants.map((v: any) => v.colorId?.id).filter(Boolean))).length - 4}
                         </motion.span>
                       )}
                   </div>
@@ -640,8 +640,8 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
     if (productData?.data?.variants?.length && productData.data.variants.length > 0) {
       const firstVariant = productData.data.variants[0];
       setSelectedVariant(firstVariant);
-      setSelectedColor(firstVariant.colorId._id);
-      setSelectedSize(firstVariant.sizeId._id);
+      setSelectedColor(firstVariant.colorId.id);
+      setSelectedSize(firstVariant.sizeId.id);
     }
   }, [productData]);
 
@@ -650,7 +650,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
     if (productData?.data && selectedVariant && promotionsData?.data?.promotions) {
       
       const discount = calculateProductDiscount(
-        productData.data._id,
+        productData.data.id,
         selectedVariant.price,
         promotionsData.data.promotions
       );
@@ -666,7 +666,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
     setSelectedColor(colorId);
 
     const matchingVariant = productData?.data?.variants.find(
-      (v) => v.colorId._id === colorId && v.sizeId._id === selectedSize
+      (v) => v.colorId.id === colorId && v.sizeId.id === selectedSize
     );
 
     if (matchingVariant) {
@@ -674,11 +674,11 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
       setCurrentImageIndex(0);
     } else {
       const firstVariantWithColor = productData?.data?.variants.find(
-        (v) => v.colorId._id === colorId
+        (v) => v.colorId.id === colorId
       );
       if (firstVariantWithColor) {
         setSelectedVariant(firstVariantWithColor);
-        setSelectedSize(firstVariantWithColor.sizeId._id);
+        setSelectedSize(firstVariantWithColor.sizeId.id);
         setCurrentImageIndex(0);
       }
     }
@@ -689,7 +689,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
     setSelectedSize(sizeId);
 
     const matchingVariant = productData?.data?.variants.find(
-      (v) => v.colorId._id === selectedColor && v.sizeId._id === sizeId
+      (v) => v.colorId.id === selectedColor && v.sizeId.id === sizeId
     );
 
     if (matchingVariant) {
@@ -721,8 +721,8 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
       : undefined;
 
     const cartItem = {
-      id: selectedVariant._id, // Use variant ID as main ID
-      productId: productData.data._id, // Separate product ID
+      id: selectedVariant.id, // Use variant ID as main ID
+      productId: productData.data.id, // Separate product ID
       name: productData.data.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -736,8 +736,8 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
       colors: [selectedVariant.colorId.name],
       stock: selectedVariant.stock,
       // New variant information
-      colorId: selectedVariant.colorId._id,
-      sizeId: selectedVariant.sizeId._id,
+      colorId: selectedVariant.colorId.id,
+      sizeId: selectedVariant.sizeId.id,
       colorName: selectedVariant.colorId.name,
       sizeName: selectedVariant.sizeId.value ? getSizeLabel(selectedVariant.sizeId.value) : (selectedVariant.sizeId.name || selectedVariant.sizeId.code || '')
     };
@@ -775,7 +775,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
   const similarProducts = useMemo(() => {
     if (!allProductsData?.data?.products || !productData?.data) return [];
     
-    let filteredProducts = allProductsData.data.products.filter((p: IProduct) => p._id !== productData.data._id).slice(0, 4);
+    let filteredProducts = allProductsData.data.products.filter((p: IProduct) => p.id !== productData.data.id).slice(0, 4);
     
     // Apply promotions to similar products
     if (promotionsData?.data?.promotions) {
@@ -1052,26 +1052,26 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
               <div className="flex flex-wrap gap-4">
                 {product.variants
                   .filter((variant, index, self) =>
-                    index === self.findIndex((v) => v.colorId._id === variant.colorId._id)
+                    index === self.findIndex((v) => v.colorId.id === variant.colorId.id)
                   )
                   .map((variant) => (
                     <motion.button
-                      key={variant.colorId._id}
-                      onClick={() => handleColorSelect(variant.colorId._id)}
+                      key={variant.colorId.id}
+                      onClick={() => handleColorSelect(variant.colorId.id)}
                       className={`
                         relative group flex items-center justify-center w-10 h-10 rounded-full
                         transition-all duration-300 border-2
-                        ${selectedColor === variant.colorId._id
+                        ${selectedColor === variant.colorId.id
                           ? 'border-primary ring-4 ring-primary/20 scale-110'
                           : 'border-gray-200 hover:border-gray-300 hover:scale-105'
                         }
                       `}
                       style={{ backgroundColor: variant.colorId.code }}
                       title={variant.colorId.name}
-                      whileHover={{ scale: selectedColor === variant.colorId._id ? 1.1 : 1.05 }}
+                      whileHover={{ scale: selectedColor === variant.colorId.id ? 1.1 : 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      {selectedColor === variant.colorId._id && (
+                      {selectedColor === variant.colorId.id && (
                         <Icon
                           path={mdiCheck}
                           size={1}
@@ -1097,11 +1097,11 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
                 )}
               </div>
               <div className="flex flex-wrap gap-4">
-                {Array.from(new Set(product.variants.map(v => v.sizeId._id)))
+                {Array.from(new Set(product.variants.map(v => v.sizeId.id)))
                   .map(sizeId => {
-                    const sizeVariant = product.variants.find(v => v.sizeId._id === sizeId);
+                    const sizeVariant = product.variants.find(v => v.sizeId.id === sizeId);
                     const variantForColorAndSize = product.variants.find(
-                      v => v.colorId._id === selectedColor && v.sizeId._id === sizeId
+                      v => v.colorId.id === selectedColor && v.sizeId.id === sizeId
                     );
                     const isAvailable = !!variantForColorAndSize && variantForColorAndSize.stock > 0;
                     
@@ -1334,13 +1334,13 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
                       <div className="flex justify-between py-2 border-b border-gray-100">
                         <span className="!text-maintext">Số màu sắc</span>
                         <span className="font-medium">
-                          {Array.from(new Set(product.variants.map(v => v.colorId._id))).length} màu
+                          {Array.from(new Set(product.variants.map(v => v.colorId.id))).length} màu
                         </span>
                       </div>
                       <div className="flex justify-between py-2 border-b border-gray-100">
                         <span className="!text-maintext">Số kích thước</span>
                         <span className="font-medium">
-                          {Array.from(new Set(product.variants.map(v => v.sizeId._id))).length} size
+                          {Array.from(new Set(product.variants.map(v => v.sizeId.id))).length} size
                         </span>
                       </div>
                       <div className="flex justify-between py-2">
@@ -1387,7 +1387,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
               <AnimatePresence>
                 {similarProducts.map((similarProduct: IProduct, index: number) => (
                   <motion.div
-                    key={similarProduct._id}
+                    key={similar(product as any)?.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}

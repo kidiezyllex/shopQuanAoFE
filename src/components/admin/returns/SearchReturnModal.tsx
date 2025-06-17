@@ -150,7 +150,7 @@ export default function SearchReturnModal({ isOpen, onClose }: SearchReturnModal
                         </TableHeader>
                         <TableBody>
                           {searchResults?.data.map((returnItem) => (
-                            <TableRow key={returnItem._id}>
+                            <TableRow key={returnItem.id}>
                               <TableCell className="font-medium">{returnItem.code}</TableCell>
                               <TableCell>
                                 {typeof returnItem.customer === 'string' ? 
@@ -166,7 +166,7 @@ export default function SearchReturnModal({ isOpen, onClose }: SearchReturnModal
                               <TableCell>{formatCurrency(returnItem.totalRefund)}</TableCell>
                               <TableCell>{getStatusBadge(returnItem.status)}</TableCell>
                               <TableCell className="text-right">
-                                <a href={`/admin/returns/edit/${returnItem._id}`}>
+                                <a href={`/admin/returns/edit/${returnItem.id}`}>
                                   <Button size="icon" variant="ghost" onClick={handleClose}>
                                     <Icon path={mdiEye} size={0.7} />
                                   </Button>

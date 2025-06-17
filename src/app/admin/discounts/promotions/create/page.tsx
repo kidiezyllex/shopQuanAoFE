@@ -257,14 +257,14 @@ export default function CreatePromotionPage() {
                     <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
                       <div className="space-y-3">
                         {productsData?.data?.products?.map((product) => (
-                          <div key={product._id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                          <div key={(product as any)?.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
                             <Checkbox
-                              id={`product-${product._id}`}
-                              checked={selectedProducts.includes(product._id)}
-                              onCheckedChange={(checked) => handleProductSelection(product._id, checked as boolean)}
+                              id={`product-${(product as any)?.id}`}
+                              checked={selectedProducts.includes((product as any)?.id)}
+                              onCheckedChange={(checked) => handleProductSelection((product as any)?.id, checked as boolean)}
                             />
                             <div className="flex-1">
-                              <Label htmlFor={`product-${product._id}`} className="text-sm font-medium cursor-pointer">
+                              <Label htmlFor={`product-${(product as any)?.id}`} className="text-sm font-medium cursor-pointer">
                                 {product.name}
                               </Label>
                               <div className="text-xs text-maintext">
@@ -283,7 +283,7 @@ export default function CreatePromotionPage() {
                         </Label>
                         <div className="flex flex-wrap gap-2">
                           {selectedProducts.map((productId) => {
-                            const product = productsData?.data?.products?.find(p => p._id === productId);
+                            const product = productsData?.data?.products?.find(p => p.id === productId);
                             return product ? (
                               <Badge key={productId} variant="secondary" className="text-xs">
                                 {product.name}

@@ -105,7 +105,7 @@ const ProductsPage: React.FC = () => {
     if (filters.brands && filters.brands.length > 0) {
       const brandsArray = Array.isArray(filters.brands) ? filters.brands : [filters.brands]
       filteredProducts = filteredProducts.filter((product) => {
-        const brandId = typeof product.brand === "object" ? product.brand._id : product.brand
+        const brandId = typeof product.brand === "object" ? product.(brand as any)?.id : product.brand
         return brandsArray.includes(brandId)
       })
     }
@@ -113,7 +113,7 @@ const ProductsPage: React.FC = () => {
     if (filters.categories && filters.categories.length > 0) {
       const categoriesArray = Array.isArray(filters.categories) ? filters.categories : [filters.categories]
       filteredProducts = filteredProducts.filter((product) => {
-        const categoryId = typeof product.category === "object" ? product.category._id : product.category
+        const categoryId = typeof product.category === "object" ? product.(category as any)?.id : product.category
         return categoriesArray.includes(categoryId)
       })
     }
@@ -121,7 +121,7 @@ const ProductsPage: React.FC = () => {
     if (filters.color) {
       filteredProducts = filteredProducts.filter((product) =>
         product.variants.some((variant: any) => {
-          const colorId = typeof variant.colorId === "object" ? variant.colorId._id : variant.colorId
+          const colorId = typeof variant.colorId === "object" ? variant.colorId.id : variant.colorId
           return colorId === filters.color
         }),
       )
@@ -130,7 +130,7 @@ const ProductsPage: React.FC = () => {
     if (filters.size) {
       filteredProducts = filteredProducts.filter((product) =>
         product.variants.some((variant: any) => {
-          const sizeId = typeof variant.sizeId === "object" ? variant.sizeId._id : variant.sizeId
+          const sizeId = typeof variant.sizeId === "object" ? variant.sizeId.id : variant.sizeId
           return sizeId === filters.size
         }),
       )
@@ -146,7 +146,7 @@ const ProductsPage: React.FC = () => {
         
         if (promotionsData?.data?.promotions) {
           const discount = calculateProductDiscount(
-            product._id,
+            (product as any)?.id,
             price,
             promotionsData.data.promotions
           );
@@ -168,8 +168,8 @@ const ProductsPage: React.FC = () => {
         let priceB = b.variants[0]?.price || 0;
         
         if (promotionsData?.data?.promotions) {
-          const discountA = calculateProductDiscount(a._id, priceA, promotionsData.data.promotions);
-          const discountB = calculateProductDiscount(b._id, priceB, promotionsData.data.promotions);
+          const discountA = calculateProductDiscount(a.id, priceA, promotionsData.data.promotions);
+          const discountB = calculateProductDiscount(b.id, priceB, promotionsData.data.promotions);
           
           if (discountA.discountPercent > 0) {
             priceA = discountA.discountedPrice;
@@ -241,7 +241,7 @@ const ProductsPage: React.FC = () => {
     
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
-        product._id,
+        (product as any)?.id,
         price,
         promotionsData.data.promotions
       );
@@ -253,9 +253,9 @@ const ProductsPage: React.FC = () => {
     }
 
     const cartItem = {
-      _id: `${product._id}-${availableVariant._id}`,
-      productId: product._id,
-      variantId: availableVariant._id,
+      _id: `${(product as any)?.id}-${availableVariant.id}`,
+      productId: (product as any)?.id,
+      variantId: availableVariant.id,
       name: product.name,
       price: price,
       originalPrice: availableVariant.price,
@@ -386,7 +386,7 @@ const ProductsPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                   {products.map((product: any) => (
                     <ProductCard
-                      key={product._id}
+                      key={(product as any)?.id}
                       product={product}
                       promotionsData={promotionsData}
                       onAddToCart={() => handleAddToCart(product)}
@@ -461,7 +461,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
   
   if (promotionsData?.data?.promotions) {
     const discount = calculateProductDiscount(
-      product._id,
+      (product as any)?.id,
       basePrice,
       promotionsData.data.promotions
     );

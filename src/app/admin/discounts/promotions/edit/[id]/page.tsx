@@ -55,7 +55,7 @@ export default function EditPromotionPage() {
         name: promotion.name,
         description: promotion.description || '',
         discountPercent: promotion.discountPercent,
-        products: Array.isArray(promotion.products) ? promotion.products.map((p: any) => typeof p === 'string' ? p : p._id) : [],
+        products: Array.isArray(promotion.products) ? promotion.products.map((p: any) => typeof p === 'string' ? p : p.id) : [],
         startDate: startDate.toISOString().slice(0, 16),
         endDate: endDate.toISOString().slice(0, 16),
         status: promotion.status,
@@ -64,7 +64,7 @@ export default function EditPromotionPage() {
       // Set product selection state
       if (Array.isArray(promotion.products) && promotion.products.length > 0) {
         setApplyToAllProducts(false);
-        setSelectedProducts(promotion.products.map((p: any) => typeof p === 'string' ? p : p._id));
+        setSelectedProducts(promotion.products.map((p: any) => typeof p === 'string' ? p : p.id));
       } else {
         setApplyToAllProducts(true);
         setSelectedProducts([]);
@@ -350,14 +350,14 @@ export default function EditPromotionPage() {
                     <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
                       <div className="space-y-3">
                         {productsData?.data?.products?.map((product) => (
-                          <div key={product._id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                          <div key={(product as any)?.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
                             <Checkbox
-                              id={`product-${product._id}`}
-                              checked={selectedProducts.includes(product._id)}
-                              onCheckedChange={(checked) => handleProductSelection(product._id, checked as boolean)}
+                              id={`product-${(product as any)?.id}`}
+                              checked={selectedProducts.includes((product as any)?.id)}
+                              onCheckedChange={(checked) => handleProductSelection((product as any)?.id, checked as boolean)}
                             />
                             <div className="flex-1">
-                              <Label htmlFor={`product-${product._id}`} className="text-sm font-medium cursor-pointer">
+                              <Label htmlFor={`product-${(product as any)?.id}`} className="text-sm font-medium cursor-pointer">
                                 {product.name}
                               </Label>
                               <div className="text-xs text-maintext">
@@ -376,7 +376,7 @@ export default function EditPromotionPage() {
                         </Label>
                         <div className="flex flex-wrap gap-2">
                           {selectedProducts.map((productId) => {
-                            const product = productsData?.data?.products?.find(p => p._id === productId);
+                            const product = productsData?.data?.products?.find(p => p.id === productId);
                             return product ? (
                               <Badge key={productId} variant="secondary" className="text-xs">
                                 {product.name}

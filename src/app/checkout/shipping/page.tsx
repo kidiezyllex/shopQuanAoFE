@@ -399,7 +399,7 @@ export default function ShippingPage() {
       
       const orderData = {
         orderId: `DH${new Date().getFullYear()}${Date.now().toString().slice(-6)}`,
-        customer: user?._id || '000000000000000000000000',
+        customer: user?.id || '000000000000000000000000',
         items: items.map(item => ({
           product: item.productId || item.id, // Use productId if available, fallback to id
           variant: {
@@ -432,7 +432,7 @@ export default function ShippingPage() {
         }
         toast.success('Đặt hàng thành công!');
         
-        await sendOrderConfirmationEmail(response.data._id, response.data, values.email);
+        await sendOrderConfirmationEmail(response.data.id, response.data, values.email);
         
         setOrderResult(response.data);
         setShowSuccessModal(true);
@@ -455,7 +455,7 @@ export default function ShippingPage() {
       
       const orderData = {
         orderId: `DH${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`,
-        customer: user?._id || '000000000000000000000000',
+        customer: user?.id || '000000000000000000000000',
         items: items.map(item => ({
           product: item.productId || item.id, // Use productId if available, fallback to id
           variant: {
@@ -491,7 +491,7 @@ export default function ShippingPage() {
         toast.success('Thanh toán và đặt hàng thành công!');
         
         // Gửi email xác nhận đơn hàng
-        await sendOrderConfirmationEmail(response.data._id, response.data, formValues.email);
+        await sendOrderConfirmationEmail(response.data.id, response.data, formValues.email);
         
         setOrderResult(response.data);
         setShowSuccessModal(true);
@@ -870,7 +870,7 @@ export default function ShippingPage() {
         <SuccessModal
           isOpen={showSuccessModal}
           onClose={() => setShowSuccessModal(false)}
-          orderId={orderResult._id}
+          orderId={orderResult.id}
           orderCode={orderResult.code}
         />
       )}

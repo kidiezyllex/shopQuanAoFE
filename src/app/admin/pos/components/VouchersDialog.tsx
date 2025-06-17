@@ -172,7 +172,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
 
                         return (
                           <motion.tr
-                            key={voucher._id}
+                            key={voucher.id}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.2, delay: index * 0.05 }}
@@ -196,7 +196,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                                     {voucher.code}
                                   </div>
                                   <div className="text-xs text-maintext">
-                                    ID: {voucher._id.slice(-6)}
+                                    ID: {voucher.id.slice(-6)}
                                   </div>
                                 </div>
                               </div>

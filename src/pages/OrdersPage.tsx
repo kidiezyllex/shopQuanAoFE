@@ -56,12 +56,12 @@ const OrdersPage: React.FC = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        if (!user?._id) {
+        if (!user?.id) {
           navigate('/login');
           return;
         }
 
-        const response = await fetch(`/api/orders?customer=${user._id}`);
+        const response = await fetch(`/api/orders?customer=${user.id}`);
         const data = await response.json();
 
         if (data.success) {
@@ -136,13 +136,13 @@ const OrdersPage: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <Card key={order._id} className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate(`/orders/${order._id}`)}>
+            <Card key={order.id} className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate(`/orders/${order.id}`)}>
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">
-                      Đơn hàng #{order._id.slice(-6)}
+                      Đơn hàng #{order.id.slice(-6)}
                     </CardTitle>
                     <CardDescription>
                       {format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}

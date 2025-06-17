@@ -45,7 +45,7 @@ export const TopProducts = () => {
           <div className="space-y-4">
             {topProducts.map((product, index) => (
               <motion.div
-                key={product.id}
+                key={(product as any)?.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}

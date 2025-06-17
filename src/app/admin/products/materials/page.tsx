@@ -18,6 +18,7 @@ import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 
 export default function MaterialsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,7 +96,7 @@ export default function MaterialsPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2 gap-2">
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
@@ -208,10 +209,10 @@ export default function MaterialsPage() {
               </TableHeader>
               <TableBody>
                 {filteredMaterials?.length ? (
-                  filteredMaterials.map((material) => (
-                    <TableRow key={material._id} className="hover:bg-gray-50">
+                  filteredMaterials.map((material, index) => (
+                    <TableRow key={(material as any)?.id || `material-${index}`} className="hover:bg-gray-50">
                       <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
-                        {material._id}
+                        {(material as any)?.id}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-maintext">{material.name}</div>
@@ -229,7 +230,7 @@ export default function MaterialsPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <Dialog open={isEditDialogOpen && materialToEdit === material._id} onOpenChange={(open) => {
+                          <Dialog open={isEditDialogOpen && materialToEdit === (material as any)?.id} onOpenChange={(open) => {
                             setIsEditDialogOpen(open);
                             if (!open) setMaterialToEdit(null);
                           }}>
@@ -239,16 +240,16 @@ export default function MaterialsPage() {
                                 size="icon"
                                 title="Sửa"
                                 onClick={() => {
-                                  setMaterialToEdit(material._id);
+                                  setMaterialToEdit((material as any)?.id);
                                   setIsEditDialogOpen(true);
                                 }}
                               >
                                 <Icon path={mdiPencilCircle} size={0.7} />
                               </Button>
                             </DialogTrigger>
-                            {materialToEdit === material._id && (
+                            {materialToEdit === (material as any)?.id && (
                               <EditMaterialDialog
-                                materialId={material._id}
+                                materialId={(material as any)?.id}
                                 isOpen={isEditDialogOpen}
                                 onClose={() => {
                                   setIsEditDialogOpen(false);
@@ -257,13 +258,13 @@ export default function MaterialsPage() {
                               />
                             )}
                           </Dialog>
-                          <Dialog open={isDeleteDialogOpen && materialToDelete === material._id} onOpenChange={setIsDeleteDialogOpen}>
+                          <Dialog open={isDeleteDialogOpen && materialToDelete === (material as any)?.id} onOpenChange={setIsDeleteDialogOpen}>
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={() => {
-                                  setMaterialToDelete(material._id);
+                                  setMaterialToDelete((material as any)?.id);
                                   setIsDeleteDialogOpen(true);
                                 }}
                                 title="Xóa"

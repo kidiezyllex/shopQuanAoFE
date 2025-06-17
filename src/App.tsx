@@ -23,7 +23,6 @@ const RegisterPage = React.lazy(() => import('@/pages/auth/RegisterPage'))
 const ProductsPage = React.lazy(() => import('@/pages/ProductsPage'))
 const ProductDetailPage = React.lazy(() => import('@/pages/ProductDetailPage'))
 const ProfilePage = React.lazy(() => import('@/pages/ProfilePage'))
-const ChangePasswordPage = React.lazy(() => import('@/pages/ChangePasswordPage'))
 const OrdersPage = React.lazy(() => import('@/pages/OrdersPage'))
 const OrderDetailPage = React.lazy(() => import('@/pages/OrderDetailPage'))
 const ReturnsPage = React.lazy(() => import('@/pages/ReturnsPage'))
@@ -132,11 +131,6 @@ function App() {
               <Route path="profile" element={
                 <LazyComponentLoader fallback={<PageLoader />}>
                   <ProfilePage />
-                </LazyComponentLoader>
-              } />
-              <Route path="profile/change-password" element={
-                <LazyComponentLoader fallback={<PageLoader />}>
-                  <ChangePasswordPage />
                 </LazyComponentLoader>
               } />
               <Route path="orders" element={

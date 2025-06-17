@@ -680,7 +680,7 @@ export default function OrdersPage() {
             </TableHeader>
             <TableBody>
               {data.data.orders.map((order) => (
-                <TableRow key={order._id}>
+                <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.code}</TableCell>
                   <TableCell>
                     <div>
@@ -701,7 +701,7 @@ export default function OrdersPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button variant="outline" size="icon" onClick={() => handleViewOrder(order._id)}>
+                      <Button variant="outline" size="icon" onClick={() => handleViewOrder(order.id)}>
                         <Icon path={mdiEye} size={0.7} />
                       </Button>
                       <Button
@@ -709,7 +709,7 @@ export default function OrdersPage() {
                         size="icon"
                         disabled={order.orderStatus === "DA_HUY" || order.orderStatus === "HOAN_THANH"}
                         onClick={() => {
-                          setOrderToCancel(order._id)
+                          setOrderToCancel(order.id)
                           setIsConfirmCancelDialogOpen(true)
                         }}
                       >

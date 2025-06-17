@@ -84,7 +84,7 @@ export default function AddressManager() {
 
   const handleEdit = (address: any) => {
     setIsEditMode(true)
-    setCurrentAddressId(address._id)
+    setCurrentAddressId(address.id)
     form.reset({
       addressName: address.addressName,
       fullName: address.fullName,
@@ -178,7 +178,7 @@ export default function AddressManager() {
             <AnimatePresence>
               {addresses.map((address) => (
                 <motion.div
-                  key={address._id}
+                  key={address.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -10 }}
@@ -221,7 +221,7 @@ export default function AddressManager() {
                         variant="outline"
                         size="sm"
                         className="h-8 px-3 border-gray-300 hover:border-red-500 hover:text-red-500"
-                        onClick={() => setDeleteId(address._id)}
+                        onClick={() => setDeleteId(address.id)}
                       >
                         <Trash2 size={14} className="mr-1" />
                         Xóa

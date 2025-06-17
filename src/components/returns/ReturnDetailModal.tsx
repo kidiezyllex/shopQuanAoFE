@@ -21,7 +21,7 @@ interface ReturnDetailModalProps {
 
 export default function ReturnDetailModal({ returnItem }: ReturnDetailModalProps) {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const { data: detailData, isLoading } = useMyReturnDetail(returnItem?._id || '');
+  const { data: detailData, isLoading } = useMyReturnDetail(returnItem?.id || '');
   const cancelReturn = useCancelMyReturn();
   const queryClient = useQueryClient();
 
@@ -108,10 +108,10 @@ export default function ReturnDetailModal({ returnItem }: ReturnDetailModalProps
     if (!returnItem) return;
     
     try {
-      await cancelReturn.mutateAsync(returnItem._id);
+      await cancelReturn.mutateAsync(returnItem.id);
       toast.success('Đã hủy yêu cầu trả hàng thành công');
       queryClient.invalidateQueries({ queryKey: ['myReturns'] });
-      queryClient.invalidateQueries({ queryKey: ['myReturn', returnItem._id] });
+      queryClient.invalidateQueries({ queryKey: ['myReturn', returnItem.id] });
       setShowCancelConfirm(false);
     } catch (error) {
       toast.error('Hủy yêu cầu trả hàng thất bại');

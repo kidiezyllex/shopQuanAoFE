@@ -205,7 +205,7 @@ export default function CustomerReturnsPage() {
               ) : (
                 <div className="space-y-4">
                   {returnableOrders?.data.orders.map((order) => (
-                    <ReturnableOrderCard key={order._id} order={order} />
+                    <ReturnableOrderCard key={order.id} order={order} />
                   ))}
                 </div>
               )}
@@ -236,7 +236,7 @@ export default function CustomerReturnsPage() {
               ) : (
                 <div className="space-y-4">
                   {myReturns?.data.returns.map((returnItem) => (
-                    <MyReturnCard key={returnItem._id} returnItem={returnItem} />
+                    <MyReturnCard key={returnItem.id} returnItem={returnItem} />
                   ))}
                 </div>
               )}

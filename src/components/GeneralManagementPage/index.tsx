@@ -635,7 +635,7 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
   const createReturnMutation = useCreateReturnRequest();
   const { data: returnableOrdersData } = useReturnableOrders();
   const { profile } = useUser();
-  const userId = profile?.data?._id;
+  const userId = profile?.data?.id;
   const { data: ordersData } = useOrdersByUser(userId || '');
   
   const [selectedItems, setSelectedItems] = useState<Array<{
@@ -648,8 +648,8 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
   }>>([]);
   const [reason, setReason] = useState('');
 
-  const returnableOrder = returnableOrdersData?.data?.orders?.find(o => o._id === orderId);
-  const displayOrder = ordersData?.data?.orders?.find(o => o._id === orderId);
+  const returnableOrder = returnableOrdersData?.data?.orders?.find(o => o.id === orderId);
+  const displayOrder = ordersData?.data?.orders?.find(o => o.id === orderId);
   const order = displayOrder || returnableOrder;
 
   const handleAddItem = (item: any) => {
@@ -664,7 +664,7 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
     }
 
     const existingIndex = selectedItems.findIndex(
-      si => si.product === product._id && 
+      si => si.product === (product as any)?.id && 
            si.variant.colorId === variant.colorId && 
            si.variant.sizeId === variant.sizeId
     );
@@ -677,7 +677,7 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
       }
     } else {
       setSelectedItems([...selectedItems, {
-        product: product._id, // This is already correct - using product._id
+        product: (product as any)?.id, // This is already correct - using (product as any)?.id
         variant: {
           colorId: variant.colorId,
           sizeId: variant.sizeId
@@ -1345,7 +1345,7 @@ const PasswordTab = () => {
 // Tab Mã giảm giá
 const VouchersTab = () => {
   const { profile } = useUser();
-  const userId = profile?.data?._id;
+  const userId = profile?.data?.id;
   const { data: vouchersData, isLoading, isError } = useAvailableVouchersForUser(userId || '', {});
 
   const formatDiscountValue = (type: 'PERCENTAGE' | 'FIXED_AMOUNT', value: number) => {
@@ -1424,7 +1424,7 @@ const VouchersTab = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
             {vouchers.map((voucher: IVoucher) => (
               <Card
-                key={voucher._id}
+                key={voucher.id}
                 className={`relative overflow-hidden shadow-lg transition-all hover:shadow-xl group
                                 ${voucher.status === 'KHONG_HOAT_DONG' || new Date(voucher.endDate) < new Date()
                     ? 'bg-muted/30 border-dashed'
@@ -1593,7 +1593,7 @@ const ReturnsTab = () => {
                 </TableHeader>
                 <TableBody>
                   {returnsData.data.returns.map((returnItem: IReturn) => (
-                    <TableRow key={returnItem._id}>
+                    <TableRow key={returnItem.id}>
                       <TableCell className="font-medium px-3 py-2">{returnItem.code}</TableCell>
                       <TableCell className="px-3 py-2">{formatDate(returnItem.createdAt)}</TableCell>
                       <TableCell className="px-3 py-2">
@@ -1625,7 +1625,7 @@ const ReturnsTab = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => handleViewReturnDetails(returnItem._id)}
+                          onClick={() => handleViewReturnDetails(returnItem.id)}
                           title="Xem chi tiết"
                         >
                           <Icon path={mdiEye} size={0.7} />
@@ -1665,7 +1665,7 @@ export default function GeneralManagementPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const { isAuthenticated, profile, isLoadingProfile } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
-  const userId = profile?.data?._id;
+  const userId = profile?.data?.id;
   const { data: ordersData, isLoading, isError, refetch } = useOrdersByUser(userId || '');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [orderDetailOpen, setOrderDetailOpen] = useState(false);
@@ -1753,7 +1753,7 @@ export default function GeneralManagementPage() {
   const isOrderReturnable = (order: IOrder) => {
     // Kiểm tra xem đơn hàng có thể trả hay không
     return order.orderStatus === 'HOAN_THANH' && 
-           returnableOrdersData?.data?.orders?.some(ro => ro._id === order._id);
+           returnableOrdersData?.data?.orders?.some(ro => ro.id === order.id);
   };
 
   const formatDate = (dateString: string) => {
@@ -1912,7 +1912,7 @@ export default function GeneralManagementPage() {
                           </TableHeader>
                           <TableBody>
                             {ordersData.data.orders.map((order: IOrder) => (
-                              <TableRow key={order._id}>
+                              <TableRow key={order.id}>
                                 <TableCell className="font-medium px-3 py-2 whitespace-nowrap text-maintext">{order.code}</TableCell>
                                 <TableCell className="px-3 py-2 whitespace-nowrap text-maintext">
                                   {format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}
@@ -1964,7 +1964,7 @@ export default function GeneralManagementPage() {
                                     <Button
                                       variant="outline"
                                       size="icon"
-                                      onClick={() => handleViewOrderDetails(order._id)}
+                                      onClick={() => handleViewOrderDetails(order.id)}
                                       title="Xem chi tiết"
                                     >
                                       <Icon path={mdiEye} size={0.7} />
@@ -1973,7 +1973,7 @@ export default function GeneralManagementPage() {
                                       <Button
                                         variant="outline"
                                         size="icon"
-                                        onClick={() => handleCreateReturn(order._id)}
+                                        onClick={() => handleCreateReturn(order.id)}
                                         title="Yêu cầu trả hàng"
                                       >
                                         <Icon path={mdiKeyboardReturn} size={0.7} />

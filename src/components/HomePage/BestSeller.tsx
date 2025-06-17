@@ -349,7 +349,7 @@ export const BestSeller = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {bestSellerData.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
+            <ProductCard key={(product as any)?.id} product={product} index={index} />
           ))}
         </div>
         <div className="flex w-full flex-col items-center justify-end flex-1 mt-8">

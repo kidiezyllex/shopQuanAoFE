@@ -254,11 +254,16 @@ export default function CreateProductPage() {
                       value={product.brand}
                       onValueChange={value => setProduct({ ...product, brand: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn thương hiệu" />
+                        <SelectValue placeholder="Chọn thương hiệu">
+                          {product.brand 
+                            ? (brandsData?.data || []).find(brand => brand.id.toString() === product.brand?.toString())?.name || 'Chọn thương hiệu'
+                            : 'Chọn thương hiệu'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {(brandsData?.data || []).map(brand => (
-                          <SelectItem key={brand._id} value={brand._id}>
+                          <SelectItem key={brand.id} value={brand.id.toString()}>
                             {brand.name}
                           </SelectItem>
                         ))}
@@ -272,11 +277,16 @@ export default function CreateProductPage() {
                       value={product.category}
                       onValueChange={value => setProduct({ ...product, category: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn danh mục" />
+                        <SelectValue placeholder="Chọn danh mục">
+                          {product.category 
+                            ? (categoriesData?.data || []).find(category => category.id.toString() === product.category?.toString())?.name || 'Chọn danh mục'
+                            : 'Chọn danh mục'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {(categoriesData?.data || []).map(category => (
-                          <SelectItem key={category._id} value={category._id}>
+                          <SelectItem key={category.id} value={category.id.toString()}>
                             {category.name}
                           </SelectItem>
                         ))}
@@ -290,11 +300,16 @@ export default function CreateProductPage() {
                       value={product.material}
                       onValueChange={value => setProduct({ ...product, material: value })}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn chất liệu" />
+                        <SelectValue placeholder="Chọn chất liệu">
+                          {product.material 
+                            ? (materialsData?.data || []).find(material => material.id.toString() === product.material?.toString())?.name || 'Chọn chất liệu'
+                            : 'Chọn chất liệu'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {(materialsData?.data || []).map(material => (
-                          <SelectItem key={material._id} value={material._id}>
+                          <SelectItem key={material.id} value={material.id.toString()}>
                             {material.name}
                           </SelectItem>
                         ))}

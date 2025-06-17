@@ -82,7 +82,7 @@ export default function AccountsPage() {
 
   const { data, isLoading, error } = useAccounts(filters);
   const deleteAccount = useDeleteAccount();
-  const updateAccountStatus = useUpdateAccountStatus(accountToUpdateStatus?._id || '');
+  const updateAccountStatus = useUpdateAccountStatus(accountToUpdateStatus?.id || '');
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -169,7 +169,7 @@ export default function AccountsPage() {
     if (!accountToDelete) return;
 
     try {
-      await deleteAccount.mutateAsync(accountToDelete._id, {
+      await deleteAccount.mutateAsync(accountToDelete.id, {
         onSuccess: () => {
           toast.success('Xóa tài khoản thành công');
           setIsDeleteDialogOpen(false);
@@ -241,7 +241,7 @@ export default function AccountsPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
@@ -346,7 +346,7 @@ export default function AccountsPage() {
                     </TableRow>
                   ) : (
                     data?.data.accounts.map((account) => (
-                      <TableRow key={account._id} className="hover:bg-gray-50">
+                      <TableRow key={account.id} className="hover:bg-gray-50">
                         <TableCell className="py-3 px-4">
                           <div className="flex items-center space-x-4">
                             <div className="p-0.5 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
@@ -383,7 +383,7 @@ export default function AccountsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <a href={`/admin/accounts/edit/${account._id}`} passHref>
+                              <a href={`/admin/accounts/edit/${account.id}`} passHref>
                                 <DropdownMenuItem className="cursor-pointer text-maintext">
                                   <Icon path={mdiPencil} size={0.7} className="mr-2" />
                                   <span className="text-maintext">Chỉnh sửa</span>

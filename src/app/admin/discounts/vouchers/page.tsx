@@ -174,7 +174,7 @@ export default function VouchersPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
@@ -321,7 +321,7 @@ export default function VouchersPage() {
               </TableHeader>
               <TableBody>
                 {data?.data?.vouchers?.map((voucher) => (
-                  <TableRow key={voucher._id}>
+                  <TableRow key={voucher.id}>
                     <TableCell className="px-4 py-4 text-sm">
                       <span className="font-mono font-medium">{voucher.code}</span>
                     </TableCell>
@@ -351,14 +351,14 @@ export default function VouchersPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            setVoucherToNotify(voucher._id);
+                            setVoucherToNotify(voucher.id);
                             setIsNotifyDialogOpen(true);
                           }}
                           title="Gửi thông báo"
                         >
                           <Icon path={mdiEmailFast} size={0.7} />
                         </Button>
-                        <a href={`/admin/discounts/vouchers/edit/${voucher._id}`}>
+                        <a href={`/admin/discounts/vouchers/edit/${voucher.id}`}>
                           <Button
                             variant="outline"
                             size="icon"
@@ -371,7 +371,7 @@ export default function VouchersPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => {
-                            setVoucherToDelete(voucher._id);
+                            setVoucherToDelete(voucher.id);
                             setIsDeleteDialogOpen(true);
                           }}
                           title="Xóa"

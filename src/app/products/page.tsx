@@ -107,7 +107,7 @@ export default function ProductsPage() {
     if (filters.brands && filters.brands.length > 0) {
       const brandsArray = Array.isArray(filters.brands) ? filters.brands : [filters.brands]
       filteredProducts = filteredProducts.filter((product) => {
-        const brandId = typeof product.brand === "object" ? product.brand._id : product.brand
+        const brandId = typeof product.brand === "object" ? product.(brand as any)?.id : product.brand
         return brandsArray.includes(brandId)
       })
     }
@@ -115,7 +115,7 @@ export default function ProductsPage() {
     if (filters.categories && filters.categories.length > 0) {
       const categoriesArray = Array.isArray(filters.categories) ? filters.categories : [filters.categories]
       filteredProducts = filteredProducts.filter((product) => {
-        const categoryId = typeof product.category === "object" ? product.category._id : product.category
+        const categoryId = typeof product.category === "object" ? product.(category as any)?.id : product.category
         return categoriesArray.includes(categoryId)
       })
     }
@@ -123,7 +123,7 @@ export default function ProductsPage() {
     if (filters.color) {
       filteredProducts = filteredProducts.filter((product) =>
         product.variants.some((variant: any) => {
-          const colorId = typeof variant.colorId === "object" ? variant.colorId._id : variant.colorId
+          const colorId = typeof variant.colorId === "object" ? variant.colorId.id : variant.colorId
           return colorId === filters.color
         }),
       )
@@ -132,7 +132,7 @@ export default function ProductsPage() {
     if (filters.size) {
       filteredProducts = filteredProducts.filter((product) =>
         product.variants.some((variant: any) => {
-          const sizeId = typeof variant.sizeId === "object" ? variant.sizeId._id : variant.sizeId
+          const sizeId = typeof variant.sizeId === "object" ? variant.sizeId.id : variant.sizeId
           return sizeId === filters.size
         }),
       )
@@ -148,7 +148,7 @@ export default function ProductsPage() {
         
         if (promotionsData?.data?.promotions) {
           const discount = calculateProductDiscount(
-            product._id,
+            (product as any)?.id,
             price,
             promotionsData.data.promotions
           );
@@ -170,8 +170,8 @@ export default function ProductsPage() {
         let priceB = b.variants[0]?.price || 0;
         
         if (promotionsData?.data?.promotions) {
-          const discountA = calculateProductDiscount(a._id, priceA, promotionsData.data.promotions);
-          const discountB = calculateProductDiscount(b._id, priceB, promotionsData.data.promotions);
+          const discountA = calculateProductDiscount(a.id, priceA, promotionsData.data.promotions);
+          const discountB = calculateProductDiscount(b.id, priceB, promotionsData.data.promotions);
           
           if (discountA.discountPercent > 0) {
             priceA = discountA.discountedPrice;
@@ -252,7 +252,7 @@ export default function ProductsPage() {
     // Check if promotions data is available and calculate discount
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
-        product._id,
+        (product as any)?.id,
         firstVariant.price,
         promotionsData.data.promotions
       );
@@ -266,8 +266,8 @@ export default function ProductsPage() {
     }
 
     const cartItem = {
-      id: firstVariant._id, // Use variant ID as main ID
-      productId: product._id, // Separate product ID
+      id: firstVariant.id, // Use variant ID as main ID
+      productId: (product as any)?.id, // Separate product ID
       name: product.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -281,8 +281,8 @@ export default function ProductsPage() {
       colors: [firstVariant.colorId?.name || 'Default'],
       stock: firstVariant.stock,
       // New variant information
-      colorId: firstVariant.colorId?._id || '',
-      sizeId: firstVariant.sizeId?._id || '',
+      colorId: firstVariant.colorId?.id || '',
+      sizeId: firstVariant.sizeId?.id || '',
       colorName: firstVariant.colorId?.name || 'Default',
       sizeName: firstVariant.sizeId?.value ? getSizeLabel(firstVariant.sizeId.value) : (firstVariant.sizeId?.code || '')
     };
@@ -292,7 +292,7 @@ export default function ProductsPage() {
   };
 
   const handleQuickView = (product: any) => {
-    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product._id}`
+    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`
   }
 
   const handleAddToWishlist = (product: any) => {
@@ -437,7 +437,7 @@ export default function ProductsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((product) => (
                   <ProductCard
-                    key={product._id}
+                    key={(product as any)?.id}
                     product={product}
                     promotionsData={promotionsData}
                     onAddToCart={() => handleAddToCart(product)}
@@ -609,7 +609,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
 
         <div className="relative overflow-visible bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl">
-          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product._id}`} className="block">
+          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`} className="block">
             <div className="aspect-square overflow-visible relative flex items-center justify-center">
               <motion.div
                 className="w-full h-full relative z-20"
@@ -634,7 +634,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
             {(() => {
               if (promotionsData?.data?.promotions && product.variants?.[0]) {
                 const discount = calculateProductDiscount(
-                  product._id,
+                  (product as any)?.id,
                   product.variants[0].price,
                   promotionsData.data.promotions
                 );
@@ -751,7 +751,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
           </div>
 
           <a
-            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product._id}`}
+            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`}
             className="hover:text-primary transition-colors group/link"
           >
             <h3 className="font-bold text-base mb-2 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
@@ -770,7 +770,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
                   // Calculate discount from promotions data if available
                   if (promotionsData?.data?.promotions) {
                     const discount = calculateProductDiscount(
-                      product._id,
+                      (product as any)?.id,
                       product.variants[0].price,
                       promotionsData.data.promotions
                     );
@@ -786,7 +786,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
               {(() => {
                 if (promotionsData?.data?.promotions) {
                   const discount = calculateProductDiscount(
-                    product._id,
+                    (product as any)?.id,
                     product.variants[0].price,
                     promotionsData.data.promotions
                   );
@@ -810,13 +810,13 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
                   <div className="flex gap-1 text-sm items-center">
                     {Array.from(
                       new Set(
-                        product.variants.map((v: any) => (typeof v.colorId === "object" ? v.colorId._id : v.colorId)),
+                        product.variants.map((v: any) => (typeof v.colorId === "object" ? v.colorId.id : v.colorId)),
                       ),
                     )
                       .slice(0, 4)
                       .map((colorId, index: number) => {
                         const variant = product.variants.find(
-                          (v: any) => (typeof v.colorId === "object" ? v.colorId._id : v.colorId) === colorId,
+                          (v: any) => (typeof v.colorId === "object" ? v.colorId.id : v.colorId) === colorId,
                         )
                         const color = typeof variant.colorId === "object" ? variant.colorId : { code: "#000000" }
 
@@ -834,7 +834,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
 
                     {Array.from(
                       new Set(
-                        product.variants.map((v: any) => (typeof v.colorId === "object" ? v.colorId._id : v.colorId)),
+                        product.variants.map((v: any) => (typeof v.colorId === "object" ? v.colorId.id : v.colorId)),
                       ),
                     ).length > 4 && (
                         <motion.span
@@ -844,7 +844,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
                           +
                           {Array.from(
                             new Set(
-                              product.variants.map((v: any) => (typeof v.colorId === "object" ? v.colorId._id : v.colorId)),
+                              product.variants.map((v: any) => (typeof v.colorId === "object" ? v.colorId.id : v.colorId)),
                             ),
                           ).length - 4}
                         </motion.span>
@@ -1075,13 +1075,13 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
         <h3 className="text-sm font-medium mb-3">Thương hiệu</h3>
         <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
           {brands.map((brand) => (
-            <div key={brand._id} className="flex items-center gap-2">
+            <div key={(brand as any)?.id} className="flex items-center gap-2">
               <Checkbox
-                id={`brand-${brand._id}`}
-                checked={selectedBrand === brand._id}
-                onCheckedChange={() => handleBrandChange(brand._id)}
+                id={`brand-${(brand as any)?.id}`}
+                checked={selectedBrand === (brand as any)?.id}
+                onCheckedChange={() => handleBrandChange((brand as any)?.id)}
               />
-              <label htmlFor={`brand-${brand._id}`} className="text-sm">
+              <label htmlFor={`brand-${(brand as any)?.id}`} className="text-sm">
                 {brand.name}
               </label>
             </div>
@@ -1093,13 +1093,13 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
         <h3 className="text-sm font-medium mb-3">Danh mục</h3>
         <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
           {categories.map((category) => (
-            <div key={category._id} className="flex items-center gap-2">
+            <div key={(category as any)?.id} className="flex items-center gap-2">
               <Checkbox
-                id={`category-${category._id}`}
-                checked={selectedCategory === category._id}
-                onCheckedChange={() => handleCategoryChange(category._id)}
+                id={`category-${(category as any)?.id}`}
+                checked={selectedCategory === (category as any)?.id}
+                onCheckedChange={() => handleCategoryChange((category as any)?.id)}
               />
-              <label htmlFor={`category-${category._id}`} className="text-sm">
+              <label htmlFor={`category-${(category as any)?.id}`} className="text-sm">
                 {category.name}
               </label>
             </div>
@@ -1112,11 +1112,11 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
         <div className="flex flex-wrap gap-2">
           {colors.map((color) => (
             <button
-              key={color._id}
-              className={`w-8 h-8 rounded-full border overflow-hidden relative transition-all duration-300 ${filters.color === color._id ? "ring-2 ring-primary ring-offset-2" : "border-gray-300"}`}
+              key={color.id}
+              className={`w-8 h-8 rounded-full border overflow-hidden relative transition-all duration-300 ${filters.color === color.id ? "ring-2 ring-primary ring-offset-2" : "border-gray-300"}`}
               style={{ backgroundColor: color.code }}
               title={color.name}
-              onClick={() => handleColorChange(color._id)}
+              onClick={() => handleColorChange(color.id)}
             />
           ))}
         </div>
@@ -1126,11 +1126,11 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
         <div className="flex flex-wrap gap-2">
           {sizes.map((size) => (
             <button
-              key={size._id}
-              className={`px-2 py-1 border rounded text-sm transition-all duration-300 ${filters.size === size._id ? "bg-primary text-white border-primary" : "border-gray-300 hover:border-primary"}`}
-              onClick={() => handleSizeChange(size._id)}
+              key={size.id}
+              className={`px-2 py-1 border rounded text-sm transition-all duration-300 ${filters.size === size.id ? "bg-primary text-white border-primary" : "border-gray-300 hover:border-primary"}`}
+              onClick={() => handleSizeChange(size.id)}
             >
-              {size.value ? getSizeLabel(size.value) : size.name || size._id}
+              {size.value ? getSizeLabel(size.value) : size.name || size.id}
             </button>
           ))}
         </div>

@@ -45,7 +45,7 @@ export default function ProductsPage() {
 
   const { data: brandsData } = useBrands();
   const { data: categoriesData } = useCategories();
-
+  
   const data = useMemo(() => {
     if (!rawData || !rawData.data || !rawData.data.products) return rawData;
     
@@ -118,10 +118,10 @@ export default function ProductsPage() {
     imageIndex: number = 0
   ) => {
     const slides = (product.variants as any[]).flatMap((variant: any) =>
-      (variant.images || []).map((img: string) => ({
-        src: checkImageUrl(img),
+      (variant.images || []).map((img: any) => ({
+        src: checkImageUrl(img.imageUrl),
         alt: product.name,
-        download: checkImageUrl(img),
+        download: checkImageUrl(img.imageUrl),
       }))
     );
     let startIndex = 0;
@@ -168,8 +168,8 @@ export default function ProductsPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
-            <div className="relative flex-1 max-w-4xl">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
+            <div className="relative flex-1">
               <Icon
                 path={mdiMagnify}
                 size={0.7}
@@ -178,7 +178,7 @@ export default function ProductsPage() {
               <Input
                 type="text"
                 placeholder="Tìm kiếm theo tên sản phẩm..."
-                className="pl-10 pr-4 py-2 w-full border rounded-[6px]"
+                className="pl-10 py-2 w-full border rounded-[6px]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -207,14 +207,19 @@ export default function ProductsPage() {
                     <label className="block text-sm text-maintext mb-2 font-semibold">
                       Thương hiệu
                     </label>
-                    <Select value={filters.brand || ''} onValueChange={(value) => handleFilterChange('brand', value === 'all' ? undefined : value)}>
+                    <Select value={filters.brand || 'all'} onValueChange={(value) => handleFilterChange('brand', value === 'all' ? undefined : value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Tất cả thương hiệu" />
+                        <SelectValue placeholder="Tất cả thương hiệu">
+                          {filters.brand 
+                            ? (brandsData?.data || []).find(brand => brand.id.toString() === filters.brand?.toString())?.name || 'Tất cả thương hiệu'
+                            : 'Tất cả thương hiệu'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả thương hiệu</SelectItem>
                         {(brandsData?.data || []).map((brand) => (
-                          <SelectItem key={brand._id} value={brand._id}>{brand.name}</SelectItem>
+                          <SelectItem key={brand.id} value={brand.id.toString()}>{brand.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -223,14 +228,19 @@ export default function ProductsPage() {
                     <label className="block text-sm text-maintext mb-2 font-semibold">
                       Danh mục
                     </label>
-                    <Select value={filters.category || ''} onValueChange={(value) => handleFilterChange('category', value === 'all' ? undefined : value)}>
+                    <Select value={filters.category || 'all'} onValueChange={(value) => handleFilterChange('category', value === 'all' ? undefined : value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Tất cả danh mục" />
+                        <SelectValue placeholder="Tất cả danh mục">
+                          {filters.category 
+                            ? (categoriesData?.data || []).find(category => category.id.toString() === filters.category?.toString())?.name || 'Tất cả danh mục'
+                            : 'Tất cả danh mục'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả danh mục</SelectItem>
                         {(categoriesData?.data || []).map((category) => (
-                          <SelectItem key={category._id} value={category._id}>{category.name}</SelectItem>
+                          <SelectItem key={category.id} value={category.id.toString()}>{category.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -239,9 +249,16 @@ export default function ProductsPage() {
                     <label className="block text-sm text-maintext mb-2 font-semibold">
                       Trạng thái
                     </label>
-                    <Select value={filters.status || ''} onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}>
+                    <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Tất cả trạng thái" />
+                        <SelectValue placeholder="Tất cả trạng thái">
+                          {filters.status === 'HOAT_DONG' 
+                            ? 'Hoạt động' 
+                            : filters.status === 'KHONG_HOAT_DONG' 
+                            ? 'Không hoạt động' 
+                            : 'Tất cả trạng thái'
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả trạng thái</SelectItem>
@@ -307,7 +324,7 @@ export default function ProductsPage() {
               <TableBody>
                 {data?.data.products.length ? (
                   data.data.products.map((product) => (
-                    <TableRow key={product._id} className="hover:bg-gray-50">
+                    <TableRow key={(product as any)?.id} className="hover:bg-gray-50">
                       <TableCell className="px-4 py-4 whitespace-nowrap">
                         <div
                           className="relative h-12 w-12 rounded-[6px] overflow-hidden bg-gray-100 cursor-pointer group"
@@ -315,7 +332,7 @@ export default function ProductsPage() {
                           title="Xem ảnh lớn"
                         >
                           <img
-                            src={checkImageUrl(product.variants[0]?.images?.[0])}
+                            src={checkImageUrl(product.variants[0]?.images?.[0]?.imageUrl)}
                             alt={product.name}
                             className="object-cover group-hover:scale-105 transition-transform duration-200"
                           />
@@ -337,7 +354,7 @@ export default function ProductsPage() {
                         {(() => {
                           const basePrice = product.variants[0]?.price || 0;
                           const discount = promotionsData?.data?.promotions 
-                            ? calculateProductDiscount(product._id, basePrice, promotionsData.data.promotions)
+                            ? calculateProductDiscount((product as any)?.id, basePrice, promotionsData.data.promotions)
                             : { originalPrice: basePrice, discountedPrice: basePrice, discountPercent: 0 };
                           
                           return (
@@ -372,7 +389,7 @@ export default function ProductsPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <a href={`/admin/products/edit/${product._id}`}>
+                          <a href={`/admin/products/edit/${(product as any)?.id}`}>
                             <Button
                               variant="outline"
                               size="icon"
@@ -381,7 +398,7 @@ export default function ProductsPage() {
                               <Icon path={mdiPencilCircle} size={0.7} />
                             </Button>
                           </a>
-                          <Dialog open={isDeleteDialogOpen && productToDelete === product._id} onOpenChange={(open) => {
+                          <Dialog open={isDeleteDialogOpen && productToDelete === (product as any)?.id} onOpenChange={(open) => {
                             if (!open) {
                               setIsDeleteDialogOpen(false);
                               setProductToDelete(null);
@@ -392,7 +409,7 @@ export default function ProductsPage() {
                                 variant="outline"
                                 size="icon"
                                 onClick={() => {
-                                  setProductToDelete(product._id);
+                                  setProductToDelete((product as any)?.id);
                                   setIsDeleteDialogOpen(true);
                                 }}
                                 title="Xóa"

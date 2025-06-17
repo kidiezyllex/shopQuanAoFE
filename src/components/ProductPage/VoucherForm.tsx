@@ -38,7 +38,7 @@ const VoucherForm = ({ orderValue, onApplyVoucher, onRemoveVoucher, appliedVouch
         onApplyVoucher({
           code: voucher.code,
           discount: result.data.discountValue,
-          voucherId: voucher._id
+          voucherId: voucher.id
         });
         toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công`);
         setVoucherCode('');

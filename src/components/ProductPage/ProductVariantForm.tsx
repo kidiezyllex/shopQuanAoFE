@@ -94,11 +94,16 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             required
           >
             <SelectTrigger id={`colorId-${variant.colorId}`} className="w-full">
-              <SelectValue placeholder="Chọn màu sắc" />
+              <SelectValue placeholder="Chọn màu sắc">
+                {variant.colorId 
+                  ? (colorsData?.data || []).find(color => color.id.toString() === variant.colorId?.toString())?.name || 'Chọn màu sắc'
+                  : 'Chọn màu sắc'
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {(colorsData?.data || []).map(color => (
-                <SelectItem key={color._id} value={color._id}>
+                <SelectItem key={color.id} value={color.id.toString()}>
                   <div className="flex items-center justify-between w-full">
                     <span>{color.name}</span>
                     <div 
@@ -120,11 +125,19 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             required
           >
             <SelectTrigger id={`sizeId-${variant.sizeId}`} className="w-full">
-              <SelectValue placeholder="Chọn kích thước" />
+              <SelectValue placeholder="Chọn kích thước">
+                {variant.sizeId 
+                  ? (() => {
+                      const foundSize = (sizesData?.data || []).find(size => size.id.toString() === variant.sizeId?.toString());
+                      return foundSize ? getSizeLabel(foundSize.value) : 'Chọn kích thước';
+                    })()
+                  : 'Chọn kích thước'
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {(sizesData?.data || []).map(size => (
-                <SelectItem key={size._id} value={size._id}>
+                <SelectItem key={size.id} value={size.id.toString()}>
                   {getSizeLabel(size.value)}
                 </SelectItem>
               ))}

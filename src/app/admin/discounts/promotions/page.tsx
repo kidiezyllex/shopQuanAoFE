@@ -151,7 +151,7 @@ export default function PromotionsPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
@@ -285,7 +285,7 @@ export default function PromotionsPage() {
               <TableBody>
                 {data?.data?.promotions?.length ? (
                   data.data.promotions.map((promotion) => (
-                    <TableRow key={promotion._id}>
+                    <TableRow key={promotion.id}>
                       <TableCell className="px-4 py-4 text-sm">
                         <span className="font-mono font-medium">{promotion.code}</span>
                       </TableCell>
@@ -325,7 +325,7 @@ export default function PromotionsPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 text-sm text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <a href={`/admin/discounts/promotions/edit/${promotion._id}`}>
+                          <a href={`/admin/discounts/promotions/edit/${promotion.id}`}>
                             <Button
                               variant="outline"
                               size="icon"
@@ -338,7 +338,7 @@ export default function PromotionsPage() {
                             variant="outline"
                             size="icon"
                             onClick={() => {
-                              setPromotionToDelete(promotion._id);
+                              setPromotionToDelete(promotion.id);
                               setIsDeleteDialogOpen(true);
                             }}
                             title="Xóa"

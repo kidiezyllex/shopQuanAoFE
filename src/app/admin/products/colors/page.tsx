@@ -53,6 +53,11 @@ export default function ColorsPage() {
     };
 
     const handleDeleteColor = async (id: string) => {
+        if (!id) {
+            toast.error('Lỗi: ID màu sắc không hợp lệ');
+            return;
+        }
+        
         try {
             await deleteColor.mutateAsync(id, {
                 onSuccess: () => {
@@ -96,7 +101,7 @@ export default function ColorsPage() {
 
             <Card className="mb-4">
                 <CardContent className="py-4">
-                    <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+                    <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2 gap-2">
                         <div className="relative flex-1 max-w-4xl">
                             <Icon
                                 path={mdiMagnify}
@@ -217,10 +222,11 @@ export default function ColorsPage() {
                             </TableHeader>
                             <TableBody>
                                 {filteredColors?.length ? (
-                                    filteredColors.map((color) => (
-                                        <TableRow key={color._id} className="hover:bg-gray-50">
+                                    filteredColors.map((color, index) => {
+                                        return (
+                                        <TableRow key={(color as any)?.id || `color-${index}`} className="hover:bg-gray-50">
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
-                                                {color._id}
+                                                {(color as any)?.id}
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
@@ -247,7 +253,7 @@ export default function ColorsPage() {
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                                                 <div className="flex items-center justify-end space-x-2">
-                                                    <Dialog open={isEditDialogOpen && colorToEdit === color._id} onOpenChange={(open) => {
+                                                    <Dialog open={isEditDialogOpen && colorToEdit === (color as any)?.id} onOpenChange={(open) => {
                                                         setIsEditDialogOpen(open);
                                                         if (!open) setColorToEdit(null);
                                                     }}>
@@ -257,16 +263,16 @@ export default function ColorsPage() {
                                                                 size="icon"
                                                                 title="Sửa"
                                                                 onClick={() => {
-                                                                    setColorToEdit(color._id);
+                                                                    setColorToEdit((color as any)?.id);
                                                                     setIsEditDialogOpen(true);
                                                                 }}
                                                             >
                                                                 <Icon path={mdiPencilCircle} size={0.7} />
                                                             </Button>
                                                         </DialogTrigger>
-                                                        {colorToEdit === color._id && (
+                                                        {colorToEdit === (color as any)?.id && (
                                                             <EditColorDialog
-                                                                colorId={color._id}
+                                                                colorId={(color as any)?.id}
                                                                 isOpen={isEditDialogOpen}
                                                                 onClose={() => {
                                                                     setIsEditDialogOpen(false);
@@ -275,13 +281,16 @@ export default function ColorsPage() {
                                                             />
                                                         )}
                                                     </Dialog>
-                                                    <Dialog open={isDeleteDialogOpen && colorToDelete === color._id} onOpenChange={setIsDeleteDialogOpen}>
+                                                    <Dialog open={isDeleteDialogOpen && colorToDelete === (color as any)?.id} onOpenChange={(open) => {
+                                                        setIsDeleteDialogOpen(open);
+                                                        if (!open) setColorToDelete(null);
+                                                    }}>
                                                         <DialogTrigger asChild>
                                                             <Button
                                                                 variant="outline"
                                                                 size="icon"
                                                                 onClick={() => {
-                                                                    setColorToDelete(color._id);
+                                                                    setColorToDelete((color as any)?.id);
                                                                     setIsDeleteDialogOpen(true);
                                                                 }}
                                                                 title="Xóa"
@@ -289,28 +298,33 @@ export default function ColorsPage() {
                                                                 <Icon path={mdiDeleteCircle} size={0.7} />
                                                             </Button>
                                                         </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>Xác nhận xóa màu sắc</DialogTitle>
-                                                            </DialogHeader>
-                                                            <p>Bạn có chắc chắn muốn xóa màu sắc này không?</p>
-                                                            <DialogFooter>
-                                                                <DialogClose asChild>
-                                                                    <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Hủy</Button>
-                                                                </DialogClose>
-                                                                <Button variant="destructive" onClick={() => {
-                                                                    if (colorToDelete) {
-                                                                        handleDeleteColor(colorToDelete);
+                                                        {colorToDelete === (color as any)?.id && (
+                                                            <DialogContent>
+                                                                <DialogHeader>
+                                                                    <DialogTitle>Xác nhận xóa màu sắc</DialogTitle>
+                                                                </DialogHeader>
+                                                                <p>Bạn có chắc chắn muốn xóa màu sắc này không?</p>
+                                                                <DialogFooter>
+                                                                    <DialogClose asChild>
+                                                                        <Button variant="outline" onClick={() => {
+                                                                            setIsDeleteDialogOpen(false);
+                                                                            setColorToDelete(null);
+                                                                        }}>Hủy</Button>
+                                                                    </DialogClose>
+                                                                    <Button variant="destructive" onClick={() => {
+                                                                        handleDeleteColor((color as any)?.id);
                                                                         setIsDeleteDialogOpen(false);
-                                                                    }
-                                                                }}>Xóa</Button>
-                                                            </DialogFooter>
-                                                        </DialogContent>
-                                                    </Dialog>
+                                                                        setColorToDelete(null);
+                                                                    }}>Xóa</Button>
+                                                                </DialogFooter>
+                                                            </DialogContent>
+                                                                                                )}
+                                    </Dialog>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="px-4 py-8 text-center text-maintext">

@@ -18,6 +18,7 @@ import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 
 export default function CategoriesPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,7 +96,7 @@ export default function CategoriesPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
@@ -209,9 +210,9 @@ export default function CategoriesPage() {
               <TableBody>
                 {filteredCategories?.length ? (
                   filteredCategories.map((category) => (
-                    <TableRow key={category._id} className="hover:bg-gray-50">
+                    <TableRow key={(category as any)?.id} className="hover:bg-gray-50">
                       <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
-                        {category._id}
+                        {(category as any)?.id}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-maintext">{category.name}</div>
@@ -229,7 +230,7 @@ export default function CategoriesPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <Dialog open={isEditDialogOpen && categoryToEdit === category._id} onOpenChange={(open) => {
+                          <Dialog open={isEditDialogOpen && categoryToEdit === (category as any)?.id} onOpenChange={(open) => {
                             setIsEditDialogOpen(open);
                             if (!open) setCategoryToEdit(null);
                           }}>
@@ -239,16 +240,16 @@ export default function CategoriesPage() {
                                 size="icon"
                                 title="Sửa"
                                 onClick={() => {
-                                  setCategoryToEdit(category._id);
+                                  setCategoryToEdit((category as any)?.id);
                                   setIsEditDialogOpen(true);
                                 }}
                               >
                                 <Icon path={mdiPencilCircle} size={0.7} />
                               </Button>
                             </DialogTrigger>
-                            {categoryToEdit === category._id && (
+                            {categoryToEdit === (category as any)?.id && (
                               <EditCategoryDialog
-                                categoryId={category._id}
+                                categoryId={(category as any)?.id}
                                 isOpen={isEditDialogOpen}
                                 onClose={() => {
                                   setIsEditDialogOpen(false);
@@ -257,13 +258,13 @@ export default function CategoriesPage() {
                               />
                             )}
                           </Dialog>
-                          <Dialog open={isDeleteDialogOpen && categoryToDelete === category._id} onOpenChange={setIsDeleteDialogOpen}>
+                          <Dialog open={isDeleteDialogOpen && categoryToDelete === (category as any)?.id} onOpenChange={setIsDeleteDialogOpen}>
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={() => {
-                                  setCategoryToDelete(category._id);
+                                  setCategoryToDelete((category as any)?.id);
                                   setIsDeleteDialogOpen(true);
                                 }}
                                 title="Xóa"

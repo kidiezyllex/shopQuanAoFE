@@ -56,7 +56,7 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
   const handleItemSelect = (item: any, checked: boolean) => {
     if (checked) {
       const newItem: SelectedItem = {
-        product: item.product._id,
+        product: item.(product as any)?.id,
         variant: item.variant,
         quantity: 1,
         maxQuantity: item.quantity,
@@ -68,7 +68,7 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
       setSelectedItems(prev => [...prev, newItem]);
     } else {
       setSelectedItems(prev => prev.filter(selected => 
-        !(selected.product === item.product._id && 
+        !(selected.product === item.(product as any)?.id && 
           selected.variant.colorId === item.variant.colorId && 
           selected.variant.sizeId === item.variant.sizeId)
       ));
@@ -83,7 +83,7 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
 
   const isItemSelected = (item: any) => {
     return selectedItems.some(selected => 
-      selected.product === item.product._id && 
+      selected.product === item.(product as any)?.id && 
       selected.variant.colorId === item.variant.colorId && 
       selected.variant.sizeId === item.variant.sizeId
     );
@@ -102,7 +102,7 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
     setIsSubmitting(true);
     try {
       const payload: ICustomerReturnRequest = {
-        originalOrder: order._id,
+        originalOrder: order.id,
         items: selectedItems.map(item => ({
           product: item.product,
           variant: item.variant,
@@ -197,7 +197,7 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                             size="sm"
                             onClick={() => {
                               const selectedIndex = selectedItems.findIndex(selected => 
-                                selected.product === item.product._id && 
+                                selected.product === item.(product as any)?.id && 
                                 selected.variant.colorId === item.variant.colorId && 
                                 selected.variant.sizeId === item.variant.sizeId
                               );
@@ -213,13 +213,13 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                             min="1"
                             max={item.quantity}
                             value={selectedItems.find(selected => 
-                              selected.product === item.product._id && 
+                              selected.product === item.(product as any)?.id && 
                               selected.variant.colorId === item.variant.colorId && 
                               selected.variant.sizeId === item.variant.sizeId
                             )?.quantity || 1}
                             onChange={(e) => {
                               const selectedIndex = selectedItems.findIndex(selected => 
-                                selected.product === item.product._id && 
+                                selected.product === item.(product as any)?.id && 
                                 selected.variant.colorId === item.variant.colorId && 
                                 selected.variant.sizeId === item.variant.sizeId
                               );
@@ -234,7 +234,7 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                             size="sm"
                             onClick={() => {
                               const selectedIndex = selectedItems.findIndex(selected => 
-                                selected.product === item.product._id && 
+                                selected.product === item.(product as any)?.id && 
                                 selected.variant.colorId === item.variant.colorId && 
                                 selected.variant.sizeId === item.variant.sizeId
                               );

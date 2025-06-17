@@ -784,7 +784,7 @@ export default function StatisticsPage() {
                       </TableHeader>
                       <TableBody>
                         {statisticsData?.data?.statistics?.map((item) => (
-                          <TableRow key={item._id}>
+                          <TableRow key={item.id}>
                             <TableCell className="font-medium text-maintext">{formatDate(item.date)}</TableCell>
                             <TableCell className="text-maintext">
                               <Badge variant="outline">
@@ -800,7 +800,7 @@ export default function StatisticsPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => handleViewDetail(item._id)}
+                                onClick={() => handleViewDetail(item.id)}
                               >
                                 <Icon path={mdiEye} size={0.6} className="mr-1" />
                                 Chi tiết

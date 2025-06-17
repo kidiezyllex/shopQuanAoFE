@@ -27,13 +27,18 @@ export interface ISize {
   code: string;
 }
 
+export interface IProductImage {
+  id: number;
+  imageUrl: string;
+}
+
 export interface IPopulatedProductVariant {
   _id: string;
   colorId: IColor;
   sizeId: ISize;
   price: number;
   stock: number;
-  images: string[];
+  images: IProductImage[];
 }
 
 export interface IProduct {

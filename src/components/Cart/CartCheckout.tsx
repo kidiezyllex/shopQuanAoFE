@@ -57,7 +57,7 @@ export const CartCheckout: React.FC<CartCheckoutProps> = ({ onClose }) => {
       setIsProcessing(true);
       const orderData = {
         items: items.map(item => ({
-          product: item.product._id,
+          product: item.(product as any)?.id,
           variant: {
             colorId: item.variant?.colorId,
             sizeId: item.variant?.sizeId
@@ -73,7 +73,7 @@ export const CartCheckout: React.FC<CartCheckoutProps> = ({ onClose }) => {
       const response = await createOrder(orderData as any);
       
       if (response.success) {
-        setOrderId(response.data._id);
+        setOrderId(response.data.id);
         setShowPaymentMethods(true);
       } else {
         throw new Error('Không thể tạo đơn hàng');

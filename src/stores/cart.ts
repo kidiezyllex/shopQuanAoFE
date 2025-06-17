@@ -34,7 +34,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const existingItemIndex = state.items.findIndex(
             (i) =>
-              i.product._id === item.product._id &&
+              i.(product as any)?.id === item.(product as any)?.id &&
               i.variant?.colorId === item.variant?.colorId &&
               i.variant?.sizeId === item.variant?.sizeId
           );
@@ -59,7 +59,7 @@ export const useCartStore = create<CartStore>()(
           const newItems = state.items.filter(
             (item) =>
               !(
-                item.product._id === productId &&
+                item.(product as any)?.id === productId &&
                 (!variantId ||
                   (item.variant?.colorId === variantId.split('-')[0] &&
                     item.variant?.sizeId === variantId.split('-')[1]))
@@ -74,7 +74,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const updatedItems = state.items.map((item) => {
             if (
-              item.product._id === productId &&
+              item.(product as any)?.id === productId &&
               (!variantId ||
                 (item.variant?.colorId === variantId.split('-')[0] &&
                   item.variant?.sizeId === variantId.split('-')[1]))

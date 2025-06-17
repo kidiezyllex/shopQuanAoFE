@@ -428,7 +428,7 @@ export const Categories = () => {
             className="mySwiper"
           >
             {categories.map((category, index) => (
-              <SwiperSlide key={category.id}>
+              <SwiperSlide key={(category as any)?.id}>
                 <CategoryCard category={category} index={index} />
               </SwiperSlide>
             ))}
