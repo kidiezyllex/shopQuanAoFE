@@ -115,7 +115,7 @@ export default function ProductsPage() {
     if (filters.categories && filters.categories.length > 0) {
       const categoriesArray = Array.isArray(filters.categories) ? filters.categories : [filters.categories]
       filteredProducts = filteredProducts.filter((product) => {
-        const categoryId = typeof product.category === "object" ? product.(category as any)?.id : product.category
+        const categoryId = typeof product.category === "object" ? (product.category as any).id : product.category
         return categoriesArray.includes(categoryId)
       })
     }
