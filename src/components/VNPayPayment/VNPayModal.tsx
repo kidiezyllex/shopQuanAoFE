@@ -20,6 +20,7 @@ import {
 } from '@mdi/js';
 import { toast } from 'react-toastify';
 import { formatPrice } from '@/utils/formatters';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 interface Bank {
   id: number;
   name: string;

@@ -1593,7 +1593,7 @@ const ReturnsTab = () => {
                 </TableHeader>
                 <TableBody>
                   {returnsData.data.returns.map((returnItem: IReturn) => (
-                    <TableRow key={returnItem.id}>
+                    <TableRow key={(returnItem as any)?.id}>
                       <TableCell className="font-medium px-3 py-2">{returnItem.code}</TableCell>
                       <TableCell className="px-3 py-2">{formatDate(returnItem.createdAt)}</TableCell>
                       <TableCell className="px-3 py-2">
@@ -1625,7 +1625,7 @@ const ReturnsTab = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => handleViewReturnDetails(returnItem.id)}
+                          onClick={() => handleViewReturnDetails((returnItem as any)?.id)}
                           title="Xem chi tiết"
                         >
                           <Icon path={mdiEye} size={0.7} />

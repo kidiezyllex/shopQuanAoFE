@@ -429,7 +429,7 @@ export default function ReturnsPage() {
                   </TableHeader>
                   <TableBody>
                     {data?.data.returns.map((returnItem) => (
-                      <TableRow key={returnItem.id}>
+                      <TableRow key={(returnItem as any)?.id}>
                         <TableCell className="font-medium">{returnItem.code}</TableCell>
                         <TableCell>
                           {typeof returnItem.customer === 'string' ? 
@@ -458,7 +458,7 @@ export default function ReturnsPage() {
                               <DropdownMenuItem 
                                 className="cursor-pointer text-maintext"
                                 onClick={() => {
-                                  setSelectedReturn(returnItem.id);
+                                  setSelectedReturn((returnItem as any)?.id);
                                   setIsDetailDialogOpen(true);
                                 }}
                               >
@@ -468,7 +468,7 @@ export default function ReturnsPage() {
                               {returnItem.status === 'CHO_XU_LY' && (
                                 <>
                                   <DropdownMenuSeparator />
-                                  <a href={`/admin/returns/edit/${returnItem.id}`} passHref>
+                                  <a href={`/admin/returns/edit/${(returnItem as any)?.id}`} passHref>
                                     <DropdownMenuItem className="cursor-pointer text-maintext">
                                       <Icon path={mdiPencilCircle} size={0.7} className="mr-2 text-blue-400" />
                                       <span className="text-maintext text-sm">Chỉnh sửa</span>
@@ -479,7 +479,7 @@ export default function ReturnsPage() {
                                     className="cursor-pointer text-green-600"
                                     onClick={() => setStatusUpdateModal({
                                       isOpen: true,
-                                      returnId: returnItem.id,
+                                      returnId: (returnItem as any)?.id,
                                       currentStatus: returnItem.status
                                     })}
                                   >
@@ -490,7 +490,7 @@ export default function ReturnsPage() {
                                   <DropdownMenuItem
                                     className="cursor-pointer text-red-600"
                                     onClick={() => {
-                                      setReturnToDelete(returnItem.id);
+                                      setReturnToDelete((returnItem as any)?.id);
                                       setIsDeleteDialogOpen(true);
                                     }}
                                   >

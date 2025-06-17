@@ -236,7 +236,7 @@ const ReturnsPage: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {myReturns?.data.returns.map((returnItem) => (
-                    <MyReturnCard key={returnItem.id} returnItem={returnItem} />
+                    <MyReturnCard key={(returnItem as any)?.id} returnItem={returnItem} />
                   ))}
                 </div>
               )}

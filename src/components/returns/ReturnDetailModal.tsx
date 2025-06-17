@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useMyReturnDetail, useCancelMyReturn } from '@/hooks/return';
 import { IReturn } from '@/interface/response/return';
 import { toast } from 'react-toastify';
@@ -14,14 +14,14 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Icon } from '@mdi/react';
 import ConfirmCancelModal from './ConfirmCancelModal';
-
+import { mdiCheckCircle, mdiClockOutline, mdiCancel } from '@mdi/js';
 interface ReturnDetailModalProps {
   returnItem: IReturn | null;
 }
 
 export default function ReturnDetailModal({ returnItem }: ReturnDetailModalProps) {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const { data: detailData, isLoading } = useMyReturnDetail(returnItem?.id || '');
+  const { data: detailData, isLoading } = useMyReturnDetail((returnItem as any)?.id || '');
   const cancelReturn = useCancelMyReturn();
   const queryClient = useQueryClient();
 
@@ -108,10 +108,10 @@ export default function ReturnDetailModal({ returnItem }: ReturnDetailModalProps
     if (!returnItem) return;
     
     try {
-      await cancelReturn.mutateAsync(returnItem.id);
+      await cancelReturn.mutateAsync((returnItem as any)?.id);
       toast.success('Đã hủy yêu cầu trả hàng thành công');
       queryClient.invalidateQueries({ queryKey: ['myReturns'] });
-      queryClient.invalidateQueries({ queryKey: ['myReturn', returnItem.id] });
+      queryClient.invalidateQueries({ queryKey: ['myReturn', (returnItem as any)?.id] });
       setShowCancelConfirm(false);
     } catch (error) {
       toast.error('Hủy yêu cầu trả hàng thất bại');
