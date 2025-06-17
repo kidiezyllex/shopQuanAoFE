@@ -209,6 +209,60 @@ interface InvoiceData {
 }
 
 
+// Fix the image URL extraction for variants
+const getVariantImageUrl = (variant: any) => {
+  if (!variant?.images) return '/images/white-image.png';
+  
+  // Handle both string arrays and object arrays
+  const firstImage = variant.images[0];
+  if (typeof firstImage === 'string') {
+    return firstImage;
+  } else if (typeof firstImage === 'object' && firstImage?.url) {
+    return firstImage.url;
+  } else if (typeof firstImage === 'object' && firstImage?.imageUrl) {
+    return firstImage.imageUrl;
+  }
+  
+  return '/images/white-image.png';
+};
+
+// Convert IPopulatedProductVariant to ApiVariant
+const convertVariantToApiVariant = (variant: any): ApiVariant => {
+  return {
+    _id: variant._id,
+    colorId: variant.colorId ? {
+      _id: variant.colorId._id,
+      name: variant.colorId.name,
+      code: variant.colorId.code,
+      images: variant.colorId.images || []
+    } : undefined,
+    sizeId: variant.sizeId ? {
+      _id: variant.sizeId._id,
+      name: variant.sizeId.name,
+      value: variant.sizeId.value
+    } : undefined,
+    price: variant.price,
+    stock: variant.stock,
+    images: variant.images?.map((img: any) => typeof img === 'string' ? img : img.url || img.imageUrl) || [],
+    sku: variant.sku,
+    actualSizeId: variant.actualSizeId
+  };
+};
+
+// Convert IProduct to ApiProduct
+const convertProductToApiProduct = (product: any): ApiProduct => {
+  return {
+    _id: product._id,
+    name: product.name,
+    brand: product.brand,
+    category: product.category,
+    description: product.description,
+    variants: product.variants?.map(convertVariantToApiVariant) || [],
+    status: product.status,
+    createdAt: product.createdAt
+  };
+};
+
 export default function POSPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<ApiProduct | null>(null);
@@ -414,9 +468,9 @@ export default function POSPage() {
     const uniqueCatObjects = new Map<string, { _id: string; name: string }>();
     
     for (const product of products) {
-      if (product.category && typeof product.category === 'object' && product.(category as any)?.id && product.category.name) {
-        if (!uniqueCatObjects.has(product.(category as any)?.id)) {
-          uniqueCatObjects.set(product.(category as any)?.id, { _id: product.(category as any)?.id, name: product.category.name });
+      if (product.category && typeof product.category === 'object' && (product.category as any)._id && product.category.name) {
+        if (!uniqueCatObjects.has((product.category as any)._id)) {
+          uniqueCatObjects.set((product.category as any)._id, { _id: (product.category as any)._id, name: product.category.name });
         }
       } else if (typeof product.category === 'string' && !uniqueCatObjects.has(product.category)) {
         uniqueCatObjects.set(product.category, { _id: product.category, name: product.category });
@@ -426,10 +480,11 @@ export default function POSPage() {
     return [...baseCategories, ...Array.from(uniqueCatObjects.values())];
   }, [dataWithPromotions?.data?.products?.length]);
 
-  const handleProductSelect = (product: ApiProduct) => {
-    setSelectedProduct(product);
-    if (product.variants && product.variants.length > 0) {
-      const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
+  const handleProductSelect = (product: any) => {
+    const convertedProduct = convertProductToApiProduct(product);
+    setSelectedProduct(convertedProduct);
+    if (convertedProduct.variants && convertedProduct.variants.length > 0) {
+      const firstAvailableVariant = convertedProduct.variants.find(v => v.stock > 0) || convertedProduct.variants[0];
       setSelectedApiVariant(firstAvailableVariant);
     } else {
       setSelectedApiVariant(null);
@@ -439,11 +494,11 @@ export default function POSPage() {
 
   const handleColorSelectFromDetail = (colorId: string) => {
     if (!selectedProduct) return;
-    const variantWithThisColor = selectedProduct.variants.find(v => v.colorId?.id === colorId && v.stock > 0);
+    const variantWithThisColor = selectedProduct.variants.find(v => v.colorId?._id === colorId && v.stock > 0);
     if (variantWithThisColor) {
       setSelectedApiVariant(variantWithThisColor);
     } else {
-      const firstVariantOfThisColor = selectedProduct.variants.find(v => v.colorId?.id === colorId);
+      const firstVariantOfThisColor = selectedProduct.variants.find(v => v.colorId?._id === colorId);
       if (firstVariantOfThisColor) {
         setSelectedApiVariant(firstVariantOfThisColor);
         if (firstVariantOfThisColor.stock === 0) toast.warn("Màu này đã hết hàng.");
@@ -454,12 +509,12 @@ export default function POSPage() {
   const handleSizeSelectFromDetail = (sizeId: string) => {
     if (!selectedProduct || !selectedApiVariant?.colorId) return;
     const variantWithThisSizeAndColor = selectedProduct.variants.find(v =>
-      v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === sizeId && v.stock > 0
+      v.colorId?._id === selectedApiVariant.colorId?._id && v.sizeId?._id === sizeId && v.stock > 0
     );
     if (variantWithThisSizeAndColor) {
       setSelectedApiVariant(variantWithThisSizeAndColor);
     } else {
-      const firstVariantOfThisSizeAndColor = selectedProduct.variants.find(v => v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === sizeId);
+      const firstVariantOfThisSizeAndColor = selectedProduct.variants.find(v => v.colorId?._id === selectedApiVariant.colorId?._id && v.sizeId?._id === sizeId);
       if (firstVariantOfThisSizeAndColor) {
         setSelectedApiVariant(firstVariantOfThisSizeAndColor);
         if (firstVariantOfThisSizeAndColor.stock === 0) toast.warn("Kích thước này với màu đã chọn đã hết hàng.");
@@ -468,27 +523,30 @@ export default function POSPage() {
   };
 
   // Helper function to add item to the correct cart (pending or main)
-  const addItemToCorrectCart = (product: ApiProduct, variant: ApiVariant) => {
-    const cartItemId = `${(product as any)?.id}-${variant.id}`;
-    const finalPrice = (product as any).hasDiscount ? (product as any).discountedPrice : variant.price;
+  const addItemToCorrectCart = (product: any, variant: any) => {
+    const convertedProduct = convertProductToApiProduct(product);
+    const convertedVariant = convertVariantToApiVariant(variant);
+    
+    const cartItemId = `${convertedProduct._id}-${convertedVariant._id}`;
+    const finalPrice = (product as any).hasDiscount ? (product as any).discountedPrice : convertedVariant.price;
 
     const newItem: POSCartItem = {
       id: cartItemId,
-      productId: (product as any)?.id,
-      variantId: variant.id,
-      name: product.name,
-      colorName: variant.colorId?.name || 'N/A',
-      colorCode: variant.colorId?.code,
-                  sizeName: variant.sizeId?.name || (variant.sizeId?.value ? getSizeLabel(Number(variant.sizeId.value)) : 'N/A'),
+      productId: convertedProduct._id,
+      variantId: convertedVariant._id,
+      name: convertedProduct.name,
+      colorName: convertedVariant.colorId?.name || 'N/A',
+      colorCode: convertedVariant.colorId?.code,
+      sizeName: convertedVariant.sizeId?.name || (convertedVariant.sizeId?.value ? getSizeLabel(Number(convertedVariant.sizeId.value)) : 'N/A'),
       price: finalPrice,
       originalPrice: (product as any).hasDiscount ? (product as any).originalPrice : undefined,
       discountPercent: (product as any).hasDiscount ? (product as any).discountPercent : undefined,
       hasDiscount: (product as any).hasDiscount || false,
       quantity: 1,
-      image: variant.images?.[0] || product.variants[0]?.images?.[0] || '/placeholder.svg',
-      stock: variant.stock,
-      actualColorId: variant.colorId?.id,
-      actualSizeId: variant.sizeId?.id,
+      image: getVariantImageUrl(convertedVariant) || '/placeholder.svg',
+      stock: convertedVariant.stock,
+      actualColorId: convertedVariant.colorId?._id,
+      actualSizeId: convertedVariant.sizeId?._id,
     };
 
     if (activeCartId) {
@@ -497,7 +555,7 @@ export default function POSPage() {
       const activeCartName = pendingCarts.find(cart => cart.id === activeCartId)?.name || 'Giỏ hàng';
       
       if (existingItem) {
-        if (existingItem.quantity < variant.stock) {
+        if (existingItem.quantity < convertedVariant.stock) {
           updateItemQuantityInPendingCart(activeCartId, cartItemId, 1);
           toast.success(`Đã cập nhật số lượng sản phẩm trong ${activeCartName}.`);
         } else {
@@ -511,7 +569,7 @@ export default function POSPage() {
       // Fallback to main cart if no pending cart is active
       const existingItem = mainCartItems.find(item => item.id === cartItemId);
       if (existingItem) {
-        if (existingItem.quantity < variant.stock) {
+        if (existingItem.quantity < convertedVariant.stock) {
           updateQuantityStore(cartItemId, 1);
           toast.success('Đã cập nhật số lượng sản phẩm.');
         } else {
@@ -799,14 +857,14 @@ export default function POSPage() {
       paymentMethod: paymentMethod === 'cash' ? 'CASH' : 'BANK_TRANSFER',
       orderStatus: "HOAN_THANH",
       discount: appliedDiscount,
-      voucher: appliedVoucher?.id || '',
+      voucher: appliedVoucher?._id || '',
     };
 
     try {
       const orderResponse = await createOrderMutation.mutateAsync(orderPayload);
 
       if (orderResponse.success && orderResponse.data) {
-        const orderId = orderResponse.data.id;
+        const orderId = orderResponse.data._id;
         const orderCode = orderResponse.data.orderNumber || `POS-${Math.floor(1000 + Math.random() * 9000)}`;
 
         updateStatsOnCheckout(totalAmount);
@@ -822,7 +880,7 @@ export default function POSPage() {
 
         if (appliedVoucher) {
           incrementVoucherUsageMutation(
-            appliedVoucher.id,
+            appliedVoucher._id,
             {
               onSuccess: () => {
                 toast.info(`Đã cập nhật lượt sử dụng cho mã giảm giá "${appliedVoucher.code}".`);
@@ -915,7 +973,7 @@ export default function POSPage() {
   const handleUserSelect = (userId: string) => {
     setSelectedUserId(userId);
     if (userId && userId !== 'guest' && userId !== 'loading' && userId !== 'no-customers' && usersData?.data?.accounts) {
-      const selectedUser = usersData.data.accounts.find((user: IAccount) => user.id === userId);
+      const selectedUser = usersData.data.accounts.find((user: IAccount) => user._id === userId);
       if (selectedUser) {
         setCustomerName(selectedUser.fullName);
         setCustomerPhone(selectedUser.phoneNumber || '');
@@ -967,29 +1025,29 @@ export default function POSPage() {
     const colorMap = new Map<string, ApiVariant['colorId']>();
     
     for (const variant of selectedProduct.variants) {
-      if (variant.colorId?.id && !colorMap.has(variant.colorId.id)) {
-        colorMap.set(variant.colorId.id, variant.colorId);
+      if (variant.colorId?._id && !colorMap.has(variant.colorId._id)) {
+        colorMap.set(variant.colorId._id, variant.colorId);
       }
     }
     
     return Array.from(colorMap.values()).filter(Boolean) as NonNullable<ApiVariant['colorId']>[];
-  }, [selectedProduct?.id, selectedProduct?.variants?.length]);
+  }, [selectedProduct?._id, selectedProduct?.variants?.length]);
 
   const availableSizesForSelectedColor = useMemo(() => {
-    if (!selectedProduct?.variants?.length || !selectedApiVariant?.colorId?.id) return [];
+    if (!selectedProduct?.variants?.length || !selectedApiVariant?.colorId?._id) return [];
     const sizeMap = new Map<string, ApiVariant['sizeId']>();
     
     for (const variant of selectedProduct.variants) {
-      if (variant.colorId?.id === selectedApiVariant.colorId.id && 
-          variant.sizeId?.id && 
+      if (variant.colorId?._id === selectedApiVariant.colorId._id && 
+          variant.sizeId?._id && 
           variant.stock > 0 && 
-          !sizeMap.has(variant.sizeId.id)) {
-        sizeMap.set(variant.sizeId.id, variant.sizeId);
+          !sizeMap.has(variant.sizeId._id)) {
+        sizeMap.set(variant.sizeId._id, variant.sizeId);
       }
     }
     
     return Array.from(sizeMap.values()).filter(Boolean) as NonNullable<ApiVariant['sizeId']>[];
-  }, [selectedProduct?.id, selectedApiVariant?.colorId?.id]);
+  }, [selectedProduct?._id, selectedApiVariant?.colorId?._id]);
 
   // Memoize cart calculations
   const cartCalculations = useMemo(() => {
@@ -1150,6 +1208,7 @@ export default function POSPage() {
                       <span className="text-sm font-medium truncate">{cart.name} <span className="text-sm text-maintext/70 font-semibold">({cart.items.reduce((sum, item) => sum + item.quantity, 0)})</span></span>
                     </div>
                     <button
+                      key={`delete-${cart.id}`}
                       className="opacity-0 group-hover:opacity-100 transition-opacity border border-red-500/70 p-1 hover:bg-red-400 bg-red-400 rounded-full hover:!text-white text-white"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1224,7 +1283,7 @@ export default function POSPage() {
             <div className="flex overflow-x-auto pb-2 scrollbar-thin gap-2">
               {dynamicCategories.map((category) => (
                 <button
-                  key={(category as any)?.id}
+                  key={category._id}
                   className={cn(
                     'whitespace-nowrap px-4 py-2 rounded-[6px] text-sm font-medium transition-all duration-200',
                     activeCategoryName === category.name
@@ -1271,7 +1330,7 @@ export default function POSPage() {
                   >
                     <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white border group">
                       <img
-                        src={checkImageUrl(selectedApiVariant?.images?.[0] || selectedProduct.variants[0]?.images?.[0])}
+                        src={checkImageUrl(getVariantImageUrl(selectedApiVariant) || getVariantImageUrl(selectedProduct.variants[0]))}
                         alt={selectedProduct.name}
                         className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                       />
@@ -1358,20 +1417,20 @@ export default function POSPage() {
                         <div className="flex gap-4 flex-wrap">
                           {uniqueColorsForSelectedProduct.map((color) => (
                             <motion.button
-                              key={color.id}
+                              key={color._id}
                               className={cn(
                                 'relative group flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border-2',
-                                selectedApiVariant?.colorId?.id === color.id
+                                selectedApiVariant?.colorId?._id === color._id
                                   ? 'border-primary ring-4 ring-primary/20 scale-110'
                                   : 'border-gray-200 hover:border-gray-300 hover:scale-105'
                               )}
                               style={{ backgroundColor: color.code }}
-                              onClick={() => handleColorSelectFromDetail(color.id)}
+                              onClick={() => handleColorSelectFromDetail(color._id)}
                               title={color.name}
-                              whileHover={{ scale: selectedApiVariant?.colorId?.id === color.id ? 1.1 : 1.05 }}
+                              whileHover={{ scale: selectedApiVariant?.colorId?._id === color._id ? 1.1 : 1.05 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              {selectedApiVariant?.colorId?.id === color.id && (
+                              {selectedApiVariant?.colorId?._id === color._id && (
                                 <Icon
                                   path={mdiCheck}
                                   size={1}
@@ -1397,18 +1456,18 @@ export default function POSPage() {
                         </div>
                         <div className="flex flex-wrap gap-4">
                           {availableSizesForSelectedColor.map((size) => {
-                            const variantForThisSize = selectedProduct.variants.find(v => v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === size.id);
+                            const variantForThisSize = selectedProduct.variants.find(v => v.colorId?._id === selectedApiVariant.colorId?._id && v.sizeId?._id === size._id);
                             const stockForThisSize = variantForThisSize?.stock || 0;
                             return (
                               <Button
-                                key={size.id}
+                                key={size._id}
                                 size="icon"
-                                variant={selectedApiVariant?.sizeId?.id === size.id ? "default" : "outline"}
+                                variant={selectedApiVariant?.sizeId?._id === size._id ? "default" : "outline"}
                                 className={cn(
                                   'transition-all duration-300',
                                   stockForThisSize === 0 && 'opacity-50 cursor-not-allowed'
                                 )}
-                                onClick={() => handleSizeSelectFromDetail(size.id)}
+                                onClick={() => handleSizeSelectFromDetail(size._id)}
                                 disabled={stockForThisSize === 0}
                               >
                                 {size.name || (size.value ? getSizeLabel(Number(size.value)) : 'N/A')}
@@ -1466,10 +1525,10 @@ export default function POSPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {processedProducts.map((product) => {
                           const firstVariant = product.variants?.[0];
-                          const uniqueColorsCount = new Set(product.variants.map(v => v.colorId?.id)).size;
+                          const uniqueColorsCount = new Set(product.variants.map(v => v.colorId?._id)).size;
                           return (
                             <motion.div
-                              key={(product as any)?.id}
+                              key={product._id}
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.3 }}
@@ -1477,10 +1536,10 @@ export default function POSPage() {
                             >
                               <div
                                 className="relative h-48 w-full bg-gray-50 overflow-hidden cursor-pointer"
-                                onClick={() => handleProductSelect(product)}
+                                                                  onClick={() => handleProductSelect(product)}
                               >
                                 <img
-                                  src={checkImageUrl(firstVariant?.images?.[0])}
+                                  src={checkImageUrl(getVariantImageUrl(firstVariant))}
                                   alt={product.name}
                                   className="object-contain transition-transform duration-300 group-hover:scale-105"
                                 />
@@ -1513,9 +1572,9 @@ export default function POSPage() {
                                   </div>
                                   {product.variants.length > 0 && (
                                     <div className="flex -space-x-1">
-                                      {Array.from(new Map(product.variants.map(v => [v.colorId?.id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
+                                      {Array.from(new Map(product.variants.map(v => [v.colorId?._id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
                                         <div
-                                          key={color.id || idx}
+                                          key={color._id || `color-${idx}`}
                                           className="h-5 w-5 rounded-full border border-white"
                                           style={{ backgroundColor: color.code }}
                                           title={color.name}
@@ -1574,18 +1633,18 @@ export default function POSPage() {
                             {processedProducts.map((product) => {
                               const firstVariant = product.variants?.[0];
                               const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-                              const uniqueColorsCount = new Set(product.variants.map(v => v.colorId?.id)).size;
+                              const uniqueColorsCount = new Set(product.variants.map(v => v.colorId?._id)).size;
                               const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
                               return (
                                 <tr
-                                  key={(product as any)?.id}
+                                  key={product._id}
                                   className="border-t border-border hover:bg-muted/20 transition-colors cursor-pointer"
                                 >
                                   <td className="py-3 px-4" onClick={() => handleProductSelect(product)}>
                                     <div className="flex items-center gap-2">
                                       <div className="relative h-10 w-10 rounded-[6px] overflow-hidden bg-gray-50">
                                         <img
-                                          src={checkImageUrl(firstVariant?.images?.[0])}
+                                          src={checkImageUrl(getVariantImageUrl(firstVariant))}
                                           alt={product.name}
                                           className="object-contain"
                                         />
@@ -1609,9 +1668,9 @@ export default function POSPage() {
                                   <td className="py-3 px-4" onClick={() => handleProductSelect(product)}>
                                     {product.variants.length > 0 && (
                                       <div className="flex -space-x-1">
-                                        {Array.from(new Map(product.variants.map(v => [v.colorId?.id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
+                                        {Array.from(new Map(product.variants.map(v => [v.colorId?._id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
                                           <div
-                                            key={color.id || idx}
+                                            key={color._id || `table-color-${idx}`}
                                             className="h-5 w-5 rounded-full border"
                                             style={{ backgroundColor: color.code }}
                                             title={color.name}
@@ -2145,7 +2204,7 @@ export default function POSPage() {
                       </SelectItem>
                     ) : usersData?.data?.accounts && usersData.data.accounts.length > 0 ? (
                       usersData.data.accounts.map((user: IAccount) => (
-                        <SelectItem key={user.id} value={user.id}>
+                                                  <SelectItem key={user._id} value={user._id}>
                           <div className="flex items-center gap-4 py-1">
                             <Icon path={mdiAccount} size={0.7} className="text-primary" />
                             <div className="flex flex-col min-w-0 flex-1">
