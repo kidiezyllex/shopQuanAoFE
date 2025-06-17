@@ -11,6 +11,8 @@ import { useSearchReturn } from '@/hooks/return';
 import { Icon } from '@mdi/react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { mdiMagnify, mdiClose, mdiEye } from '@mdi/js';
 interface SearchReturnModalProps {
   isOpen: boolean;
   onClose: () => void;

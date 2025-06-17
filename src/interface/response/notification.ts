@@ -1,10 +1,10 @@
 export interface INotification {
-  _id: string;
+  id: string;
   type: 'EMAIL' | 'SYSTEM';
   title: string;
   content: string;
   recipients: {
-    _id: string;
+    id: string;
     fullName?: string;
     email?: string;
   }[];

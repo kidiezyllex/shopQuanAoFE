@@ -24,6 +24,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import StatusUpdateModal from '@/components/admin/returns/StatusUpdateModal';
 import SearchReturnModal from '@/components/admin/returns/SearchReturnModal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { mdiMagnify, mdiDownload, mdiPlus, mdiFilterOutline, mdiCalendar, mdiDotsVertical, mdiEye, mdiPencilCircle, mdiCheckCircle, mdiDeleteCircle, mdiCancel, mdiCheck } from '@mdi/js';
 
 export default function ReturnsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -468,7 +470,7 @@ export default function ReturnsPage() {
                               {returnItem.status === 'CHO_XU_LY' && (
                                 <>
                                   <DropdownMenuSeparator />
-                                  <a href={`/admin/returns/edit/${(returnItem as any)?.id}`} passHref>
+                                  <a href={`/admin/returns/edit/${(returnItem as any)?.id}`}>
                                     <DropdownMenuItem className="cursor-pointer text-maintext">
                                       <Icon path={mdiPencilCircle} size={0.7} className="mr-2 text-blue-400" />
                                       <span className="text-maintext text-sm">Chỉnh sửa</span>

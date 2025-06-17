@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Icon } from '@mdi/react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { mdiAlertCircle, mdiCheckCircle, mdiCancel, mdiCurrencyUsd } from '@mdi/js';
 interface StatusUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;

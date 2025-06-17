@@ -128,7 +128,7 @@ export default function CreatePromotionPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/discounts">Quản lý Đợt khuyến mãii</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/discounts">Quản lý khuyến mãii</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

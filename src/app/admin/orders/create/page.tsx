@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useProducts } from '@/hooks/product';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 interface OrderItemType {
   product: string;
   variant: {

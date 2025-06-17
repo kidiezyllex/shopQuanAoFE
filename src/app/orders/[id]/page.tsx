@@ -17,7 +17,7 @@ import { vi } from 'date-fns/locale';
 
 interface OrderItem {
   product: {
-    _id: string;
+    id: string;
     name: string;
     image: string;
     price: number;
@@ -27,7 +27,7 @@ interface OrderItem {
 }
 
 interface Order {
-  _id: string;
+  id: string;
   customer: string;
   items: OrderItem[];
   subTotal: number;

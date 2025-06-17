@@ -253,7 +253,7 @@ const ProductsPage: React.FC = () => {
     }
 
     const cartItem = {
-      _id: `${(product as any)?.id}-${availableVariant.id}`,
+      id: `${(product as any)?.id}-${availableVariant.id}`,
       productId: (product as any)?.id,
       variantId: availableVariant.id,
       name: product.name,

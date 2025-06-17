@@ -7,7 +7,7 @@ export interface IBaseResponse<T> {
 }
 
 export interface IAccountData {
-  _id: string
+  id: string
   code: string
   fullName: string
   email: string
@@ -15,7 +15,7 @@ export interface IAccountData {
 }
 
 export interface IAuthData {
-  _id: string
+  id: string
   fullName: string
   email: string
   role: string
@@ -26,7 +26,7 @@ export interface IAuthData {
 export interface IAuthResponse extends IBaseResponse<IAuthData> {}
 
 export interface IProfileData {
-  _id: string
+  id: string
   fullName: string
   email: string
   phoneNumber: string

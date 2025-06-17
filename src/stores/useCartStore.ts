@@ -27,8 +27,8 @@ export interface AppliedVoucher {
   code: string;
   discount: number;
   voucherId: string;
-  type: 'PERCENTAGE' | 'FIXED_AMOUNT';
-  value: number;
+  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  discountValue: number;
   maxDiscount?: number;
 }
 
@@ -93,15 +93,15 @@ export const useCartStore = create(
         // Calculate current subtotal from items
         const currentSubtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
         
-        if (appliedVoucher.type === 'PERCENTAGE') {
-          let discount = (currentSubtotal * appliedVoucher.value) / 100;
+        if (appliedVoucher.discountType === 'PERCENTAGE') {
+          let discount = (currentSubtotal * appliedVoucher.discountValue) / 100;
           // Apply max discount if exists
           if (appliedVoucher.maxDiscount && discount > appliedVoucher.maxDiscount) {
             discount = appliedVoucher.maxDiscount;
           }
           return discount;
         } else {
-          return Math.min(appliedVoucher.value, currentSubtotal);
+          return Math.min(appliedVoucher.discountValue, currentSubtotal);
         }
       },
       

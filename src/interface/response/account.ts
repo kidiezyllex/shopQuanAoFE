@@ -2,7 +2,7 @@ import { IBaseResponse } from './authentication';
 import { IAddress } from '../request/account';
 
 export interface IAccount {
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   phoneNumber: string;

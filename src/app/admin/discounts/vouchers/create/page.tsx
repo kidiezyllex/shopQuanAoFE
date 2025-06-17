@@ -19,8 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const initialVoucher: IVoucherCreate = {
   code: '',
   name: '',
-  type: 'PERCENTAGE',
-  value: 0,
+  discountType: 'PERCENTAGE',
+  discountValue: 0,
   quantity: 1,
   startDate: new Date().toISOString().split('T')[0],
   endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
@@ -39,14 +39,12 @@ export default function CreateVoucherPage() {
     const { name, value, type } = e.target;
     let parsedValue: string | number = value;
     
-    // Handle numeric fields
     if (type === 'number') {
       parsedValue = value === '' ? 0 : parseFloat(value);
     }
     
     setVoucher({ ...voucher, [name]: parsedValue });
     
-    // Clear error for the field being edited
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -55,7 +53,6 @@ export default function CreateVoucherPage() {
   const handleSelectChange = (name: string, value: string) => {
     setVoucher({ ...voucher, [name]: value });
     
-    // Clear error for the field being edited
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -83,12 +80,12 @@ export default function CreateVoucherPage() {
       newErrors.name = 'Tên voucher không được để trống';
     }
     
-    if (voucher.value <= 0) {
-      newErrors.value = 'Giá trị voucher phải lớn hơn 0';
+    if (voucher.discountValue <= 0) {
+      newErrors.discountValue = 'Giá trị voucher phải lớn hơn 0';
     }
     
-    if (voucher.type === 'PERCENTAGE' && voucher.value > 100) {
-      newErrors.value = 'Phần trăm giảm giá không được vượt quá 100%';
+    if (voucher.discountType === 'PERCENTAGE' && voucher.discountValue > 100) {
+      newErrors.discountValue = 'Phần trăm giảm giá không được vượt quá 100%';
     }
     
     if (voucher.quantity <= 0) {
@@ -111,7 +108,7 @@ export default function CreateVoucherPage() {
       newErrors.minOrderValue = 'Giá trị đơn hàng tối thiểu không được âm';
     }
     
-    if (voucher.type === 'PERCENTAGE' && voucher.maxDiscount !== undefined && voucher.maxDiscount <= 0) {
+    if (voucher.discountType === 'PERCENTAGE' && voucher.maxDiscount !== undefined && voucher.maxDiscount <= 0) {
       newErrors.maxDiscount = 'Giảm giá tối đa phải lớn hơn 0';
     }
     
@@ -129,16 +126,28 @@ export default function CreateVoucherPage() {
     
     try {
       await createVoucher.mutateAsync(voucher, {
-        onSuccess: () => {
-          toast.success('Tạo mã giảm giá thành công');
+        onSuccess: (response) => {
+          toast.success(response.message || 'Tạo mã giảm giá thành công');
           navigate('/admin/discounts/vouchers');
         },
-        onError: (error) => {
-          toast.error('Tạo mã giảm giá thất bại: ' + (error.message || 'Không xác định'));
+        onError: (error: any) => {
+          if (error?.response?.data?.message) {
+            toast.error(error.response.data.message);
+          } else if (error?.message) {
+            toast.error(error.message);
+          } else {
+            toast.error('Tạo mã giảm giá thất bại');
+          }
         }
       });
-    } catch (error) {
-      toast.error('Tạo mã giảm giá thất bại');
+    } catch (error: any) {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error?.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('Tạo mã giảm giá thất bại');
+      }
     }
   };
 
@@ -152,7 +161,7 @@ export default function CreateVoucherPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/discounts">Quản lý Đợt khuyến mãi</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/discounts">Quản lý khuyến mãi</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -233,12 +242,12 @@ export default function CreateVoucherPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="type">Loại voucher <span className="text-red-500">*</span></Label>
+                <Label htmlFor="discountType">Loại voucher <span className="text-red-500">*</span></Label>
                 <Select
-                  value={voucher.type}
-                  onValueChange={(value) => handleSelectChange('type', value)}
+                  value={voucher.discountType}
+                  onValueChange={(value) => handleSelectChange('discountType', value)}
                 >
-                  <SelectTrigger id="type" className={errors.type ? 'border-red-500' : ''}>
+                  <SelectTrigger id="discountType" className={errors.discountType ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Chọn loại voucher" />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,35 +255,35 @@ export default function CreateVoucherPage() {
                     <SelectItem value="FIXED_AMOUNT">Số tiền cố định (VNĐ)</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
+                {errors.discountType && <p className="text-red-500 text-sm">{errors.discountType}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="value">Giá trị <span className="text-red-500">*</span></Label>
+                <Label htmlFor="discountValue">Giá trị <span className="text-red-500">*</span></Label>
                 <div className="flex items-center">
                   <Input
-                    id="value"
-                    name="value"
+                    id="discountValue"
+                    name="discountValue"
                     type="number"
                     min={0}
-                    value={voucher.value}
+                    value={voucher.discountValue}
                     onChange={handleInputChange}
-                    className={`${errors.value ? 'border-red-500' : ''} ${voucher.type === 'PERCENTAGE' ? 'rounded-r-none' : ''}`}
+                    className={`${errors.discountValue ? 'border-red-500' : ''} ${voucher.discountType === 'PERCENTAGE' ? 'rounded-r-none' : ''}`}
                   />
-                  {voucher.type === 'PERCENTAGE' && (
+                  {voucher.discountType === 'PERCENTAGE' && (
                     <div className="bg-gray-100 border border-l-0 px-3 py-2 rounded-r-md">
                       %
                     </div>
                   )}
-                  {voucher.type === 'FIXED_AMOUNT' && (
+                  {voucher.discountType === 'FIXED_AMOUNT' && (
                     <div className="bg-gray-100 border border-l-0 px-3 py-2 rounded-r-md">
                       VNĐ
                     </div>
                   )}
                 </div>
-                {errors.value && <p className="text-red-500 text-sm">{errors.value}</p>}
+                {errors.discountValue && <p className="text-red-500 text-sm">{errors.discountValue}</p>}
                 <p className="text-xs text-maintext">
-                  {voucher.type === 'PERCENTAGE' 
+                  {voucher.discountType === 'PERCENTAGE' 
                     ? 'Phần trăm giảm giá (0-100%)' 
                     : 'Số tiền giảm giá cố định'}
                 </p>
@@ -295,7 +304,7 @@ export default function CreateVoucherPage() {
                 <p className="text-xs text-maintext">Tổng số voucher có thể sử dụng</p>
               </div>
 
-              {voucher.type === 'PERCENTAGE' && (
+              {voucher.discountType === 'PERCENTAGE' && (
                 <div className="space-y-2">
                   <Label htmlFor="maxDiscount">Giảm giá tối đa</Label>
                   <div className="flex items-center">

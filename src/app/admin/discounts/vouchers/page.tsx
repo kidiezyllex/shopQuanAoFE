@@ -147,7 +147,7 @@ export default function VouchersPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/discounts">Quản lý Đợt khuyến mãi</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/discounts">Quản lý khuyến mãi</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -156,14 +156,14 @@ export default function VouchersPage() {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="flex space-x-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => setIsValidateDialogOpen(true)}
             className="flex items-center gap-2"
           >
             <Icon path={mdiTagCheckOutline} size={0.7} />
             Kiểm tra mã
-          </Button>
+          </Button> */}
           <a href="/admin/discounts/vouchers/create" className="flex items-center gap-2">
             <Button className="flex items-center gap-2">
               <Icon path={mdiPlus} size={0.7} />
@@ -328,10 +328,10 @@ export default function VouchersPage() {
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm font-medium">{voucher.name}</TableCell>
                     <TableCell className="px-4 py-4 text-sm">
-                      {voucher.type === 'PERCENTAGE' ? 'Phần trăm' : 'Số tiền cố định'}
+                      {(voucher as any)?.type === 'PERCENTAGE' ? 'Phần trăm' : 'Số tiền cố định'}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
-                      {voucher.type === 'PERCENTAGE' ? `${voucher.value}%` : formatCurrency(voucher.value)}
+                      {(voucher as any)?.type === 'PERCENTAGE' ? `${(voucher as any)?.value}%` : formatCurrency((voucher as any)?.value)}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
                       {voucher.usedCount}/{voucher.quantity}
@@ -562,7 +562,7 @@ export default function VouchersPage() {
                   <div className="flex justify-between">
                     <span className="text-maintext">Loại:</span>
                     <span className="font-medium">
-                      {validationResult.data.voucher.type === 'PERCENTAGE' ? 'Phần trăm' : 'Số tiền cố định'}
+                      {validationResult.data.discountType === 'PERCENTAGE' ? 'Phần trăm' : 'Số tiền cố định'}
                     </span>
                   </div>
                   <div className="flex justify-between">

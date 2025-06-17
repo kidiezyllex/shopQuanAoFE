@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Icon } from '@mdi/react';
 import { mdiAlertCircle } from '@mdi/js';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 interface ConfirmCancelModalProps {
   onConfirm: () => void;

@@ -1,7 +1,7 @@
 import { IReturnItem } from "../request/return";
 
 export interface IReturnProduct {
-  _id: string;
+  id: string;
   name: string;
   code: string;
   images?: string[];
@@ -9,19 +9,19 @@ export interface IReturnProduct {
 }
 
 export interface IReturnCustomer {
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   phoneNumber: string;
 }
 
 export interface IReturnStaff {
-  _id: string;
+  id: string;
   fullName: string;
 }
 
 export interface IReturnOrder {
-  _id: string;
+  id: string;
   code: string;
   createdAt?: string;
 }
@@ -31,7 +31,7 @@ export interface IPopulatedReturnItem extends Omit<IReturnItem, 'product'> {
 }
 
 export interface IReturn {
-  _id: string;
+  id: string;
   code: string;
   originalOrder: string | IReturnOrder;
   customer: string | IReturnCustomer;
@@ -93,7 +93,7 @@ export interface IActionResponse {
 
 export interface IReturnableOrderItem {
   product: {
-    _id: string;
+    id: string;
     name: string;
     images: string[];
     code: string;
@@ -104,7 +104,7 @@ export interface IReturnableOrderItem {
 }
 
 export interface IReturnableOrder {
-  _id: string;
+  id: string;
   code: string;
   orderStatus: 'HOAN_THANH';
   items: IReturnableOrderItem[];

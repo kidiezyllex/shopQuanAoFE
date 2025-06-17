@@ -7,7 +7,7 @@ interface IBrandsResponse {
   message: string;
   data: {
     brands: Array<{
-      _id: string;
+      id: string;
       name: string;
     }>;
   };
@@ -18,7 +18,7 @@ interface ICategoriesResponse {
   message: string;
   data: {
     categories: Array<{
-      _id: string;
+      id: string;
       name: string;
     }>;
   };
@@ -29,7 +29,7 @@ interface IColorsResponse {
   message: string;
   data: {
     colors: Array<{
-      _id: string;
+      id: string;
       name: string;
       code: string;
     }>;
@@ -41,7 +41,7 @@ interface ISizesResponse {
   message: string;
   data: {
     sizes: Array<{
-      _id: string;
+      id: string;
       name: string;
     }>;
   };
@@ -52,7 +52,7 @@ interface IMaterialsResponse {
   message: string;
   data: {
     materials: Array<{
-      _id: string;
+      id: string;
       name: string;
     }>;
   };

@@ -937,7 +937,7 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
     const uniqueBrands = Array.from(
       new Set(
         products.map((product) => {
-          const brand = typeof product.brand === "object" ? product.brand : { _id: product.brand, name: product.brand }
+          const brand = typeof product.brand === "object" ? product.brand : { id: product.brand, name: product.brand }
           return JSON.stringify(brand)
         }),
       ),
@@ -953,7 +953,7 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
       new Set(
         products.map((product) => {
           const category =
-            typeof product.category === "object" ? product.category : { _id: product.category, name: product.category }
+            typeof product.category === "object" ? product.category : { id: product.category, name: product.category }
           return JSON.stringify(category)
         }),
       ),
@@ -969,7 +969,7 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
       product.variants.map((variant) =>
         typeof variant.colorId === "object"
           ? variant.colorId
-          : { _id: variant.colorId, name: variant.colorId, code: "#000000" },
+          : { id: variant.colorId, name: variant.colorId, code: "#000000" },
       ),
     )
 
@@ -985,7 +985,7 @@ const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
 
     const allSizes = products.flatMap((product) =>
       product.variants.map((variant) =>
-        typeof variant.sizeId === "object" ? variant.sizeId : { _id: variant.sizeId, value: variant.sizeId },
+        typeof variant.sizeId === "object" ? variant.sizeId : { id: variant.sizeId, value: variant.sizeId },
       ),
     )
 

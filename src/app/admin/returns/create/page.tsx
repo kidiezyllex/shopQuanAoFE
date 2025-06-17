@@ -18,14 +18,14 @@ import { toast } from 'react-toastify';
 import { Icon } from '@mdi/react';
 import { mdiArrowLeft, mdiPlus, mdiMinus, mdiAccountSearch, mdiPackageVariant } from '@mdi/js';
 interface Customer {
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   phoneNumber: string;
 }
 
 interface Order {
-  _id: string;
+  id: string;
   code: string;
   totalAmount: number;
   createdAt: string;
@@ -34,9 +34,9 @@ interface Order {
 }
 
 interface OrderItem {
-  _id: string;
+  id: string;
   product: {
-    _id: string;
+    id: string;
     name: string;
     code: string;
     images: string[];
@@ -76,22 +76,22 @@ export default function CreateReturnPage() {
   const navigate = useNavigate();
 
   const mockCustomers: Customer[] = [
-    { _id: '1', fullName: 'Nguyễn Văn A', email: 'a@example.com', phoneNumber: '0123456789' },
-    { _id: '2', fullName: 'Trần Thị B', email: 'b@example.com', phoneNumber: '0987654321' },
+    { id: '1', fullName: 'Nguyễn Văn A', email: 'a@example.com', phoneNumber: '0123456789' },
+    { id: '2', fullName: 'Trần Thị B', email: 'b@example.com', phoneNumber: '0987654321' },
   ];
 
   const mockOrders: Order[] = [
     {
-      _id: '1',
+      id: '1',
       code: 'ORD001',
       totalAmount: 1500000,
       createdAt: '2024-01-15T10:00:00Z',
       status: 'HOAN_THANH',
       items: [
         {
-          _id: '1',
+          id: '1',
           product: {
-            _id: 'p1',
+            id: 'p1',
             name: 'Giày thể thao Nike',
             code: 'NIKE001',
             images: ['/placeholder.jpg']

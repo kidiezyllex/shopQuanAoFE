@@ -1,28 +1,28 @@
 import { IProductVariant } from "../request/product";
 
 export interface IBrand {
-  _id: string;
+  id: string;
   name: string;
 }
 
 export interface ICategory {
-  _id: string;
+  id: string;
   name: string;
 }
 
 export interface IMaterial {
-  _id: string;
+  id: string;
   name: string;
 }
 
 export interface IColor {
-  _id: string;
+  id: string;
   name: string;
   code: string;
 }
 
 export interface ISize {
-  _id: string;
+  id: string;
   name: string;
   code: string;
 }
@@ -33,7 +33,7 @@ export interface IProductImage {
 }
 
 export interface IPopulatedProductVariant {
-  _id: string;
+  id: string;
   colorId: IColor;
   sizeId: ISize;
   price: number;
@@ -42,7 +42,7 @@ export interface IPopulatedProductVariant {
 }
 
 export interface IProduct {
-  _id: string;
+  id: string;
   code: string;
   name: string;
   brand: string | IBrand;

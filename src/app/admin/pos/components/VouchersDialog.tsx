@@ -218,15 +218,15 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                             {/* Type */}
                             <TableCell className="text-center">
                               <Badge
-                                variant={voucher.type === 'PERCENTAGE' ? 'default' : 'secondary'}
+                                variant={voucher.discountType === 'PERCENTAGE' ? 'default' : 'secondary'}
                                 className={cn(
                                   "text-xs",
-                                  voucher.type === 'PERCENTAGE'
+                                  voucher.discountType === 'PERCENTAGE'
                                     ? "bg-blue-100 text-blue-700 border-blue-200"
                                     : "bg-purple-100 text-purple-700 border-purple-200"
                                 )}
                               >
-                                {voucher.type === 'PERCENTAGE' ? '%' : 'VNĐ'}
+                                {voucher.discountType === 'PERCENTAGE' ? '%' : 'VNĐ'}
                               </Badge>
                             </TableCell>
 
@@ -236,9 +236,9 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                                 "font-bold text-sm",
                                 isDisabled ? "text-maintext" : "text-primary"
                               )}>
-                                {voucher.type === 'PERCENTAGE' ? `${voucher.value}%` : formatCurrency(voucher.value)}
+                                {voucher.discountType === 'PERCENTAGE' ? `${voucher.discountValue}%` : formatCurrency(voucher.discountValue)}
                               </div>
-                              {voucher.type === 'PERCENTAGE' && (voucher as any).maxValue && (
+                              {voucher.discountType === 'PERCENTAGE' && (voucher as any).maxValue && (
                                 <div className="text-xs text-maintext">
                                   Max: {formatCurrency((voucher as any).maxValue)}
                                 </div>

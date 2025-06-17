@@ -17,8 +17,8 @@ export interface IVoucherFilter {
 export interface IVoucherCreate {
   code: string;                                  // Unique voucher code (uppercase letters, numbers, and dashes)
   name: string;                                  // Display name for the voucher
-  type: 'PERCENTAGE' | 'FIXED_AMOUNT';           // Type of voucher (percentage or fixed amount)
-  value: number;                                 // Value of the voucher (percentage or fixed amount)
+  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';   // Type of voucher (percentage or fixed amount)
+  discountValue: number;                         // Value of the voucher (percentage or fixed amount)
   quantity: number;                              // Total number of vouchers available
   startDate: string | Date;                      // Start date (when voucher becomes valid)
   endDate: string | Date;                        // End date (when voucher expires)

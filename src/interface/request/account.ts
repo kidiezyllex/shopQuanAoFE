@@ -33,7 +33,7 @@ export interface IAccountStatusUpdate {
 }
 
 export interface IAddress {
-  _id?: string;
+  id?: string;
   name: string;
   phoneNumber: string;
   provinceName: string;

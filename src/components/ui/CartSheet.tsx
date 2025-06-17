@@ -73,11 +73,11 @@ const VouchersListDialog = ({
     }).format(new Date(dateString));
   };
 
-  const formatDiscountValue = (type: 'PERCENTAGE' | 'FIXED_AMOUNT', value: number) => {
-    if (type === 'PERCENTAGE') {
-      return `${value}%`;
+  const formatDiscountValue = (discountType: 'PERCENTAGE' | 'FIXED_AMOUNT', discountValue: number) => {
+    if (discountType === 'PERCENTAGE') {
+      return `${discountValue}%`;
     }
-    return formatCurrency(value);
+    return formatCurrency(discountValue);
   };
 
   const vouchers = vouchersData?.data?.vouchers;
@@ -138,11 +138,11 @@ const VouchersListDialog = ({
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Giá trị giảm:</span>
                           <span className="font-bold text-primary text-lg">
-                            {formatDiscountValue(voucher.type, voucher.value)}
+                            {formatDiscountValue(voucher.discountType, voucher.discountValue)}
                           </span>
                         </div>
                         
-                        {voucher.type === 'PERCENTAGE' && voucher.maxDiscount && (
+                        {voucher.discountType === 'PERCENTAGE' && voucher.maxDiscount && (
                                                       <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Tối đa:</span>
                               <span className='text-sm'>{formatCurrency(voucher.maxDiscount)}</span>

@@ -1,5 +1,5 @@
 export interface IStatisticsItem {
-  _id: string;
+  id: string;
   date: string;
   type: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
   totalOrders: number;
@@ -9,7 +9,7 @@ export interface IStatisticsItem {
 
 export interface IProductSold {
   product: {
-    _id: string;
+    id: string;
     name: string;
     code?: string;
     imageUrl?: string;
@@ -20,7 +20,7 @@ export interface IProductSold {
 
 export interface IVoucherUsed {
   voucher: {
-    _id: string;
+    id: string;
     code: string;
     discount: number;
   };
@@ -62,14 +62,14 @@ export interface IRevenueReport {
 
 export interface ITopProduct {
   product: {
-    _id: string;
+    id: string;
     name: string;
     brand: {
-      _id: string;
+      id: string;
       name: string;
     };
     category: {
-      _id: string;
+      id: string;
       name: string;
     };
   };

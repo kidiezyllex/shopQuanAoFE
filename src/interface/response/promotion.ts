@@ -1,5 +1,5 @@
 export interface IPromotionProduct {
-  _id: string;
+  id: string;
   name: string;
   code: string;
   price: number;
@@ -7,7 +7,7 @@ export interface IPromotionProduct {
 }
 
 export interface IPromotion {
-  _id: string;
+  id: string;
   code: string;
   name: string;
   description?: string;
@@ -43,7 +43,7 @@ export interface IPromotionsResponse {
 export interface IProductPromotionsResponse {
   success: boolean;
   message: string;
-  data: Pick<IPromotion, '_id' | 'name' | 'discountPercent' | 'startDate' | 'endDate'>[];
+  data: Pick<IPromotion, 'id' | 'name' | 'discountPercent' | 'startDate' | 'endDate'>[];
 }
 
 export interface IActionResponse {

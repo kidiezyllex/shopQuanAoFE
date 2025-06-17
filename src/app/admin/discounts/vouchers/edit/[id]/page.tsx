@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
  
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useVoucherDetail, useUpdateVoucher } from '@/hooks/voucher';
 import { IVoucherUpdate } from '@/interface/request/voucher';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -36,8 +36,8 @@ export default function EditVoucherPage() {
 
   const [originalVoucher, setOriginalVoucher] = useState({
     code: '',
-    type: '',
-    value: 0,
+    discountType: '',
+    discountValue: 0,
     usedCount: 0,
   });
 
@@ -57,8 +57,8 @@ export default function EditVoucherPage() {
       
       setOriginalVoucher({
         code: voucherData.data.code,
-        type: voucherData.data.type,
-        value: voucherData.data.value,
+        discountType: voucherData.data.discountType,
+        discountValue: voucherData.data.discountValue,
         usedCount: voucherData.data.usedCount,
       });
     }
@@ -126,7 +126,7 @@ export default function EditVoucherPage() {
       newErrors.minOrderValue = 'Giá trị đơn hàng tối thiểu không được âm';
     }
     
-    if (originalVoucher.type === 'PERCENTAGE' && voucher.maxDiscount !== undefined && voucher.maxDiscount <= 0) {
+    if (originalVoucher.discountType === 'PERCENTAGE' && voucher.maxDiscount !== undefined && voucher.maxDiscount <= 0) {
       newErrors.maxDiscount = 'Giảm giá tối đa phải lớn hơn 0';
     }
     
@@ -197,7 +197,7 @@ export default function EditVoucherPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/discounts">Quản lý Đợt khuyến mãi</BreadcrumbLink>
+                <BreadcrumbLink href="/admin/discounts">Quản lý khuyến mãi</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -244,7 +244,7 @@ export default function EditVoucherPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/discounts">Quản lý Đợt khuyến mãi</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/discounts">Quản lý khuyến mãi</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -275,29 +275,29 @@ export default function EditVoucherPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="code" className="text-maintext">Mã voucher</Label>
-                <div className="p-2.5 border rounded-[6px] bg-gray-50 mt-1">
+                <div className="px-2.5 border rounded-[6px] bg-gray-50 mt-1 h-9 flex items-center justify-between">
                   {originalVoucher.code}
                 </div>
-                <p className="text-xs text-maintext mt-1">Mã voucher không thể thay đổi sau khi tạo</p>
+                <p className="text-xs text-maintext mt-1 italic">Mã voucher không thể thay đổi sau khi tạo</p>
               </div>
 
               <div>
-                <Label htmlFor="type" className="text-maintext">Loại voucher</Label>
-                <div className="p-2.5 border rounded-[6px] bg-gray-50 mt-1">
-                  {originalVoucher.type === 'PERCENTAGE' ? 'Phần trăm (%)' : 'Số tiền cố định (VNĐ)'}
+                <Label htmlFor="discountType" className="text-maintext">Loại voucher</Label>
+                <div className="px-2.5 border rounded-[6px] bg-gray-50 mt-1 h-9 flex items-center justify-between">
+                  {originalVoucher.discountType === 'PERCENTAGE' ? 'Phần trăm (%)' : 'Số tiền cố định (VNĐ)'}
                 </div>
-                <p className="text-xs text-maintext mt-1">Loại voucher không thể thay đổi sau khi tạo</p>
+                <p className="text-xs text-maintext mt-1 italic">Loại voucher không thể thay đổi sau khi tạo</p>
               </div>
 
               <div>
-                <Label htmlFor="value" className="text-maintext">Giá trị</Label>
-                <div className="p-2.5 border rounded-[6px] bg-gray-50 mt-1 flex">
-                  <span>{originalVoucher.value}</span>
+                <Label htmlFor="discountValue" className="text-maintext">Giá trị</Label>
+                <div className="px-2.5 border rounded-[6px] bg-gray-50 mt-1 h-9 flex items-center justify-between flex">
+                  <span>{originalVoucher.discountValue}</span>
                   <span className="ml-2">
-                    {originalVoucher.type === 'PERCENTAGE' ? '%' : 'VNĐ'}
+                    {originalVoucher.discountType === 'PERCENTAGE' ? '%' : 'VNĐ'}
                   </span>
                 </div>
-                <p className="text-xs text-maintext mt-1">Giá trị không thể thay đổi sau khi tạo</p>
+                <p className="text-xs text-maintext mt-1 italic">Giá trị không thể thay đổi sau khi tạo</p>
               </div>
 
               <div className="space-y-2">
@@ -326,12 +326,12 @@ export default function EditVoucherPage() {
                   />
                 </div>
                 {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity}</p>}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-maintext italic">
                   Đã sử dụng: {originalVoucher.usedCount}/{voucher.quantity} voucher
                 </p>
               </div>
 
-              {originalVoucher.type === 'PERCENTAGE' && (
+              {originalVoucher.discountType === 'PERCENTAGE' && (
                 <div className="space-y-2">
                   <Label htmlFor="maxDiscount">Giảm giá tối đa</Label>
                   <div className="flex items-center">
@@ -372,7 +372,7 @@ export default function EditVoucherPage() {
                   </div>
                 </div>
                 {errors.minOrderValue && <p className="text-red-500 text-sm">{errors.minOrderValue}</p>}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-maintext italic">
                   Giá trị đơn hàng tối thiểu để áp dụng voucher (0 = không giới hạn)
                 </p>
               </div>

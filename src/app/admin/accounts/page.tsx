@@ -383,7 +383,7 @@ export default function AccountsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <a href={`/admin/accounts/edit/${account.id}`} passHref>
+                              <a href={`/admin/accounts/edit/${account.id}`}>
                                 <DropdownMenuItem className="cursor-pointer text-maintext">
                                   <Icon path={mdiPencil} size={0.7} className="mr-2" />
                                   <span className="text-maintext">Chỉnh sửa</span>

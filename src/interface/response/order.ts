@@ -2,7 +2,7 @@
 import { IVoucher } from "./voucher";
 
 export interface IOrderProduct {
-  _id: string;
+  id: string;
   name: string;
   code: string;
   imageUrl: string;
@@ -10,7 +10,7 @@ export interface IOrderProduct {
 }
 
 export interface IOrderCustomer {
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   phoneNumber: string;
@@ -18,13 +18,13 @@ export interface IOrderCustomer {
 }
 
 export interface IOrderStaff {
-  _id: string;
+  id: string;
   fullName: string;
 }
 
 // Define IOrderItem locally for IPopulatedOrderItem
 export interface IOrderItem {
-  _id: string;
+  id: string;
   product: string; // This will be replaced by IOrderProduct in IPopulatedOrderItem
   variant?: { // Assuming variant is optional here and might have colorId/sizeId
     colorId?: string;
@@ -52,7 +52,7 @@ export interface IShippingAddress {
 }
 
 export interface IOrder {
-  _id: string;
+  id: string;
   orderNumber: string;
   code: string;
   customer: IOrderCustomer;
@@ -74,7 +74,7 @@ export interface IOrder {
 export interface IOrderResponse {
   success: boolean;
   data: {
-    _id: string;
+    id: string;
     orderNumber: string;
     customer: any;
     items: any[];

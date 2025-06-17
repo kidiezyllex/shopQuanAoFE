@@ -21,7 +21,6 @@ const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutPro
   const pathname = location.pathname;
   const { isOpen } = useMenuSidebar();
 
-  // Use stable callbacks to prevent unnecessary re-renders
   const toggleSubMenu = useStableCallback((menuId: string) => {
     setOpenMenus((prev) => ({
       ...prev,
@@ -36,14 +35,14 @@ const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutPro
       if (activeMenuCache.has(cacheKey)) {
         return activeMenuCache.get(cacheKey);
       }
-      
+
       let isActive = false;
       if (menu.path && pathname === menu.path) {
         isActive = true;
       } else if (menu.subMenu) {
         isActive = menu.subMenu.some((sub) => pathname === sub.path);
       }
-      
+
       activeMenuCache.set(cacheKey, isActive);
       return isActive;
     };
@@ -69,7 +68,7 @@ const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutPro
   return (
     <div className="flex flex-row min-h-screen w-screen">
       {/* Sidebar */}
-      <div 
+      <div
         className={cn(
           "bg-white shadow-md min-h-screen transition-all duration-300",
           isOpen ? "w-60 min-w-60" : "w-0 md:w-16 overflow-hidden"
@@ -78,9 +77,16 @@ const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutPro
         <div className="flex flex-col h-full">
           <div className={cn("p-4 border-b !max-h-16", isOpen ? "" : "justify-center")}>
             {isOpen ? (
-              <h1 className="text-2xl  text-primary !font-bold select-none cursor-pointer">
-                Street<span className="text-extra">AllwearStudio</span>
-              </h1>
+              <a href="/" className="flex items-center">
+                <img
+                  draggable="false"
+                  src="/images/logo.svg"
+                  alt="logo"
+                  width={100}
+                  height={100}
+                  className="w-auto mx-auto h-10 select-none cursor-pointer"
+                />
+              </a>
             ) : (
               <h1 className="text-2xl text-primary !font-bold select-none cursor-pointer text-center">
                 A<span className="text-extra">S</span>
@@ -161,7 +167,7 @@ const SidebarLayout = memo(function SidebarLayout({ children }: SidebarLayoutPro
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <div 
+                    <div
                       className="relative"
                       onMouseEnter={() => handleMouseEnter(menu.id)}
                       onMouseLeave={handleMouseLeave}

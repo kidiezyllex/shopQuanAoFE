@@ -1,9 +1,9 @@
 export interface IVoucher {
-  _id: string;
+  id: string;
   code: string;
   name: string;
-  type: 'PERCENTAGE' | 'FIXED_AMOUNT';
-  value: number;
+  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  discountValue: number;
   quantity: number;
   usedCount: number;
   startDate: string;

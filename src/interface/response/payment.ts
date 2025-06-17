@@ -2,10 +2,10 @@ import { IBankTransferInfo } from "../request/payment";
 import { IOrder } from "./order";
 
 export interface IPaymentOrder {
-  _id: string;
+  id: string;
   code: string;
   customer: {
-    _id: string;
+    id: string;
     fullName: string;
     code?: string;
     email?: string;
@@ -16,7 +16,7 @@ export interface IPaymentOrder {
 }
 
 export interface IPayment {
-  _id: string;
+  id: string;
   code: string;
   order: string | IPaymentOrder;
   amount: number;
