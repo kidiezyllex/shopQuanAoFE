@@ -1698,7 +1698,7 @@ export default function GeneralManagementPage() {
     if (!isAuthenticated && !isLoadingProfile) {
       navigate('/auth/login');
     }
-  }, [isAuthenticated, isLoadingProfile, router]);
+  }, [isAuthenticated, isLoadingProfile, navigate]);
 
   if (isLoadingProfile) {
     return (

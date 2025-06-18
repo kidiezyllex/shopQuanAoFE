@@ -81,7 +81,7 @@ export default function OrdersPage() {
     };
 
     fetchOrders();
-  }, [user, router, showToast]);
+  }, [user, navigate, showToast]);
 
   const getStatusColor = (status: Order['status']) => {
     switch (status) {

@@ -9,7 +9,7 @@ import { Icon } from '@mdi/react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { mdiTicket, mdiClose, mdiLoading, mdiCheck } from '@mdi/js';
 interface VoucherFormProps {
   orderValue: number;
   onApplyVoucher: (voucherData: { code: string; discount: number; voucherId: string }) => void;
@@ -22,11 +22,6 @@ const VoucherForm = ({ orderValue, onApplyVoucher, onRemoveVoucher, appliedVouch
   const validateVoucher = useValidateVoucher();
 
   const handleApplyVoucher = async () => {
-    if (!voucherCode.trim()) {
-      toast.error('Vui lòng nhập mã giảm giá');
-      return;
-    }
-
     try {
       const result = await validateVoucher.mutateAsync({
         code: voucherCode,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import {
@@ -46,7 +46,8 @@ interface Order {
   updatedAt: string;
 }
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
+export default function OrderDetailPage() {
+  const params = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -82,7 +83,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
     };
 
     fetchOrder();
-  }, [params.id, user, router, showToast]);
+      }, [params.id, user, navigate, showToast]);
 
   const getStatusColor = (status: Order['status']) => {
     switch (status) {

@@ -319,15 +319,6 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
   };
 
   const handleApplyVoucher = async () => {
-    if (!voucher.trim()) {
-      showToast({
-        title: "Lỗi",
-        message: "Vui lòng nhập mã giảm giá",
-        type: "error"
-      });
-      return;
-    }
-
     if (!userId) {
       showToast({
         title: "Lỗi",

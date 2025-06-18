@@ -13,8 +13,6 @@ import {
   mdiCashRegister,
   mdiTag,
   mdiCashMultiple,
-  mdiReceiptOutline,
-  mdiClockOutline,
   mdiInformationOutline,
   mdiReceipt,
   mdiClock,
@@ -32,7 +30,11 @@ import {
   mdiInvoicePlus,
   mdiClose,
   mdiCart,
-  mdiChevronDown
+  mdiChevronDown,
+  mdiViewGridOutline,
+  mdiTableLarge,
+  mdiEye,
+  mdiBankTransfer
 } from '@mdi/js';
 import { checkImageUrl, cn } from '@/lib/utils';
 import {
@@ -211,55 +213,87 @@ interface InvoiceData {
 
 // Fix the image URL extraction for variants
 const getVariantImageUrl = (variant: any) => {
-  if (!variant?.images) return '/images/white-image.png';
-  
+  if (!variant?.images || !Array.isArray(variant.images) || variant.images.length === 0) {
+    return '/images/white-image.png';
+  }
+
   // Handle both string arrays and object arrays
   const firstImage = variant.images[0];
   if (typeof firstImage === 'string') {
     return firstImage;
-  } else if (typeof firstImage === 'object' && firstImage?.url) {
-    return firstImage.url;
   } else if (typeof firstImage === 'object' && firstImage?.imageUrl) {
     return firstImage.imageUrl;
+  } else if (typeof firstImage === 'object' && firstImage?.url) {
+    return firstImage.url;
   }
-  
+
   return '/images/white-image.png';
 };
 
-// Convert IPopulatedProductVariant to ApiVariant
+// Convert API variant to ApiVariant interface
 const convertVariantToApiVariant = (variant: any): ApiVariant => {
+  // Handle case where variant might be null or undefined
+  if (!variant) {
+    return {
+      id: '',
+      price: 0,
+      stock: 0,
+      images: []
+    };
+  }
+
   return {
-    id: variant.id || variant._id,
-    colorId: variant.colorId ? {
-      id: variant.colorId.id || variant.colorId._id,
-      name: variant.colorId.name,
-      code: variant.colorId.code,
-      images: variant.colorId.images || []
-    } : undefined,
-    sizeId: variant.sizeId ? {
-      id: variant.sizeId.id || variant.sizeId._id,
-      name: variant.sizeId.name,
-      value: variant.sizeId.value
-    } : undefined,
-    price: variant.price,
-    stock: variant.stock,
-    images: variant.images?.map((img: any) => typeof img === 'string' ? img : img.url || img.imageUrl) || [],
-    sku: variant.sku,
-    actualSizeId: variant.actualSizeId || variant.sizeId?.id || variant.sizeId?._id
+    id: variant.id?.toString() || variant._id?.toString() || '',
+    colorId: variant.color ? {
+      id: variant.color.id?.toString() || variant.colorId?.toString() || '',
+      name: variant.color.name || 'N/A',
+      code: variant.color.code || '#000000',
+      images: variant.color.images || []
+    } : (variant.colorId ? {
+      id: variant.colorId.toString(),
+      name: 'N/A',
+      code: '#000000',
+      images: []
+    } : undefined),
+    sizeId: variant.size ? {
+      id: variant.size.id?.toString() || variant.sizeId?.toString() || '',
+      name: variant.size.name || (variant.size.value ? getSizeLabel(Number(variant.size.value)) : 'N/A'),
+      value: variant.size.value?.toString()
+    } : (variant.sizeId ? {
+      id: variant.sizeId.toString(),
+      name: 'N/A',
+      value: undefined
+    } : undefined),
+    price: parseFloat(variant.price?.toString() || '0'),
+    stock: parseInt(variant.stock?.toString() || '0'),
+    images: variant.images?.map((img: any) => typeof img === 'string' ? img : img.imageUrl || img.url) || [],
+    sku: variant.sku || '',
+    actualSizeId: variant.size?.id?.toString() || variant.sizeId?.toString() || ''
   };
 };
 
-// Convert IProduct to ApiProduct
+// Convert API product to ApiProduct interface
 const convertProductToApiProduct = (product: any): ApiProduct => {
+  if (!product) {
+    return {
+      id: '',
+      name: 'Unknown Product',
+      brand: 'Unknown',
+      category: 'Unknown',
+      variants: [],
+      createdAt: new Date().toISOString()
+    };
+  }
+
   return {
-    id: product.id,
-    name: product.name,
-    brand: product.brand,
-    category: product.category,
+    id: product.id?.toString() || product._id?.toString() || '',
+    name: product.name || 'Unknown Product',
+    brand: product.brand || 'Unknown',
+    category: product.category || 'Unknown',
     description: product.description,
     variants: product.variants?.map(convertVariantToApiVariant) || [],
     status: product.status,
-    createdAt: product.createdAt
+    createdAt: product.createdAt || new Date().toISOString()
   };
 };
 
@@ -267,6 +301,7 @@ export default function POSPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<ApiProduct | null>(null);
   const [selectedApiVariant, setSelectedApiVariant] = useState<ApiVariant | null>(null);
+  console.log(selectedProduct)
 
   // Pending carts store
   const {
@@ -362,7 +397,7 @@ export default function POSPage() {
   useEffect(() => {
     setFilters(prevFilters => {
       const isAllProducts = activeCategoryName === 'Tất cả sản phẩm';
-      
+
       if (isAllProducts) {
         // Remove categories filter if "All products" is selected
         const { categories, ...restFilters } = prevFilters;
@@ -376,7 +411,7 @@ export default function POSPage() {
         return { ...prevFilters, categories: newCategories };
       }
     });
-    
+
     // Reset pagination only when actually changing category
     setPagination(prev => ({ ...prev, page: 1 }));
   }, [activeCategoryName]);
@@ -392,9 +427,9 @@ export default function POSPage() {
   // Optimize search params with stable reference
   const searchQueryParams = useMemo(() => {
     if (!isSearching) return { keyword: '' };
-    return { 
-      keyword: searchQuery, 
-      status: 'HOAT_DONG' as const, 
+    return {
+      keyword: searchQuery,
+      status: 'HOAT_DONG' as const,
       page: pagination.page,
       limit: pagination.limit,
       ...(filters.categories && { categories: filters.categories })
@@ -463,11 +498,11 @@ export default function POSPage() {
   const dynamicCategories = useMemo(() => {
     const baseCategories = [{ id: 'all', name: 'Tất cả sản phẩm' }];
     const products = dataWithPromotions?.data?.products;
-    
+
     if (!products?.length) return baseCategories;
 
     const uniqueCatObjects = new Map<string, { id: string; name: string }>();
-    
+
     for (const product of products) {
       if (product.category && typeof product.category === 'object' && (product.category as any).id && product.category.name) {
         if (!uniqueCatObjects.has((product.category as any).id)) {
@@ -477,7 +512,7 @@ export default function POSPage() {
         uniqueCatObjects.set(product.category, { id: product.category, name: product.category });
       }
     }
-    
+
     return [...baseCategories, ...Array.from(uniqueCatObjects.values())];
   }, [dataWithPromotions?.data?.products?.length]);
 
@@ -485,55 +520,60 @@ export default function POSPage() {
     const convertedProduct = convertProductToApiProduct(product);
     setSelectedProduct(convertedProduct);
     if (convertedProduct.variants && convertedProduct.variants.length > 0) {
-      const firstAvailableVariant = convertedProduct.variants.find(v => v.stock > 0) || convertedProduct.variants[0];
-      setSelectedApiVariant(firstAvailableVariant);
+      // Prioritize variants with stock, but still allow selection of out-of-stock variants
+      const variantWithStock = convertedProduct.variants.find(v => v.stock > 0);
+      const selectedVariant = variantWithStock || convertedProduct.variants[0];
+      setSelectedApiVariant(selectedVariant);
+
+      if (!variantWithStock) {
+        toast.warn('Sản phẩm này hiện tại đã hết hàng.');
+      }
     } else {
       setSelectedApiVariant(null);
-      toast.warn('Sản phẩm này không có biến thể hoặc đã hết hàng.');
+      toast.warn('Sản phẩm này không có biến thể.');
     }
   };
 
   const handleColorSelectFromDetail = (colorId: string) => {
     if (!selectedProduct) return;
-    const variantWithThisColor = selectedProduct.variants.find(v => v.colorId?.id === colorId && v.stock > 0);
-    if (variantWithThisColor) {
-      setSelectedApiVariant(variantWithThisColor);
+
+    // Find variants with the selected color
+    const variantsWithThisColor = selectedProduct.variants.filter(v => v.colorId?.id === colorId);
+    if (variantsWithThisColor.length === 0) return;
+
+    // Try to find a variant with stock first
+    const variantWithStock = variantsWithThisColor.find(v => v.stock > 0);
+    if (variantWithStock) {
+      setSelectedApiVariant(variantWithStock);
     } else {
-      const firstVariantOfThisColor = selectedProduct.variants.find(v => v.colorId?.id === colorId);
-      if (firstVariantOfThisColor) {
-        setSelectedApiVariant(firstVariantOfThisColor);
-        if (firstVariantOfThisColor.stock === 0) toast.warn("Màu này đã hết hàng.");
-      }
+      // If no variants with stock, select the first one
+      setSelectedApiVariant(variantsWithThisColor[0]);
+      toast.warn("Màu này đã hết hàng.");
     }
   };
 
   const handleSizeSelectFromDetail = (sizeId: string) => {
     if (!selectedProduct || !selectedApiVariant?.colorId) return;
+
+    // Find variant with selected color and size
     const variantWithThisSizeAndColor = selectedProduct.variants.find(v =>
-      v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === sizeId && v.stock > 0
+      v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === sizeId
     );
+
     if (variantWithThisSizeAndColor) {
       setSelectedApiVariant(variantWithThisSizeAndColor);
-    } else {
-      const firstVariantOfThisSizeAndColor = selectedProduct.variants.find(v => v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === sizeId);
-      if (firstVariantOfThisSizeAndColor) {
-        setSelectedApiVariant(firstVariantOfThisSizeAndColor);
-        if (firstVariantOfThisSizeAndColor.stock === 0) toast.warn("Kích thước này với màu đã chọn đã hết hàng.");
+      if (variantWithThisSizeAndColor.stock === 0) {
+        toast.warn("Kích thước này với màu đã chọn đã hết hàng.");
       }
     }
   };
 
   // Helper function to add item to the correct cart (pending or main)
-  const addItemToCorrectCart = (product: any, variant: any) => {
-    console.log('addItemToCorrectCart - Original product:', product);
-    console.log('addItemToCorrectCart - Original variant:', variant);
-    
-    const convertedProduct = convertProductToApiProduct(product);
-    const convertedVariant = convertVariantToApiVariant(variant);
-    
-    console.log('addItemToCorrectCart - Converted product:', convertedProduct);
-    console.log('addItemToCorrectCart - Converted variant:', convertedVariant);
-    
+  const addItemToCorrectCart = (product: any, variant: any, isAlreadyConverted = false) => {
+    // Always ensure proper conversion unless explicitly told variant is already converted
+    const convertedProduct = isAlreadyConverted ? product : convertProductToApiProduct(product);
+    const convertedVariant = isAlreadyConverted ? variant : convertVariantToApiVariant(variant);
+
     const cartItemId = `${convertedProduct.id}-${convertedVariant.id}`;
     const finalPrice = (product as any).hasDiscount ? (product as any).discountedPrice : convertedVariant.price;
 
@@ -544,7 +584,7 @@ export default function POSPage() {
       name: convertedProduct.name,
       colorName: convertedVariant.colorId?.name || 'N/A',
       colorCode: convertedVariant.colorId?.code,
-      sizeName: convertedVariant.sizeId?.name || (convertedVariant.sizeId?.value ? getSizeLabel(Number(convertedVariant.sizeId.value)) : 'N/A'),
+      sizeName: convertedVariant.sizeId?.name || 'N/A',
       price: finalPrice,
       originalPrice: (product as any).hasDiscount ? (product as any).originalPrice : undefined,
       discountPercent: (product as any).hasDiscount ? (product as any).discountPercent : undefined,
@@ -553,16 +593,14 @@ export default function POSPage() {
       image: getVariantImageUrl(convertedVariant) || '/placeholder.svg',
       stock: convertedVariant.stock,
       actualColorId: convertedVariant.colorId?.id,
-      actualSizeId: convertedVariant.sizeId?.id,
+      actualSizeId: convertedVariant.actualSizeId,
     };
-    
-    console.log('addItemToCorrectCart - Final newItem:', newItem);
 
     if (activeCartId) {
       // Add to pending cart
       const existingItem = cartItems.find(item => item.id === cartItemId);
       const activeCartName = pendingCarts.find(cart => cart.id === activeCartId)?.name || 'Giỏ hàng';
-      
+
       if (existingItem) {
         if (existingItem.quantity < convertedVariant.stock) {
           updateItemQuantityInPendingCart(activeCartId, cartItemId, 1);
@@ -602,7 +640,7 @@ export default function POSPage() {
       return;
     }
 
-    addItemToCorrectCart(selectedProduct, selectedApiVariant);
+    addItemToCorrectCart(selectedProduct, selectedApiVariant, true);
 
     setSelectedProduct(null);
     setSelectedApiVariant(null);
@@ -710,11 +748,6 @@ export default function POSPage() {
   });
 
   const applyCoupon = async () => {
-    if (!couponCode) {
-      toast.error('Vui lòng nhập mã giảm giá.');
-      return;
-    }
-
     const { data: voucherDataResult, isError: voucherFetchError } = await fetchVoucherByCode();
 
     if (voucherFetchError) {
@@ -784,7 +817,7 @@ export default function POSPage() {
         setDiscount(discountAmount);
         setVoucher(voucher);
       }
-      
+
       toast.success(`Đã áp dụng mã giảm giá "${voucher.code}".`);
     } else {
       toast.error('Mã giảm giá không hợp lệ hoặc không tìm thấy.');
@@ -937,12 +970,12 @@ export default function POSPage() {
 
 
         clearCartStore();
-        
+
         // Clear active pending cart if exists
         if (activeCartId) {
           clearPendingCartItems(activeCartId);
         }
-        
+
         setCustomerName('');
         setCustomerPhone('');
         setSelectedUserId('guest');
@@ -967,10 +1000,10 @@ export default function POSPage() {
       toast.error('Giỏ hàng đang trống');
       return;
     }
-    
+
     // Sync active cart to main cart for checkout
     syncActiveCartToMainCart();
-    
+
     setCashReceived('');
     setSelectedUserId('guest');
     setCustomerName('');
@@ -1003,12 +1036,12 @@ export default function POSPage() {
         if (cartItems.length > 0 || appliedVoucher) {
           // Clear main cart
           clearCartStore();
-          
+
           // Clear active pending cart if exists
           if (activeCartId) {
             clearPendingCartItems(activeCartId);
           }
-          
+
           setSelectedProduct(null);
           setSelectedApiVariant(null);
           toast.success('Đã xóa giỏ hàng và mã giảm giá.');
@@ -1032,29 +1065,28 @@ export default function POSPage() {
   const uniqueColorsForSelectedProduct = useMemo(() => {
     if (!selectedProduct?.variants?.length) return [];
     const colorMap = new Map<string, ApiVariant['colorId']>();
-    
+
     for (const variant of selectedProduct.variants) {
       if (variant.colorId?.id && !colorMap.has(variant.colorId.id)) {
         colorMap.set(variant.colorId.id, variant.colorId);
       }
     }
-    
+
     return Array.from(colorMap.values()).filter(Boolean) as NonNullable<ApiVariant['colorId']>[];
   }, [selectedProduct?.id, selectedProduct?.variants?.length]);
 
   const availableSizesForSelectedColor = useMemo(() => {
     if (!selectedProduct?.variants?.length || !selectedApiVariant?.colorId?.id) return [];
     const sizeMap = new Map<string, ApiVariant['sizeId']>();
-    
+
     for (const variant of selectedProduct.variants) {
-      if (variant.colorId?.id === selectedApiVariant.colorId.id && 
-          variant.sizeId?.id && 
-          variant.stock > 0 && 
-          !sizeMap.has(variant.sizeId.id)) {
+      if (variant.colorId?.id === selectedApiVariant.colorId.id &&
+        variant.sizeId?.id &&
+        !sizeMap.has(variant.sizeId.id)) {
         sizeMap.set(variant.sizeId.id, variant.sizeId);
       }
     }
-    
+
     return Array.from(sizeMap.values()).filter(Boolean) as NonNullable<ApiVariant['sizeId']>[];
   }, [selectedProduct?.id, selectedApiVariant?.colorId?.id]);
 
@@ -1071,7 +1103,7 @@ export default function POSPage() {
 
   const totalAmount = cartCalculations.total;
   const cashReceivedNum = parseFloat(cashReceived.toString());
-  
+
   // Optimize change calculation
   const changeDue = useMemo(() => {
     if (paymentMethod !== 'cash' || !cashReceived) return 0;
@@ -1080,7 +1112,7 @@ export default function POSPage() {
   }, [paymentMethod, cashReceived, totalAmount]);
 
   // Memoize getBrandName function
-  const getBrandName = useCallback((brand: ApiProduct['brand']) => 
+  const getBrandName = useCallback((brand: ApiProduct['brand']) =>
     typeof brand === 'object' ? brand.name : brand, []
   );
 
@@ -1133,12 +1165,12 @@ export default function POSPage() {
     if (activeCart) {
       // Clear main cart first
       clearCartStore();
-      
+
       // Add all items from active cart to main cart
       activeCart.items.forEach(item => {
         addToCartStore(item);
       });
-      
+
       // Set discount and voucher
       setDiscount(activeCart.appliedDiscount);
       setVoucher(activeCart.appliedVoucher);
@@ -1175,104 +1207,104 @@ export default function POSPage() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-      
+
       </div>
-        {/* Pending Carts Tabs */}
-        <div className='bg-white rounded-[6px] p-4 mb-4 shadow-sm border border-border'>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-maintext flex items-center gap-2">
-                <Icon path={mdiCart} size={1} className="text-primary" />
-                Hoá đơn chờ ({pendingCarts.length}/5)
-              </h3>
-              <Button
-                onClick={handleCreateNewCart}
-                disabled={pendingCarts.length >= 5}
-              >
-                <Icon path={mdiInvoicePlus} size={0.7} />
-                Thêm mới
-              </Button>
-            </div>
-            
-            {pendingCarts.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {pendingCarts.slice(0, 5).map((cart, index) => (
-                  <motion.button
-                    key={cart.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className={cn(
-                      'relative flex items-center gap-2 p-2 rounded-sm border-2 transition-all duration-200 min-w-[140px] group',
-                      activeCartId === cart.id
-                        ? 'border-primary bg-primary/5 text-primary shadow-md'
-                        : 'border-border bg-white text-maintext hover:border-primary/50 hover:bg-primary/5'
-                    )}
-                    onClick={() => handleSwitchCart(cart.id)}
-                  >
-                    <div className="flex items-center gap-1 flex-1">
-                      <div className={cn(
-                        'w-2 h-2 rounded-full',
-                        cart.items.length > 0 ? 'bg-green-500' : 'bg-gray-300'
-                      )} />
-                      <span className="text-sm font-medium truncate">{cart.name} <span className="text-sm text-maintext/70 font-semibold">({cart.items.reduce((sum, item) => sum + item.quantity, 0)})</span></span>
-                    </div>
-                    <button
-                      key={`delete-${cart.id}`}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity border border-red-500/70 p-1 hover:bg-red-400 bg-red-400 rounded-full hover:!text-white text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCart(cart.id);
-                      }}
-                    >
-                      <Icon path={mdiClose} size={0.7} className="hover:!text-white" />
-                    </button>
-                  </motion.button>
-                ))}
-                
-                {pendingCarts.length > 5 && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="min-w-[100px] h-[46px] border-2 border-primary/50 flex items-center justify-center text-sm">
-                        +{pendingCarts.length - 4} khác
-                        <Icon path={mdiChevronDown} size={0.7} className="ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      {pendingCarts.slice(4).map((cart) => (
-                        <DropdownMenuItem
-                          key={cart.id}
-                          className="flex items-center justify-between"
-                          onClick={() => handleSwitchCart(cart.id)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className={cn(
-                              'w-2 h-2 rounded-full',
-                              cart.items.length > 0 ? 'bg-green-500' : 'bg-gray-300'
-                            )} />
-                            <span>{cart.name}</span>
-                            {cart.items.length > 0 && (
-                              <Badge variant="secondary" className="text-xs">
-                                {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
-                              </Badge>
-                            )}
-                          </div>
-                          <button
-                            className="p-1 hover:bg-red-100 rounded"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteCart(cart.id);
-                            }}
-                          >
-                            <Icon path={mdiClose} size={0.4} className="text-red-500" />
-                          </button>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+      {/* Pending Carts Tabs */}
+      <div className='bg-white rounded-[6px] p-4 mb-4 shadow-sm border border-border'>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-maintext flex items-center gap-2">
+            <Icon path={mdiCart} size={1} className="text-primary" />
+            Hoá đơn chờ ({pendingCarts.length}/5)
+          </h3>
+          <Button
+            onClick={handleCreateNewCart}
+            disabled={pendingCarts.length >= 5}
+          >
+            <Icon path={mdiInvoicePlus} size={0.7} />
+            Thêm mới
+          </Button>
+        </div>
+
+        {pendingCarts.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {pendingCarts.slice(0, 5).map((cart, index) => (
+              <motion.button
+                key={cart.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className={cn(
+                  'relative flex items-center gap-2 p-2 rounded-sm border-2 transition-all duration-200 min-w-[140px] group',
+                  activeCartId === cart.id
+                    ? 'border-primary bg-primary/5 text-primary shadow-md'
+                    : 'border-border bg-white text-maintext hover:border-primary/50 hover:bg-primary/5'
                 )}
-              </div>
+                onClick={() => handleSwitchCart(cart.id)}
+              >
+                <div className="flex items-center gap-1 flex-1">
+                  <div className={cn(
+                    'w-2 h-2 rounded-full',
+                    cart.items.length > 0 ? 'bg-green-500' : 'bg-gray-300'
+                  )} />
+                  <span className="text-sm font-medium truncate">{cart.name} <span className="text-sm text-maintext/70 font-semibold">({cart.items.reduce((sum, item) => sum + item.quantity, 0)})</span></span>
+                </div>
+                <button
+                  key={`delete-${cart.id}`}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity border border-red-500/70 p-1 hover:bg-red-400 bg-red-400 rounded-full hover:!text-white text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteCart(cart.id);
+                  }}
+                >
+                  <Icon path={mdiClose} size={0.7} className="hover:!text-white" />
+                </button>
+              </motion.button>
+            ))}
+
+            {pendingCarts.length > 5 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="min-w-[100px] h-[46px] border-2 border-primary/50 flex items-center justify-center text-sm">
+                    +{pendingCarts.length - 4} khác
+                    <Icon path={mdiChevronDown} size={0.7} className="ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {pendingCarts.slice(4).map((cart) => (
+                    <DropdownMenuItem
+                      key={cart.id}
+                      className="flex items-center justify-between"
+                      onClick={() => handleSwitchCart(cart.id)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          'w-2 h-2 rounded-full',
+                          cart.items.length > 0 ? 'bg-green-500' : 'bg-gray-300'
+                        )} />
+                        <span>{cart.name}</span>
+                        {cart.items.length > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
+                          </Badge>
+                        )}
+                      </div>
+                      <button
+                        className="p-1 hover:bg-red-100 rounded"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCart(cart.id);
+                        }}
+                      >
+                        <Icon path={mdiClose} size={0.4} className="text-red-500" />
+                      </button>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
+        )}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 overflow-hidden flex flex-col">
           <div className="bg-white rounded-[6px] p-4 mb-4 shadow-sm border border-border hover:shadow-md transition-shadow duration-300">
@@ -1311,12 +1343,12 @@ export default function POSPage() {
             </div>
           </div>
 
-        
+
 
           <div className="bg-white rounded-xl p-4 flex-1 shadow-lg border border-border/50 hover:shadow-xl transition-all duration-300 min-h-[400px]">
             {selectedProduct && <div className='w-full flex items-center justify-between mb-4'>
               <motion.button
-                className="text-sm text-primary font-medium flex items-center gap-2 hover:text-primary/80 transition-colors bg-primary/5 px-4 py-2 rounded-full"
+                className="text-sm text-primary font-medium flex items-center gap-2 hover:text-primary/80 transition-colors bg-primary/5 px-4 py-2 rounded-full border border-primary/50"
                 onClick={() => {
                   setSelectedProduct(null);
                   setSelectedApiVariant(null);
@@ -1391,8 +1423,8 @@ export default function POSPage() {
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <div className={`text-4xl font-bold ${(selectedProduct as any).hasDiscount ? 'text-primary' : 'text-primary'}`}>
-                          {formatCurrency((selectedProduct as any).hasDiscount ? (selectedProduct as any).discountedPrice : selectedApiVariant.price)}
+                        <div className="text-4xl font-bold text-primary">
+                          {formatCurrency(selectedApiVariant.price)}
                         </div>
                         {(selectedProduct as any).hasDiscount && (
                           <div className="flex items-center gap-2">
@@ -1467,20 +1499,27 @@ export default function POSPage() {
                           {availableSizesForSelectedColor.map((size) => {
                             const variantForThisSize = selectedProduct.variants.find(v => v.colorId?.id === selectedApiVariant.colorId?.id && v.sizeId?.id === size.id);
                             const stockForThisSize = variantForThisSize?.stock || 0;
+                            const isSelected = selectedApiVariant?.sizeId?.id === size.id;
                             return (
                               <Button
                                 key={size.id}
-                                size="icon"
-                                variant={selectedApiVariant?.sizeId?.id === size.id ? "default" : "outline"}
+                                variant={isSelected ? "outline" : "ghost"}
                                 className={cn(
-                                  'transition-all duration-300',
+                                  'transition-all duration-300 min-w-[60px] h-auto py-2 px-4 flex flex-col items-center border-2',
                                   stockForThisSize === 0 && 'opacity-50 cursor-not-allowed'
                                 )}
                                 onClick={() => handleSizeSelectFromDetail(size.id)}
                                 disabled={stockForThisSize === 0}
                               >
-                                {size.name || (size.value ? getSizeLabel(Number(size.value)) : 'N/A')}
-                                {stockForThisSize === 0 && ' (Hết hàng)'}
+                                <span className="font-medium">
+                                  {size.name || (size.value ? getSizeLabel(Number(size.value)) : 'N/A')}
+                                </span>
+                                <span className={cn(
+                                  'text-xs mt-1',
+                                  stockForThisSize === 0 ? 'text-red-500' : 'text-gray-500'
+                                )}>
+                                  {stockForThisSize === 0 ? 'Hết hàng' : `Kho: ${stockForThisSize}`}
+                                </span>
                               </Button>
                             );
                           })}
@@ -1490,11 +1529,16 @@ export default function POSPage() {
                     <div className="flex items-center gap-2">
                       <Icon path={mdiPackageVariant} size={1} className="text-primary" />
                       <h3 className="text-base font-semibold text-maintext">Tồn kho</h3>
-                      {selectedApiVariant?.sizeId && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-                          {selectedApiVariant.stock}
-                        </Badge>
-                      )}
+                      <Badge
+                        variant={selectedApiVariant.stock > 10 ? "secondary" : selectedApiVariant.stock > 0 ? "outline" : "destructive"}
+                        className={cn(
+                          selectedApiVariant.stock > 10 ? "bg-green-100 text-green-700 border-green-200" :
+                            selectedApiVariant.stock > 0 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                              "bg-red-100 text-red-700 border-red-200"
+                        )}
+                      >
+                        {selectedApiVariant.stock > 0 ? `${selectedApiVariant.stock} sản phẩm` : 'Hết hàng'}
+                      </Badge>
                     </div>
                   </motion.div>
                 </div>
@@ -1504,11 +1548,11 @@ export default function POSPage() {
                 <div className="flex justify-between items-center mb-4">
                   <TabsList>
                     <TabsTrigger value="grid" className="flex items-center gap-1 text-maintext/70">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-maintext"><rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" /></svg>
+                      <Icon path={mdiViewGridOutline} size={0.8} />
                       Lưới
                     </TabsTrigger>
                     <TabsTrigger value="table" className="flex items-center gap-1 text-maintext/70">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-maintext"><path d="M3 3h18v18H3z" /><path d="M3 9h18" /><path d="M3 15h18" /><path d="M9 3v18" /><path d="M15 3v18" /></svg>
+                      <Icon path={mdiTableLarge} size={0.8} />
                       Bảng
                     </TabsTrigger>
                   </TabsList>
@@ -1545,7 +1589,7 @@ export default function POSPage() {
                             >
                               <div
                                 className="relative h-48 w-full bg-gray-50 overflow-hidden cursor-pointer"
-                                                                  onClick={() => handleProductSelect(product)}
+                                onClick={() => handleProductSelect(product)}
                               >
                                 <img
                                   src={checkImageUrl(getVariantImageUrl(firstVariant))}
@@ -1600,23 +1644,11 @@ export default function POSPage() {
                                 <Button
                                   variant="outline"
                                   className="w-full mt-3 flex items-center justify-center gap-2"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
-                                    if (firstAvailableVariant) {
-                                      if (firstAvailableVariant.stock > 0) {
-                                        addItemToCorrectCart(product, firstAvailableVariant);
-                                      } else {
-                                        toast.warn('Sản phẩm này đã hết hàng.');
-                                      }
-                                    } else {
-                                      toast.warn('Sản phẩm này không có biến thể hoặc đã hết hàng.');
-                                    }
-                                  }}
+                                  onClick={() => handleProductSelect(product)}
                                   disabled={product.variants.every(v => v.stock === 0)}
                                 >
-                                  <Icon path={mdiPlus} size={0.7} />
-                                  Thêm vào giỏ
+                                  <Icon path={mdiEye} size={0.7} />
+                                  Xem chi tiết
                                 </Button>
                               </div>
                             </motion.div>
@@ -1731,12 +1763,12 @@ export default function POSPage() {
                                               disabled={product.variants.every(v => v.stock === 0)}
                                               onClick={(e) => {
                                                 e.stopPropagation();
-                                                if (firstAvailableVariant) {
-                                                  if (firstAvailableVariant.stock > 0) {
-                                                    addItemToCorrectCart(product, firstAvailableVariant);
-                                                  } else {
-                                                    toast.warn('Sản phẩm này đã hết hàng.');
-                                                  }
+                                                const convertedProduct = convertProductToApiProduct(product);
+                                                const convertedFirstAvailableVariant = convertedProduct.variants.find(v => v.stock > 0);
+                                                if (convertedFirstAvailableVariant) {
+                                                  addItemToCorrectCart(convertedProduct, convertedFirstAvailableVariant, true);
+                                                } else {
+                                                  toast.warn('Sản phẩm này đã hết hàng.');
                                                 }
                                               }}
                                             >
@@ -1902,7 +1934,7 @@ export default function POSPage() {
               ) : (
                 'Giỏ hàng chính'
               )}
-              
+
               {pendingCarts.length > 4 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -1991,67 +2023,67 @@ export default function POSPage() {
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => updateCartItemQuantity(item.id, -1)}
-                          >
-                            <Icon path={mdiMinus} size={0.7} />
-                          </Button>
-                          <Input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => {
-                              const newQuantity = parseInt(e.target.value) || 0;
-                              if (newQuantity < 0) {
-                                toast.warn('Số lượng không được âm.');
-                                return;
-                              }
-                              if (newQuantity > item.stock) {
-                                toast.warn(`Chỉ còn ${item.stock} sản phẩm trong kho.`);
-                                return;
-                              }
-                              if (newQuantity === 0) {
-                                removeCartItem(item.id);
-                                return;
-                              }
-                              // Calculate the difference and update
-                              const difference = newQuantity - item.quantity;
-                              if (difference !== 0) {
-                                updateCartItemQuantity(item.id, difference);
-                              }
-                            }}
-                            onBlur={(e) => {
-                              // Ensure we have a valid number on blur
-                              const value = e.target.value;
-                              if (value === '' || isNaN(parseInt(value))) {
-                                // Reset to current quantity if invalid
-                                e.target.value = item.quantity.toString();
-                              }
-                            }}
-                            className="w-16 h-8 text-center text-sm"
-                            min="1"
-                            max={item.stock}
-                          />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => updateCartItemQuantity(item.id, 1)}
-                            disabled={item.quantity >= item.stock}
-                          >
-                            <Icon path={mdiPlus} size={0.7} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 bg-red-50 border border-red-500"
-                            onClick={() => removeCartItem(item.id)}
-                          >
-                            <Icon path={mdiDelete} size={0.7} />
-                          </Button>
-                        </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => updateCartItemQuantity(item.id, -1)}
+                            >
+                              <Icon path={mdiMinus} size={0.7} />
+                            </Button>
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => {
+                                const newQuantity = parseInt(e.target.value) || 0;
+                                if (newQuantity < 0) {
+                                  toast.warn('Số lượng không được âm.');
+                                  return;
+                                }
+                                if (newQuantity > item.stock) {
+                                  toast.warn(`Chỉ còn ${item.stock} sản phẩm trong kho.`);
+                                  return;
+                                }
+                                if (newQuantity === 0) {
+                                  removeCartItem(item.id);
+                                  return;
+                                }
+                                // Calculate the difference and update
+                                const difference = newQuantity - item.quantity;
+                                if (difference !== 0) {
+                                  updateCartItemQuantity(item.id, difference);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                // Ensure we have a valid number on blur
+                                const value = e.target.value;
+                                if (value === '' || isNaN(parseInt(value))) {
+                                  // Reset to current quantity if invalid
+                                  e.target.value = item.quantity.toString();
+                                }
+                              }}
+                              className="w-16 h-8 text-center text-sm"
+                              min="1"
+                              max={item.stock}
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => updateCartItemQuantity(item.id, 1)}
+                              disabled={item.quantity >= item.stock}
+                            >
+                              <Icon path={mdiPlus} size={0.7} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 bg-red-50 border border-red-500"
+                              onClick={() => removeCartItem(item.id)}
+                            >
+                              <Icon path={mdiDelete} size={0.7} />
+                            </Button>
+                          </div>
                         </div>
                       </motion.div>
                     ))}
@@ -2213,7 +2245,7 @@ export default function POSPage() {
                       </SelectItem>
                     ) : usersData?.data?.accounts && usersData.data.accounts.length > 0 ? (
                       usersData.data.accounts.map((user: IAccount) => (
-                                                  <SelectItem key={user.id} value={user.id}>
+                        <SelectItem key={user.id} value={user.id}>
                           <div className="flex items-center gap-4 py-1">
                             <Icon path={mdiAccount} size={0.7} className="text-primary" />
                             <div className="flex flex-col min-w-0 flex-1">
@@ -2318,7 +2350,7 @@ export default function POSPage() {
                     </SelectItem>
                     <SelectItem value="transfer">
                       <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-maintext"><path d="M4 10V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2H4" /><polyline points="14 2 14 8 20 8" /><path d="m10 18 3-3-3-3" /><path d="M4 18v-1a2 2 0 0 1 2-2h6" /></svg>
+                        <Icon path={mdiBankTransfer} size={0.7} className="text-maintext" />
                         <span>Chuyển khoản</span>
                       </div>
                     </SelectItem>

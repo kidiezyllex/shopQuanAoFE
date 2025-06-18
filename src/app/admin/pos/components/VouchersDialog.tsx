@@ -32,7 +32,6 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
   formatCurrency,
 }) => {
   const { data: vouchersData, isLoading, isError } = useVouchers({ page: 1, limit: 100, status: 'HOAT_DONG' });
-
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code).then(() => {
       toast.success(`Đã sao chép mã: ${code}`);
@@ -61,6 +60,17 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
 
   const isVoucherDisabled = (voucher: any) => {
     return isVoucherExpired(voucher.endDate) || isVoucherOutOfStock(voucher);
+  };
+
+  // Map API fields to component expected fields
+  const mapVoucherData = (voucher: any) => {
+    return {
+      ...voucher,
+      discountType: voucher.type, // Map 'type' to 'discountType'
+      discountValue: parseFloat(voucher.value), // Convert string to number
+      maxValue: voucher.maxDiscount ? parseFloat(voucher.maxDiscount) : null, // Convert string to number
+      minOrderValue: parseFloat(voucher.minOrderValue) // Convert string to number
+    };
   };
 
   return (
@@ -136,12 +146,12 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                   </div>
                   <div className="text-sm text-maintext">
                     <span className="font-semibold text-green-600 text-lg">
-                      {vouchersData.data.vouchers.filter(v => !isVoucherDisabled(v)).length}
+                      {vouchersData.data.vouchers.filter(v => !isVoucherDisabled(mapVoucherData(v))).length}
                     </span> khả dụng
                   </div>
                   <div className="text-sm text-maintext">
                     <span className="font-semibold text-red-600 text-lg">
-                      {vouchersData.data.vouchers.filter(v => isVoucherDisabled(v)).length}
+                      {vouchersData.data.vouchers.filter(v => isVoucherDisabled(mapVoucherData(v))).length}
                     </span> không khả dụng
                   </div>
                 </div>
@@ -164,7 +174,8 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {vouchersData.data.vouchers.map((voucher, index) => {
+                      {vouchersData.data.vouchers.map((voucherRaw, index) => {
+                        const voucher = mapVoucherData(voucherRaw);
                         const isExpired = isVoucherExpired(voucher.endDate);
                         const isOutOfStock = isVoucherOutOfStock(voucher);
                         const isDisabled = isVoucherDisabled(voucher);
@@ -196,7 +207,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                                     {voucher.code}
                                   </div>
                                   <div className="text-xs text-maintext">
-                                    ID: {voucher.id.slice(-6)}
+                                    ID: {String(voucher.id).slice(-6)}
                                   </div>
                                 </div>
                               </div>
@@ -238,9 +249,9 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                               )}>
                                 {voucher.discountType === 'PERCENTAGE' ? `${voucher.discountValue}%` : formatCurrency(voucher.discountValue)}
                               </div>
-                              {voucher.discountType === 'PERCENTAGE' && (voucher as any).maxValue && (
+                              {voucher.discountType === 'PERCENTAGE' && voucher.maxValue && (
                                 <div className="text-xs text-maintext">
-                                  Max: {formatCurrency((voucher as any).maxValue)}
+                                  Max: {formatCurrency(voucher.maxValue)}
                                 </div>
                               )}
                             </TableCell>

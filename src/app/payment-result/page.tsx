@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 function PaymentResultContent() {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const orderId = searchParams.get('orderId');
   const success = searchParams.get('success') === 'true';
@@ -14,7 +14,7 @@ function PaymentResultContent() {
     if (!orderId) {
       navigate('/');
     }
-  }, [orderId, router]);
+  }, [orderId, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-100 py-12">

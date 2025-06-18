@@ -246,7 +246,7 @@ export default function ShippingPage() {
     };
 
     checkCart();
-  }, [items, router]);
+  }, [items, navigate]);
 
   useEffect(() => {
     if (selectedPaymentMethod === "BANK_TRANSFER" && !showVNPayModal) {

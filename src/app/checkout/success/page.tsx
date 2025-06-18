@@ -1,21 +1,21 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
 
 function SuccessContent() {
   const navigate = useNavigate();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const orderId = searchParams.get('orderId');
 
   useEffect(() => {
     if (!orderId) {
       navigate('/');
     }
-  }, [orderId, router]);
+  }, [orderId, navigate]);
 
   return (
     <div className="container max-w-lg py-16 mx-auto">

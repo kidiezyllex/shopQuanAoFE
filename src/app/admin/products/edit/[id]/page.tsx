@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
  
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProductDetail, useUpdateProduct, useUpdateProductStatus, useUpdateProductStock, useUpdateProductImages } from '@/hooks/product';
 import { useUploadImage } from '@/hooks/upload';
 import { IProductUpdate, IProductVariant, IProductStockUpdate, IProductStatusUpdate, IProductImageUpdate } from '@/interface/request/product';
@@ -23,7 +23,8 @@ import { mdiPlus, mdiTrashCanOutline, mdiArrowLeft, mdiLoading, mdiUpload, mdiIm
 import { AnimatePresence, motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
+export default function EditProductPage() {
+  const params = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { id } = params;
   const [activeTab, setActiveTab] = useState('info');

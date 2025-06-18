@@ -7,7 +7,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     navigate('/admin/statistics');
-  }, [router]);
+  }, [navigate]);
 
   return null;
 } 

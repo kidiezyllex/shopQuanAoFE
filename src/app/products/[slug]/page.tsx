@@ -607,7 +607,10 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
   );
 };
 
-export default function ProductDetail({ params }: { params: { slug: string } }) {
+import { useParams } from 'react-router-dom';
+
+export default function ProductDetail() {
+  const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const [productId, setProductId] = useState<string>('');
   const { data: productData, isLoading } = useProductDetail(productId);

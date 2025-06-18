@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
  
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAccount, useUpdateAccount, useUpdateAccountStatus } from '@/hooks/account';
 import { IAccountUpdate, IAccountStatusUpdate } from '@/interface/request/account';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -20,14 +20,11 @@ import { mdiArrowLeft, mdiLoading } from '@mdi/js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-interface Props {
-  params: {
-    id: string;
-  };
-}
 
-export default function EditAccountPage({ params }: Props) {
-  const { id } = params;
+
+export default function EditAccountPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id as string;
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("info");
   const { data: accountData, isLoading, error } = useAccount(id);

@@ -175,7 +175,7 @@ export default function ProfilePage() {
     if (!isAuthenticated) {
       navigate("/auth/login")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, navigate])
 
   if (!isAuthenticated) {
     return null

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
 import { updateOrderPayment } from '@/services/order';
 import {
@@ -13,7 +13,7 @@ import {
 
 function VNPayCallbackContent() {
   const navigate = useNavigate();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { showToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(true);
 
@@ -66,7 +66,7 @@ function VNPayCallbackContent() {
     };
 
     processPaymentResult();
-  }, [router, searchParams, showToast]);
+  }, [navigate, searchParams, showToast]);
 
   return (
     <div className="container max-w-4xl py-8">
