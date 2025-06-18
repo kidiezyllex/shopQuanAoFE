@@ -324,7 +324,7 @@ export default function ProductsPage() {
               <TableBody>
                 {data?.data.products.length ? (
                   data.data.products.map((product) => (
-                    <TableRow key={(product as any)?.id} className="hover:bg-gray-50">
+                    <TableRow key={product.id} className="hover:bg-gray-50">
                       <TableCell className="px-4 py-4 whitespace-nowrap">
                         <div
                           className="relative h-12 w-12 rounded-[6px] overflow-hidden bg-gray-100 cursor-pointer group"
@@ -354,7 +354,7 @@ export default function ProductsPage() {
                         {(() => {
                           const basePrice = product.variants[0]?.price || 0;
                           const discount = promotionsData?.data?.promotions 
-                            ? calculateProductDiscount((product as any)?.id, basePrice, promotionsData.data.promotions)
+                            ? calculateProductDiscount(product.id, basePrice, promotionsData.data.promotions)
                             : { originalPrice: basePrice, discountedPrice: basePrice, discountPercent: 0 };
                           
                           return (
@@ -389,7 +389,7 @@ export default function ProductsPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <a href={`/admin/products/edit/${(product as any)?.id}`}>
+                          <a href={`/admin/products/edit/${product.id}`}>
                             <Button
                               variant="outline"
                               size="icon"
@@ -398,7 +398,7 @@ export default function ProductsPage() {
                               <Icon path={mdiPencilCircle} size={0.7} />
                             </Button>
                           </a>
-                          <Dialog open={isDeleteDialogOpen && productToDelete === (product as any)?.id} onOpenChange={(open) => {
+                          <Dialog open={isDeleteDialogOpen && productToDelete === product.id} onOpenChange={(open) => {
                             if (!open) {
                               setIsDeleteDialogOpen(false);
                               setProductToDelete(null);
@@ -409,7 +409,7 @@ export default function ProductsPage() {
                                 variant="outline"
                                 size="icon"
                                 onClick={() => {
-                                  setProductToDelete((product as any)?.id);
+                                  setProductToDelete(product.id);
                                   setIsDeleteDialogOpen(true);
                                 }}
                                 title="Xóa"

@@ -52,7 +52,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
   useEffect(() => {
     if (returnData?.data) {
       const items = returnData.data.items.map((item: any) => ({
-        product: typeof item.product === 'string' ? item.product : item.(product as any)?.id,
+        product: typeof item.product === 'string' ? item.product : item.product.id,
         variant: item.variant,
         quantity: item.quantity,
         price: item.price,

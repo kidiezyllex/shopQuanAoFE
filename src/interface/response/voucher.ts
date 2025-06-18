@@ -13,6 +13,8 @@ export interface IVoucher {
   status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
   createdAt: string;
   updatedAt: string;
+  type: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  value: number;
 }
 export interface IVoucherResponse {
   success: boolean;

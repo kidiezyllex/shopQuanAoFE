@@ -229,15 +229,15 @@ const getVariantImageUrl = (variant: any) => {
 // Convert IPopulatedProductVariant to ApiVariant
 const convertVariantToApiVariant = (variant: any): ApiVariant => {
   return {
-    id: variant.id,
+    id: variant.id || variant._id,
     colorId: variant.colorId ? {
-      id: variant.colorId.id,
+      id: variant.colorId.id || variant.colorId._id,
       name: variant.colorId.name,
       code: variant.colorId.code,
       images: variant.colorId.images || []
     } : undefined,
     sizeId: variant.sizeId ? {
-      id: variant.sizeId.id,
+      id: variant.sizeId.id || variant.sizeId._id,
       name: variant.sizeId.name,
       value: variant.sizeId.value
     } : undefined,
@@ -245,7 +245,7 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
     stock: variant.stock,
     images: variant.images?.map((img: any) => typeof img === 'string' ? img : img.url || img.imageUrl) || [],
     sku: variant.sku,
-    actualSizeId: variant.actualSizeId
+    actualSizeId: variant.actualSizeId || variant.sizeId?.id || variant.sizeId?._id
   };
 };
 
@@ -285,6 +285,7 @@ export default function POSPage() {
 
   const activeCart = getActiveCart();
   const cartItems = activeCart?.items || [];
+  console.log(cartItems)
   const appliedDiscount = activeCart?.appliedDiscount || 0;
   const appliedVoucher = activeCart?.appliedVoucher || null;
   const couponCode = activeCart?.couponCode || '';
@@ -524,8 +525,14 @@ export default function POSPage() {
 
   // Helper function to add item to the correct cart (pending or main)
   const addItemToCorrectCart = (product: any, variant: any) => {
+    console.log('addItemToCorrectCart - Original product:', product);
+    console.log('addItemToCorrectCart - Original variant:', variant);
+    
     const convertedProduct = convertProductToApiProduct(product);
     const convertedVariant = convertVariantToApiVariant(variant);
+    
+    console.log('addItemToCorrectCart - Converted product:', convertedProduct);
+    console.log('addItemToCorrectCart - Converted variant:', convertedVariant);
     
     const cartItemId = `${convertedProduct.id}-${convertedVariant.id}`;
     const finalPrice = (product as any).hasDiscount ? (product as any).discountedPrice : convertedVariant.price;
@@ -548,6 +555,8 @@ export default function POSPage() {
       actualColorId: convertedVariant.colorId?.id,
       actualSizeId: convertedVariant.sizeId?.id,
     };
+    
+    console.log('addItemToCorrectCart - Final newItem:', newItem);
 
     if (activeCartId) {
       // Add to pending cart

@@ -350,14 +350,14 @@ export default function EditPromotionPage() {
                     <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
                       <div className="space-y-3">
                         {productsData?.data?.products?.map((product) => (
-                          <div key={(product as any)?.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                          <div key={product.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
                             <Checkbox
-                              id={`product-${(product as any)?.id}`}
-                              checked={selectedProducts.includes((product as any)?.id)}
-                              onCheckedChange={(checked) => handleProductSelection((product as any)?.id, checked as boolean)}
+                              id={`product-${product.id}`}
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={(checked) => handleProductSelection(product.id, checked as boolean)}
                             />
                             <div className="flex-1">
-                              <Label htmlFor={`product-${(product as any)?.id}`} className="text-sm font-medium cursor-pointer">
+                              <Label htmlFor={`product-${product.id}`} className="text-sm font-medium cursor-pointer">
                                 {product.name}
                               </Label>
                               <div className="text-xs text-maintext">

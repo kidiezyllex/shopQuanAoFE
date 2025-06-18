@@ -148,7 +148,7 @@ export default function ProductsPage() {
         
         if (promotionsData?.data?.promotions) {
           const discount = calculateProductDiscount(
-            (product as any)?.id,
+            product.id,
             price,
             promotionsData.data.promotions
           );
@@ -252,7 +252,7 @@ export default function ProductsPage() {
     // Check if promotions data is available and calculate discount
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
-        (product as any)?.id,
+        product.id,
         firstVariant.price,
         promotionsData.data.promotions
       );
@@ -267,7 +267,7 @@ export default function ProductsPage() {
 
     const cartItem = {
       id: firstVariant.id, // Use variant ID as main ID
-      productId: (product as any)?.id, // Separate product ID
+      productId: product.id, // Separate product ID
       name: product.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -292,7 +292,7 @@ export default function ProductsPage() {
   };
 
   const handleQuickView = (product: any) => {
-    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`
+    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`
   }
 
   const handleAddToWishlist = (product: any) => {
@@ -437,7 +437,7 @@ export default function ProductsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((product) => (
                   <ProductCard
-                    key={(product as any)?.id}
+                    key={product.id}
                     product={product}
                     promotionsData={promotionsData}
                     onAddToCart={() => handleAddToCart(product)}
@@ -609,7 +609,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
 
         <div className="relative overflow-visible bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl">
-          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`} className="block">
+          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`} className="block">
             <div className="aspect-square overflow-visible relative flex items-center justify-center">
               <motion.div
                 className="w-full h-full relative z-20"
@@ -634,7 +634,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
             {(() => {
               if (promotionsData?.data?.promotions && product.variants?.[0]) {
                 const discount = calculateProductDiscount(
-                  (product as any)?.id,
+                  product.id,
                   product.variants[0].price,
                   promotionsData.data.promotions
                 );
@@ -751,7 +751,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
           </div>
 
           <a
-            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`}
+            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`}
             className="hover:text-primary transition-colors group/link"
           >
             <h3 className="font-bold text-base mb-2 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
@@ -770,7 +770,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
                   // Calculate discount from promotions data if available
                   if (promotionsData?.data?.promotions) {
                     const discount = calculateProductDiscount(
-                      (product as any)?.id,
+                      product.id,
                       product.variants[0].price,
                       promotionsData.data.promotions
                     );
@@ -786,7 +786,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
               {(() => {
                 if (promotionsData?.data?.promotions) {
                   const discount = calculateProductDiscount(
-                    (product as any)?.id,
+                    product.id,
                     product.variants[0].price,
                     promotionsData.data.promotions
                   );

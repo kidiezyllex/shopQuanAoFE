@@ -664,7 +664,7 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
     }
 
     const existingIndex = selectedItems.findIndex(
-      si => si.product === (product as any)?.id && 
+      si => si.product === product.id && 
            si.variant.colorId === variant.colorId && 
            si.variant.sizeId === variant.sizeId
     );
@@ -677,7 +677,7 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
       }
     } else {
       setSelectedItems([...selectedItems, {
-        product: (product as any)?.id, // This is already correct - using (product as any)?.id
+        product: product.id, // This is already correct - using product.id
         variant: {
           colorId: variant.colorId,
           sizeId: variant.sizeId

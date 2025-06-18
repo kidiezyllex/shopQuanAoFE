@@ -308,7 +308,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
     // Check if promotions data is available and calculate discount
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
-        (product as any)?.id,
+        product.id,
         firstVariant.price,
         promotionsData.data.promotions
       );
@@ -323,7 +323,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
 
     const cartItem = {
       id: firstVariant.id, // Use variant ID as main ID
-      productId: (product as any)?.id, // Separate product ID
+      productId: product.id, // Separate product ID
       name: product.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -348,7 +348,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
   };
 
   const handleQuickView = () => {
-    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`;
+    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`;
   };
 
   const handleAddToWishlist = () => {
@@ -366,7 +366,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
       <Card className="group overflow-hidden border rounded-lg hover:shadow-2xl shadow-lg transition-all duration-500 h-full flex flex-col transform hover:-translate-y-3 bg-white relative backdrop-blur-sm">
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl">
-          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`} className="block">
+          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`} className="block">
             <div className="aspect-square overflow-hidden relative flex items-center justify-center">
               <motion.div
                 className="w-full h-full relative"
@@ -400,7 +400,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
               // Calculate discount from promotions data if available
               if (promotionsData?.data?.promotions && product.variants?.[0]) {
                 const discount = calculateProductDiscount(
-                  (product as any)?.id,
+                  product.id,
                   product.variants[0].price,
                   promotionsData.data.promotions
                 );
@@ -489,7 +489,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
           </div>
 
           <a
-            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${(product as any)?.id}`}
+            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`}
             className="hover:text-primary transition-colors group/a"
           >
             <h3 className="font-bold text-base mb-3 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
@@ -509,7 +509,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
                   // Calculate discount from promotions data if available
                   if (promotionsData?.data?.promotions && product.variants?.[0]) {
                     const discount = calculateProductDiscount(
-                      (product as any)?.id,
+                      product.id,
                       product.variants[0].price,
                       promotionsData.data.promotions
                     );
@@ -526,7 +526,7 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
                 // Show original price if there's a discount
                 if (promotionsData?.data?.promotions && product.variants?.[0]) {
                   const discount = calculateProductDiscount(
-                    (product as any)?.id,
+                    product.id,
                     product.variants[0].price,
                     promotionsData.data.promotions
                   );
@@ -1387,7 +1387,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
               <AnimatePresence>
                 {similarProducts.map((similarProduct: IProduct, index: number) => (
                   <motion.div
-                    key={similar(product as any)?.id}
+                    key={similarproduct.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}

@@ -105,7 +105,7 @@ export const applyPromotionsToProducts = (
     }
 
     const discountInfo = calculateProductDiscount(
-      (product as any)?.id,
+      product.id,
       basePrice,
       activePromotions
     );

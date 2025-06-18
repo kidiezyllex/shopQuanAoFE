@@ -1,1 +1,0 @@
-import{s as a,x as s}from"./index-BHeY-5EX.js";import{c as t}from"./query-vendor-CBwfxcof.js";const n=()=>t({mutationFn:s=>(async s=>await a("/auth/login",s))(s),onSuccess:a=>(a.success&&a.data.token&&s.set("accessToken",a.data.token),a)}),o=()=>t({mutationFn:s=>(async s=>await a("/auth/register",s))(s)});export{o as a,n as u};

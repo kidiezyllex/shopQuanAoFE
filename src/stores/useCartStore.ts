@@ -122,7 +122,7 @@ export const useCartStore = create(
       
       addToCart: (product, quantity) => {
         const currentItems = [...get().items];
-        const existingItemIndex = currentItems.findIndex(item => item.id === (product as any)?.id);
+        const existingItemIndex = currentItems.findIndex(item => item.id === product.id);
         
         if (existingItemIndex !== -1) {
           const existingItem = currentItems[existingItemIndex];
@@ -141,8 +141,8 @@ export const useCartStore = create(
           }
           
           currentItems.push({
-            id: (product as any)?.id,
-            productId: product.productId || (product as any)?.id, // Default to id if productId not provided
+            id: product.id,
+            productId: product.productId || product.id, // Default to id if productId not provided
             name: product.name,
             price: product.price,
             originalPrice: product.originalPrice,

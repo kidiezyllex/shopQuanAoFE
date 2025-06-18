@@ -57,7 +57,7 @@ export const CartCheckout: React.FC<CartCheckoutProps> = ({ onClose }) => {
       setIsProcessing(true);
       const orderData = {
         items: items.map(item => ({
-          product: item.(product as any)?.id,
+          product: item.product.id,
           variant: {
             colorId: item.variant?.colorId,
             sizeId: item.variant?.sizeId

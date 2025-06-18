@@ -215,10 +215,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
   const [quantityInputs, setQuantityInputs] = React.useState<{[key: string]: string}>({});
   
   const validateVoucherMutation = useValidateVoucher();
-  
-  // Remove local calculations since we're using store values
-  
-  // Initialize quantity inputs when items change
+
   React.useEffect(() => {
     const newInputs: {[key: string]: string} = {};
     items.forEach(item => {
@@ -353,8 +350,8 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
           code: voucherData.code,
           discount: result.data.discountValue,
           voucherId: voucherData.id,
-          type: voucherData.type,
-          value: voucherData.value,
+          discountType: voucherData.discountType,
+          discountValue: voucherData.discountValue,
           maxDiscount: voucherData.maxDiscount
         });
         setVoucher('');

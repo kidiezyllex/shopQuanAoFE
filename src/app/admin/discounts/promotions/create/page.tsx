@@ -16,10 +16,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useCreatePromotion } from '@/hooks/promotion';
 import { useProducts } from '@/hooks/product';
 import { IPromotionCreate } from '@/interface/request/promotion';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/components/ui/checkbox';  
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-
+import { mdiArrowLeft, mdiPercent, mdiInformation, mdiLoading } from '@mdi/js';
 export default function CreatePromotionPage() {
   const navigate = useNavigate();
   const createPromotion = useCreatePromotion();
@@ -158,8 +158,7 @@ export default function CreatePromotionPage() {
       >
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon path={mdiPercent} size={1} className="text-primary" />
+            <CardTitle>
               Tạo chiến dịch khuyến mãi mới
             </CardTitle>
           </CardHeader>
@@ -257,14 +256,14 @@ export default function CreatePromotionPage() {
                     <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
                       <div className="space-y-3">
                         {productsData?.data?.products?.map((product) => (
-                          <div key={(product as any)?.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
+                          <div key={product.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
                             <Checkbox
-                              id={`product-${(product as any)?.id}`}
-                              checked={selectedProducts.includes((product as any)?.id)}
-                              onCheckedChange={(checked) => handleProductSelection((product as any)?.id, checked as boolean)}
+                              id={`product-${product.id}`}
+                              checked={selectedProducts.includes(product.id)}
+                              onCheckedChange={(checked) => handleProductSelection(product.id, checked as boolean)}
                             />
                             <div className="flex-1">
-                              <Label htmlFor={`product-${(product as any)?.id}`} className="text-sm font-medium cursor-pointer">
+                              <Label htmlFor={`product-${product.id}`} className="text-sm font-medium cursor-pointer">
                                 {product.name}
                               </Label>
                               <div className="text-xs text-maintext">

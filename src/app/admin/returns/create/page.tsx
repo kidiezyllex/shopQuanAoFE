@@ -161,7 +161,7 @@ export default function CreateReturnPage() {
   const handleItemSelect = (item: OrderItem, checked: boolean) => {
     if (checked) {
       const newItem: SelectedItem = {
-        product: item.(product as any)?.id,
+        product: item.product.id,
         variant: item.variant,
         quantity: 1,
         maxQuantity: item.quantity,
@@ -171,7 +171,7 @@ export default function CreateReturnPage() {
       setSelectedItems(prev => [...prev, newItem]);
     } else {
       setSelectedItems(prev => prev.filter(selected => 
-        !(selected.product === item.(product as any)?.id && 
+        !(selected.product === item.product.id && 
           selected.variant.colorId === item.variant.colorId && 
           selected.variant.sizeId === item.variant.sizeId)
       ));
@@ -192,7 +192,7 @@ export default function CreateReturnPage() {
 
   const isItemSelected = (item: OrderItem) => {
     return selectedItems.some(selected => 
-      selected.product === item.(product as any)?.id && 
+      selected.product === item.product.id && 
       selected.variant.colorId === item.variant.colorId && 
       selected.variant.sizeId === item.variant.sizeId
     );
@@ -413,7 +413,7 @@ export default function CreateReturnPage() {
                               size="sm"
                               onClick={() => {
                                 const selectedIndex = selectedItems.findIndex(selected => 
-                                  selected.product === item.(product as any)?.id && 
+                                  selected.product === item.product.id && 
                                   selected.variant.colorId === item.variant.colorId && 
                                   selected.variant.sizeId === item.variant.sizeId
                                 );
@@ -429,13 +429,13 @@ export default function CreateReturnPage() {
                               min="1"
                               max={item.quantity}
                               value={selectedItems.find(selected => 
-                                selected.product === item.(product as any)?.id && 
+                                selected.product === item.product.id && 
                                 selected.variant.colorId === item.variant.colorId && 
                                 selected.variant.sizeId === item.variant.sizeId
                               )?.quantity || 1}
                               onChange={(e) => {
                                 const selectedIndex = selectedItems.findIndex(selected => 
-                                  selected.product === item.(product as any)?.id && 
+                                  selected.product === item.product.id && 
                                   selected.variant.colorId === item.variant.colorId && 
                                   selected.variant.sizeId === item.variant.sizeId
                                 );
@@ -450,7 +450,7 @@ export default function CreateReturnPage() {
                               size="sm"
                               onClick={() => {
                                 const selectedIndex = selectedItems.findIndex(selected => 
-                                  selected.product === item.(product as any)?.id && 
+                                  selected.product === item.product.id && 
                                   selected.variant.colorId === item.variant.colorId && 
                                   selected.variant.sizeId === item.variant.sizeId
                                 );
@@ -470,13 +470,13 @@ export default function CreateReturnPage() {
                         <Textarea
                           placeholder="Nhập lý do trả hàng..."
                           value={selectedItems.find(selected => 
-                            selected.product === item.(product as any)?.id && 
+                            selected.product === item.product.id && 
                             selected.variant.colorId === item.variant.colorId && 
                             selected.variant.sizeId === item.variant.sizeId
                           )?.reason || ''}
                           onChange={(e) => {
                             const selectedIndex = selectedItems.findIndex(selected => 
-                              selected.product === item.(product as any)?.id && 
+                              selected.product === item.product.id && 
                               selected.variant.colorId === item.variant.colorId && 
                               selected.variant.sizeId === item.variant.sizeId
                             );
@@ -515,7 +515,7 @@ export default function CreateReturnPage() {
               <TableBody>
                 {selectedItems.map((item, index) => {
                   const orderItem = selectedOrder?.items.find(oi => 
-                    oi.(product as any)?.id === item.product &&
+                    oi.product.id === item.product &&
                     oi.variant.colorId === item.variant.colorId &&
                     oi.variant.sizeId === item.variant.sizeId
                   );

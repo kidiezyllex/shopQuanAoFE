@@ -1,1 +1,0 @@
-import{c as a}from"./query-vendor-CBwfxcof.js";import{s as e}from"./index-BHeY-5EX.js";const o=()=>a({mutationFn:a=>(async a=>await e("/upload/image",a))(a)}),n=a=>{const e=new FormData;return e.append("file",a),e.append("upload_preset","ml_default"),e.append("cloud_name","dv4iqmqrm"),e.append("folder","clothes"),e};export{n as c,o as u};
