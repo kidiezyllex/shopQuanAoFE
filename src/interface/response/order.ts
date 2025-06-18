@@ -53,8 +53,11 @@ export interface IShippingAddress {
 
 export interface IOrder {
   id: string;
-  orderNumber: string;
+  orderNumber?: string;
   code: string;
+  customerId?: number;
+  staffId?: number;
+  voucherId?: number | null;
   customer: IOrderCustomer;
   staff?: IOrderStaff;
   items: IPopulatedOrderItem[];
@@ -63,6 +66,12 @@ export interface IOrder {
   discount: number;
   total: number;
   shippingAddress?: IShippingAddress;
+  shippingName: string;
+  shippingPhoneNumber: string;
+  shippingProvinceId: string;
+  shippingDistrictId: string;
+  shippingWardId: string;
+  shippingSpecificAddress: string;
   paymentMethod: 'CASH' | 'BANK_TRANSFER' | 'COD' | 'MIXED';
   paymentStatus: 'PENDING' | 'PARTIAL_PAID' | 'PAID';
   orderStatus: 'CHO_XAC_NHAN' | 'CHO_GIAO_HANG' | 'DANG_VAN_CHUYEN' | 'DA_GIAO_HANG' | 'HOAN_THANH' | 'DA_HUY';

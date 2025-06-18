@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,6 +27,74 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getSizeLabel } from '@/utils/sizeMapping';
+import jsPDF from "jspdf";
+import { toPng } from 'html-to-image';
+
+interface ProductInfo {
+    name: string;
+    code: string;
+    brand: string;
+    colorName: string;
+    colorCode: string;
+    sizeName: string;
+    images: any[];
+}
+
+interface OrderItem {
+    id: number;
+    orderId: number;
+    variantId: number;
+    quantity: number;
+    price: string | number;
+    productVariant?: {
+        product: {
+            name: string;
+            code: string;
+            brand: { name: string };
+        };
+        color: { name: string; code: string };
+        size: { value: string };
+        images?: any[];
+    };
+    product?: {
+        name: string;
+        code: string;
+        brand: { name: string } | string;
+        variants?: any[];
+    };
+    variant?: {
+        colorId: string;
+        sizeId: string;
+    };
+}
+
+interface OrderData {
+    id: number;
+    code: string;
+    orderStatus: string;
+    paymentStatus: string;
+    paymentMethod: string;
+    subTotal: string | number;
+    discount: string | number;
+    total: string | number;
+    createdAt: string;
+    shippingName?: string;
+    shippingPhoneNumber?: string;
+    shippingSpecificAddress?: string;
+    customer: {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+    } | string;
+    staff?: {
+        fullName: string;
+    };
+    voucher?: {
+        code: string;
+    };
+    items: OrderItem[];
+}
 
 interface OrderStep {
     status: string;
@@ -172,6 +240,87 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
     return <Badge className={config.className}>{config.label}</Badge>
 }
 
+// Helper function to get product info from the new data structure
+const getProductInfo = (item: OrderItem): ProductInfo => {
+    // Handle the new data structure from the API response
+    if (item.productVariant?.product) {
+        return {
+            name: item.productVariant.product.name || "Tên sản phẩm chưa cập nhật",
+            code: item.productVariant.product.code || "N/A",
+            brand: item.productVariant.product.brand?.name || 'N/A',
+            colorName: item.productVariant.color?.name || 'N/A',
+            colorCode: item.productVariant.color?.code || '#000000',
+            sizeName: item.productVariant.size ? getSizeLabel(Number(item.productVariant.size.value)) : 'N/A',
+            images: item.productVariant.images || []
+        };
+    }
+    
+    // Fallback for older data structure
+    return {
+        name: item.product?.name || "Tên sản phẩm chưa cập nhật",
+        code: item.product?.code || "N/A",
+        brand: typeof item.product?.brand === 'object' ? item.product.brand.name : (item.product?.brand || 'N/A'),
+        colorName: 'N/A',
+        colorCode: '#000000',
+        sizeName: 'N/A',
+        images: []
+    };
+};
+
+// Helper function to get variant image for both online and POS orders  
+const getVariantImage = (item: OrderItem): string => {
+    const productInfo = getProductInfo(item);
+    
+    // If we have images from the product variant, use the first one
+    if (productInfo.images && productInfo.images.length > 0) {
+        const firstImage = productInfo.images[0];
+        if (typeof firstImage === 'string') {
+            return firstImage;
+        } else if (typeof firstImage === 'object' && firstImage?.imageUrl) {
+            return firstImage.imageUrl;
+        } else if (typeof firstImage === 'object' && firstImage?.url) {
+            return firstImage.url;
+        }
+    }
+    
+    // For POS orders: item has variant field with colorId and sizeId
+    if (item.variant && item.variant.colorId && item.variant.sizeId) {
+        const matchingVariant = item.product?.variants?.find((v: any) => 
+            v.colorId === item.variant.colorId && v.sizeId === item.variant.sizeId
+        );
+        return matchingVariant?.images?.[0] || '/images/white-image.png';
+    }
+    
+    // For online orders: item doesn't have variant field, use first variant with image
+    if (item.product?.variants) {
+        const variantWithImage = item.product.variants.find((v: any) => v.images && v.images.length > 0);
+        return variantWithImage?.images?.[0] || '/images/white-image.png';
+    }
+    
+    return '/images/white-image.png';
+};
+
+// Helper function to format phone number display
+const formatPhoneDisplay = (phone: string | undefined | null): string => {
+    if (!phone || phone === "0000000000") {
+        return "Chưa có SĐT";
+    }
+    return phone;
+};
+
+// Helper function to format email display
+const formatEmailDisplay = (email: string | undefined | null): string => {
+    if (!email || email === "guest@pos.local") {
+        return "Chưa có email";
+    }
+    return email;
+};
+
+// Helper function to generate invoice code
+const generateInvoiceCode = (orderCode: string) => {
+    return `HD-${orderCode}`;
+};
+
 export default function OrderDetailPage() {
     const params = useParams();
     const navigate = useNavigate();
@@ -181,10 +330,12 @@ export default function OrderDetailPage() {
     const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
     const [statusToUpdate, setStatusToUpdate] = useState<string>("");
     const [paymentStatusToUpdate, setPaymentStatusToUpdate] = useState<string>("");
+    const [isProcessingPrint, setIsProcessingPrint] = useState(false);
     const { data: orderDetail, isLoading, isError } = useOrderDetail(orderId);
     const updateOrderStatus = useUpdateOrderStatus();
     const cancelOrder = useCancelOrder();
     const queryClient = useQueryClient();
+    const invoiceRef = useRef<HTMLDivElement>(null);
 
     // Helper function to get available order statuses based on current status
     const getAvailableOrderStatuses = (currentStatus: string) => {
@@ -244,6 +395,48 @@ export default function OrderDetailPage() {
         }
     };
 
+    // Print invoice functionality
+    const handlePrintInvoice = async () => {
+        if (!orderDetail?.data) {
+            toast.error("Không có dữ liệu đơn hàng để in");
+            return;
+        }
+
+        try {
+            setIsProcessingPrint(true);
+
+            const input = invoiceRef.current;
+            if (!input) throw new Error("Invoice element not found");
+
+            const canvas = await toPng(input, {
+                quality: 0.95,
+                pixelRatio: 2,
+                skipAutoScale: true,
+                cacheBust: true,
+            });
+
+            const pdf = new jsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: "a4",
+                putOnlyUsedFonts: true,
+            });
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const imgProps = pdf.getImageProperties(canvas);
+            const imgHeight = (imgProps.height * pageWidth) / imgProps.width;
+
+            pdf.addImage(canvas, 'PNG', 0, 0, pageWidth, imgHeight);
+            pdf.save(`HoaDon_${generateInvoiceCode(orderDetail.data.code).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+            
+            toast.success("Đã lưu hoá đơn PDF thành công!");
+        } catch (error) {
+            toast.error("Lỗi khi in hoá đơn PDF.");
+        } finally {
+            setIsProcessingPrint(false);
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("vi-VN", {
             style: "currency",
@@ -256,23 +449,14 @@ export default function OrderDetailPage() {
         return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: vi });
     };
 
-    // Helper function to get variant image for both online and POS orders
-    const getVariantImage = (item: any) => {
-        // For POS orders: item has variant field with colorId and sizeId
-        if (item.variant && item.variant.colorId && item.variant.sizeId) {
-            const matchingVariant = item.product?.variants?.find((v: any) => 
-                v.colorId === item.variant.colorId && v.sizeId === item.variant.sizeId
-            );
-            return matchingVariant?.images?.[0] || null;
-        }
-        
-        // For online orders: item doesn't have variant field, use first variant with image
-        if (item.product?.variants) {
-            const variantWithImage = item.product.variants.find((v: any) => v.images && v.images.length > 0);
-            return variantWithImage?.images?.[0] || null;
-        }
-        
-        return null;
+    const formatDateTimeForInvoice = (dateString: string) => {
+        return new Intl.DateTimeFormat('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(new Date(dateString));
     };
 
     const getPaymentMethodName = (method: string) => {
@@ -470,7 +654,7 @@ export default function OrderDetailPage() {
             </div>
         );
     }
-    const order = orderDetail.data;
+    const order = orderDetail.data as any;
     return (
         <div className="space-y-4 text-maintext">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -532,7 +716,7 @@ export default function OrderDetailPage() {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-maintext">Mã đơn hàng:</span>
-                                    <span className="font-medium text-maintext">{(order as any).code}</span>
+                                    <span className="font-medium text-maintext">{order.code}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-maintext">Ngày tạo:</span>
@@ -566,15 +750,13 @@ export default function OrderDetailPage() {
                                             <span className="text-maintext">Tên khách hàng:</span>
                                             <span className="font-medium text-maintext">{order.customer?.fullName}</span>
                                         </div>
-                                        {order.customer?.email && (
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-maintext">Email:</span>
-                                                <span className="text-maintext">{order.customer.email}</span>
-                                            </div>
-                                        )}
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-maintext">Email:</span>
+                                            <span className="text-maintext">{formatEmailDisplay(order.customer?.email)}</span>
+                                        </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-maintext">Số điện thoại:</span>
-                                            <span className="text-maintext">{order.customer?.phoneNumber}</span>
+                                            <span className="text-maintext">{formatPhoneDisplay(order.customer?.phoneNumber)}</span>
                                         </div>
                                     </>
                                 ) : (
@@ -588,7 +770,7 @@ export default function OrderDetailPage() {
                     </Card>
 
                     {/* Staff Information (Optional) */}
-                    {(order as any).staff && (
+                    {order.staff && (
                         <Card>
                             <CardHeader>
                                 <CardTitle>Thông tin nhân viên</CardTitle>
@@ -597,7 +779,7 @@ export default function OrderDetailPage() {
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
                                         <span className="text-maintext">Tên nhân viên:</span>
-                                        <span className="font-medium text-maintext">{(order as any).staff.fullName}</span>
+                                        <span className="font-medium text-maintext">{order.staff.fullName}</span>
                                     </div>
                                 </div>
                             </CardContent>
@@ -610,24 +792,20 @@ export default function OrderDetailPage() {
                             <CardTitle>Địa chỉ giao hàng</CardTitle>
                         </CardHeader>
                         <CardContent className="p-4">
-                            {order.shippingAddress ? (
-                                <div className="space-y-2">
-                                    {order.shippingAddress.specificAddress === "Tại quầy" ? (
-                                        <p className="text-maintext">Tại quầy</p>
-                                    ) : (
-                                        <>
-                                            {order.shippingAddress.name && <p className="text-maintext">Người nhận: {order.shippingAddress.name}</p>}
-                                            {order.shippingAddress.phoneNumber && <p className="text-maintext">Số điện thoại: {order.shippingAddress.phoneNumber}</p>}
-                                            <p className="text-maintext">
-                                                Địa chỉ:{' '}
-                                                {order.shippingAddress.specificAddress && `${order.shippingAddress.specificAddress}`}
-                                            </p>
-                                        </>
-                                    )}
-                                </div>
-                            ) : (
-                                <p className="text-maintext">Không có thông tin địa chỉ giao hàng</p>
-                            )}
+                            <div className="space-y-2">
+                                {order.shippingSpecificAddress === "Tại quầy" ? (
+                                    <p className="text-maintext">Tại quầy</p>
+                                ) : (
+                                    <>
+                                        {order.shippingName && <p className="text-maintext">Người nhận: {order.shippingName}</p>}
+                                        {order.shippingPhoneNumber && <p className="text-maintext">Số điện thoại: {formatPhoneDisplay(order.shippingPhoneNumber)}</p>}
+                                        <p className="text-maintext">
+                                            Địa chỉ:{' '}
+                                            {order.shippingSpecificAddress || 'Không có thông tin địa chỉ'}
+                                        </p>
+                                    </>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -651,32 +829,34 @@ export default function OrderDetailPage() {
                                 <TableBody>
                                     {order.items.map((item: any, index: number) => {
                                         const variantImage = getVariantImage(item);
+                                        const productInfo = getProductInfo(item);
                                         
                                         return (
                                             <TableRow key={index}>
                                                 <TableCell>
-                                                    <div className="flex items- flex-col gap-2">
+                                                    <div className="flex items-center flex-col gap-2">
                                                         {variantImage && (
                                                             <div className="w-40 h-40 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
                                                                 <img
                                                                     draggable="false"
                                                                     src={variantImage}
-                                                                    alt={item.product?.name || "Sản phẩm"}
+                                                                    alt={productInfo.name}
                                                                     className="w-full h-full object-contain"
                                                                 />
                                                             </div>
                                                         )}
                                                         <div className="min-w-0 flex-1">
                                                             <div className="font-semibold text-sm text-maintext/70 line-clamp-2">
-                                                                {item.product?.name || "Sản phẩm không rõ"}
+                                                                {productInfo.name}
                                                             </div>
-                                                            {item.product?.brand && (
-                                                                <div className="text-sm text-maintext/70 mt-0.5">
-                                                                    Thương hiệu: {item.product.brand.name}
-                                                                </div>
-                                                            )}
                                                             <div className="text-sm text-maintext/70 mt-0.5">
-                                                                Mã: {item.product?.code || "N/A"}
+                                                                Thương hiệu: {productInfo.brand}
+                                                            </div>
+                                                            <div className="text-sm text-maintext/70 mt-0.5">
+                                                                Mã: {productInfo.code}
+                                                            </div>
+                                                            <div className="text-sm text-maintext/70 mt-0.5">
+                                                                Màu: {productInfo.colorName} | Size: {productInfo.sizeName}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -795,144 +975,150 @@ export default function OrderDetailPage() {
             <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Hóa đơn đơn hàng #{order.orderNumber}</DialogTitle>
+                        <DialogTitle>Hóa đơn đơn hàng #{generateInvoiceCode(order.code)}</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
-                        <div className="border-b pb-4 mb-4">
-                            <div className="flex justify-between items-start">
+                        <div ref={invoiceRef} className="p-4 bg-white" id="invoice-content">
+                            <div className="border-b pb-4 mb-4">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className='w-full justify-center mb-4'>
+                                            <img
+                                                draggable="false"
+                                                src="/images/logo.svg"
+                                                alt="logo"
+                                                width={100}
+                                                height={100}
+                                                className="w-auto mx-auto h-10 select-none cursor-pointer"
+                                            />
+                                        </div>
+                                        <p className="text-sm text-maintext">Hóa đơn bán hàng</p>
+                                        <p className="text-sm text-maintext">Ngày: {formatDate(order.createdAt)}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <h3 className="font-bold text-xl mb-2">Mã hóa đơn: {generateInvoiceCode(order.code)}</h3>
+                                        <p className="text-sm text-maintext">
+                                            <OrderStatusBadge status={order.orderStatus} />
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <h3 className="font-bold text-xl mb-2">Clothes Shop</h3>
-                                    <p className="text-sm text-maintext">Hóa đơn bán hàng</p>
-                                    <p className="text-sm text-maintext">Ngày: {formatDate(order.createdAt)}</p>
+                                    <h3 className="font-semibold mb-2">Thông tin khách hàng:</h3>
+                                    {typeof order.customer === 'object' ? (
+                                        <>
+                                            <p>{order.customer?.fullName}</p>
+                                            <p>{formatPhoneDisplay(order.customer?.phoneNumber)}</p>
+                                            <p>{formatEmailDisplay(order.customer?.email)}</p>
+                                        </>
+                                    ) : (
+                                        <p>{order.customer}</p>
+                                    )}
                                 </div>
-                                <div className="text-right">
-                                    <h3 className="font-bold text-xl mb-2">Mã hóa đơn: #{order.orderNumber}</h3>
-                                    <p className="text-sm text-maintext">
-                                        <OrderStatusBadge status={order.orderStatus} />
-                                    </p>
+                                <div>
+                                    <h3 className="font-semibold mb-2">Địa chỉ giao hàng:</h3>
+                                    {order.shippingSpecificAddress === "Tại quầy" ? (
+                                        <p>Tại quầy</p>
+                                    ) : (
+                                        <>
+                                            {order.shippingName && <p>Người nhận: {order.shippingName}</p>}
+                                            {order.shippingPhoneNumber && <p>Số điện thoại: {formatPhoneDisplay(order.shippingPhoneNumber)}</p>}
+                                            <p>
+                                                Địa chỉ: {order.shippingSpecificAddress}
+                                            </p>
+                                        </>
+                                    )}
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <h3 className="font-semibold mb-2">Thông tin khách hàng:</h3>
-                                {typeof order.customer === 'object' ? (
-                                    <>
-                                        <p>{order.customer?.fullName}</p>
-                                        <p>{order.customer?.phoneNumber}</p>
-                                        {order.customer?.email && <p>{order.customer.email}</p>}
-                                    </>
-                                ) : (
-                                    <p>{order.customer}</p>
-                                )}
-                            </div>
-                            <div>
-                                <h3 className="font-semibold mb-2">Địa chỉ giao hàng:</h3>
-                                {order.shippingAddress ? (
-                                    <>
-                                        {order.shippingAddress.specificAddress === "Tại quầy" ? (
-                                            <p>Tại quầy</p>
-                                        ) : (
-                                            <>
-                                                {order.shippingAddress.name && <p>Người nhận: {order.shippingAddress.name}</p>}
-                                                {order.shippingAddress.phoneNumber && <p>Số điện thoại: {order.shippingAddress.phoneNumber}</p>}
-                                                <p>
-                                                    Địa chỉ:
-                                                    {order.shippingAddress.specificAddress}
-                                                </p>
-                                            </>
-                                        )}
-                                    </>
-                                ) : (
-                                    <p>Không có thông tin địa chỉ giao hàng</p>
-                                )}
-                            </div>
-                        </div>
-
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Sản phẩm</TableHead>
-                                    <TableHead className="text-right">Đơn giá</TableHead>
-                                    <TableHead className="text-right">Số lượng</TableHead>
-                                    <TableHead className="text-right">Thành tiền</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {order.items.map((item: any, index: number) => {
-                                    const variantImage = getVariantImage(item);
-                                    
-                                    return (
-                                        <TableRow key={index}>
-                                            <TableCell>
-                                                <div className="flex items-center gap-3">
-                                                    {variantImage && (
-                                                        <div className="w-10 h-10 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
-                                                            <img
-                                                                src={variantImage}
-                                                                alt={item.product?.name || "Sản phẩm"}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    <div className="min-w-0 flex-1">
-                                                        <div className="font-medium text-sm">
-                                                            {item.product?.name || "Sản phẩm không rõ"}
-                                                        </div>
-                                                        {item.product?.brand && (
-                                                            <div className="text-xs text-maintext/70 mt-0.5">
-                                                                {item.product.brand.name}
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Sản phẩm</TableHead>
+                                        <TableHead className="text-right">Đơn giá</TableHead>
+                                        <TableHead className="text-right">Số lượng</TableHead>
+                                        <TableHead className="text-right">Thành tiền</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {order.items.map((item: any, index: number) => {
+                                        const variantImage = getVariantImage(item);
+                                        const productInfo = getProductInfo(item);
+                                        
+                                        return (
+                                            <TableRow key={index}>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        {variantImage && (
+                                                            <div className="w-10 h-10 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
+                                                                <img
+                                                                    src={variantImage}
+                                                                    alt={productInfo.name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
                                                             </div>
                                                         )}
-                                                        <div className="text-xs text-maintext/70 mt-0.5">
-                                                            Mã: {item.product?.code || "N/A"}
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="font-medium text-sm">
+                                                                {productInfo.name}
+                                                            </div>
+                                                            <div className="text-xs text-maintext/70 mt-0.5">
+                                                                {productInfo.brand}
+                                                            </div>
+                                                            <div className="text-xs text-maintext/70 mt-0.5">
+                                                                Mã: {productInfo.code}
+                                                            </div>
+                                                            <div className="text-xs text-maintext/70 mt-0.5">
+                                                                {productInfo.colorName} / {productInfo.sizeName}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
-                                            <TableCell className="text-right">{item.quantity}</TableCell>
-                                            <TableCell className="text-right">{formatCurrency(item.price * item.quantity)}</TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
+                                                </TableCell>
+                                                <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                                                <TableCell className="text-right">{item.quantity}</TableCell>
+                                                <TableCell className="text-right">{formatCurrency(item.price * item.quantity)}</TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
 
-                        <div className="mt-6 space-y-2">
-                            <div className="flex justify-between">
-                                <span>Tổng tiền hàng:</span>
-                                <span>{formatCurrency(order.subTotal)}</span>
-                            </div>
-                            {order.voucher && (
+                            <div className="mt-6 space-y-2">
                                 <div className="flex justify-between">
-                                    <span>Giảm giá ({order.voucher.code}):</span>
-                                    <span className="text-red-500">-{formatCurrency(order.discount)}</span>
+                                    <span>Tổng tiền hàng:</span>
+                                    <span>{formatCurrency(order.subTotal)}</span>
                                 </div>
-                            )}
-                            <div className="flex justify-between pt-2 border-t font-bold">
-                                <span>Tổng thanh toán:</span>
-                                <span>{formatCurrency(order.total)}</span>
+                                {order.voucher && (
+                                    <div className="flex justify-between">
+                                        <span>Giảm giá ({order.voucher.code}):</span>
+                                        <span className="text-red-500">-{formatCurrency(order.discount)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between pt-2 border-t font-bold">
+                                    <span>Tổng thanh toán:</span>
+                                    <span>{formatCurrency(order.total)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Phương thức thanh toán:</span>
+                                    <span>{getPaymentMethodName(order.paymentMethod)}</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between">
-                                <span>Phương thức thanh toán:</span>
-                                <span>{getPaymentMethodName(order.paymentMethod)}</span>
-                            </div>
-                        </div>
 
-                        <div className="mt-8 text-center text-sm text-maintext">
-                            <p>Cảm ơn quý khách đã mua hàng tại Clothes Shop</p>
-                            <p>Hotline: 1900 1234</p>
+                            <div className="mt-8 text-center text-sm text-maintext">
+                                <p>Cảm ơn quý khách đã mua hàng tại Clothes Shop</p>
+                                <p>Hotline: 1900 1234</p>
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsInvoiceDialogOpen(false)}>
                             Đóng
                         </Button>
-                        <Button>
+                        <Button onClick={handlePrintInvoice} disabled={isProcessingPrint}>
                             <Icon path={mdiPrinter} size={0.7} className="mr-2" />
-                            In hóa đơn
+                            {isProcessingPrint ? 'Đang xử lý...' : 'In hóa đơn'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

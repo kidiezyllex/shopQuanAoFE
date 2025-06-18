@@ -227,8 +227,8 @@ export default function OrdersPage() {
 
     const formattedOrders = ordersToExport.map((order) => ({
       "Mã đơn hàng": order.code,
-      "Khách hàng": order.shippingAddress?.name || "N/A",
-      "Số điện thoại": order.shippingAddress?.phoneNumber || "N/A",
+      "Khách hàng": order.customer?.fullName || order.shippingName || "N/A",
+      "Số điện thoại": order.customer?.phoneNumber || order.shippingPhoneNumber || "N/A",
       "Ngày tạo": formatDate(order.createdAt),
       "Tổng tiền": formatCurrency(order.total),
       "Trạng thái đơn hàng": order.orderStatus, // Consider mapping to readable status like in Badge
@@ -303,7 +303,7 @@ export default function OrdersPage() {
     const tableColumn = ["Mã đơn hàng", "Khách hàng", "Ngày tạo", "Tổng tiền", "Trạng thái ĐH", "Trạng thái TT"]
     const tableRows = ordersToExport.map((order) => [
       order.code || "N/A",
-      order.shippingAddress?.name || "N/A",
+      order.customer?.fullName || order.shippingName || "N/A",
       formatDate(order.createdAt),
       formatCurrency(order.total),
       getOrderStatusLabelLocal(order.orderStatus),
@@ -426,11 +426,11 @@ export default function OrdersPage() {
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal text-primary",
                         !dateRange && "text-muted-foreground",
                       )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                    > 
+                      <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                       {dateRange?.from ? (
                         dateRange.to ? (
                           <>
@@ -440,7 +440,7 @@ export default function OrdersPage() {
                           format(dateRange.from, "dd/MM/yyyy")
                         )
                       ) : (
-                        "Chọn khoảng thời gian"
+                        <span className="text-primary">Chọn khoảng thời gian</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -684,8 +684,8 @@ export default function OrdersPage() {
                   <TableCell className="font-medium">{order.code}</TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{order.shippingAddress?.name}</div>
-                      <div className="text-sm text-maintext">{order.shippingAddress?.phoneNumber}</div>
+                      <div className="font-medium">{order.customer?.fullName || order.shippingName}</div>
+                      <div className="text-sm text-maintext italic">{order.customer?.phoneNumber === "0000000000" ? "Chưa có SĐT" : order.customer?.phoneNumber}</div>
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{formatDate(order.createdAt)}</TableCell>
