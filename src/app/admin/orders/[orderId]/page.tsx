@@ -427,7 +427,7 @@ export default function OrderDetailPage() {
             const imgHeight = (imgProps.height * pageWidth) / imgProps.width;
 
             pdf.addImage(canvas, 'PNG', 0, 0, pageWidth, imgHeight);
-            pdf.save(`HoaDon_${generateInvoiceCode(orderDetail.data.code).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+            pdf.save(`HoaDon_${generateInvoiceCode((orderDetail.data as any).code).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
             
             toast.success("Đã lưu hoá đơn PDF thành công!");
         } catch (error) {

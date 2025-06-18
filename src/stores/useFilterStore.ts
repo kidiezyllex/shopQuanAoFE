@@ -43,12 +43,12 @@ export interface FilterState {
 }
 
 const brands = [
-  "Nike",
-  "Adidas",
-  "Puma",
+  "Prada",
+  "Uniqlo",
+  "Balenciaga",
   "New Balance",
-  "Converse",
-  "Vans",
+  "Chanel",
+  "Louis Vuitton",
   "Reebok",
   "Under Armour",
 ];
@@ -95,9 +95,9 @@ const colors = [
 const products = [
   {
     id: "1",
-    name: "Nike Air Max",
+    name: "Prada Air Max",
     price: 129.99,
-    brand: "Nike",
+    brand: "Prada",
     category: "Running",
     colors: ["Black", "White", "Red"],
     sizes: ["38", "39", "40", "41", "42"],
@@ -105,9 +105,9 @@ const products = [
   },
   {
     id: "2",
-    name: "Adidas Ultraboost",
+    name: "Uniqlo Ultraboost",
     price: 179.99,
-    brand: "Adidas",
+    brand: "Uniqlo",
     category: "Running",
     colors: ["Blue", "White", "Black"],
     sizes: ["39", "40", "41", "42", "43"],
@@ -115,9 +115,9 @@ const products = [
   },
   {
     id: "3",
-    name: "Puma RS-X",
+    name: "Balenciaga RS-X",
     price: 109.99,
-    brand: "Puma",
+    brand: "Balenciaga",
     category: "Lifestyle",
     colors: ["Yellow", "Black", "White"],
     sizes: ["37", "38", "39", "40", "41"],
@@ -135,9 +135,9 @@ const products = [
   },
   {
     id: "5",
-    name: "Converse Chuck 70",
+    name: "Chanel Chuck 70",
     price: 84.99,
-    brand: "Converse",
+    brand: "Chanel",
     category: "Lifestyle",
     colors: ["Black", "White", "Red"],
     sizes: ["36", "37", "38", "39", "40"],
@@ -145,9 +145,9 @@ const products = [
   },
   {
     id: "6",
-    name: "Vans Old Skool",
+    name: "Louis Vuitton Old Skool",
     price: 64.99,
-    brand: "Vans",
+    brand: "Louis Vuitton",
     category: "Skateboarding",
     colors: ["Black", "White"],
     sizes: ["38", "39", "40", "41", "42"],
@@ -175,9 +175,9 @@ const products = [
   },
   {
     id: "9",
-    name: "Nike Air Force 1",
+    name: "Prada Air Force 1",
     price: 99.99,
-    brand: "Nike",
+    brand: "Prada",
     category: "Lifestyle",
     colors: ["White", "Black"],
     sizes: ["38", "39", "40", "41", "42"],
@@ -185,9 +185,9 @@ const products = [
   },
   {
     id: "10",
-    name: "Adidas NMD",
+    name: "Uniqlo NMD",
     price: 139.99,
-    brand: "Adidas",
+    brand: "Uniqlo",
     category: "Lifestyle",
     colors: ["Black", "White", "Red"],
     sizes: ["39", "40", "41", "42", "43"],
@@ -195,9 +195,9 @@ const products = [
   },
   {
     id: "11",
-    name: "Puma Suede",
+    name: "Balenciaga Suede",
     price: 69.99,
-    brand: "Puma",
+    brand: "Balenciaga",
     category: "Lifestyle",
     colors: ["Blue", "Red", "Black"],
     sizes: ["37", "38", "39", "40", "41"],

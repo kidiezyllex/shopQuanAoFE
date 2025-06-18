@@ -92,8 +92,8 @@ export default function CreateReturnPage() {
           id: '1',
           product: {
             id: 'p1',
-            name: 'Giày thể thao Nike',
-            code: 'NIKE001',
+            name: 'Giày thể thao Prada',
+            code: 'Prada001',
             images: ['/placeholder.jpg']
           },
           variant: {

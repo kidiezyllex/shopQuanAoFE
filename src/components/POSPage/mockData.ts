@@ -51,15 +51,15 @@ export const categories: Category[] = [
 export const products: Product[] = [
   {
     id: 'prod-1',
-    name: 'Nike Air Force 1 Low',
-    brand: 'Nike',
-    description: 'Giày thể thao Nike Air Force 1 Low chính hãng',
+    name: 'Prada Air Force 1 Low',
+    brand: 'Prada',
+    description: 'Giày thể thao Prada Air Force 1 Low chính hãng',
     colors: [
       {
         id: 'color-1',
         name: 'Trắng',
         code: '#FFFFFF',
-        image: 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-force-1-07-shoes-WrLlWX.png',
+        image: 'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-force-1-07-shoes-WrLlWX.png',
         sizes: [
           { id: 'size-1', size: '39', quantity: 12, price: 2500000 },
           { id: 'size-2', size: '40', quantity: 8, price: 2500000 },
@@ -71,7 +71,7 @@ export const products: Product[] = [
         id: 'color-2',
         name: 'Đen',
         code: '#000000',
-        image: 'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/c331ff82-87f3-4bd7-a67c-97a300552fdc/air-force-1-07-shoes-WrLlWX.png',
+        image: 'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/c331ff82-87f3-4bd7-a67c-97a300552fdc/air-force-1-07-shoes-WrLlWX.png',
         sizes: [
           { id: 'size-5', size: '39', quantity: 7, price: 2500000 },
           { id: 'size-6', size: '40', quantity: 15, price: 2500000 },
@@ -83,15 +83,15 @@ export const products: Product[] = [
   },
   {
     id: 'prod-2',
-    name: 'Adidas Ultraboost 23',
-    brand: 'Adidas',
-    description: 'Giày chạy bộ Adidas Ultraboost 23 chính hãng',
+    name: 'Uniqlo Ultraboost 23',
+    brand: 'Uniqlo',
+    description: 'Giày chạy bộ Uniqlo Ultraboost 23 chính hãng',
     colors: [
       {
         id: 'color-3',
         name: 'Xanh dương',
         code: '#1E3A8A',
-        image: 'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/c533fd3ba6a34ed7bff5af0c00e3808c_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_01_standard.jpg',
+        image: 'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/c533fd3ba6a34ed7bff5af0c00e3808c_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_01_standard.jpg',
         sizes: [
           { id: 'size-9', size: '39', quantity: 4, price: 4200000 },
           { id: 'size-10', size: '40', quantity: 8, price: 4200000 },
@@ -103,7 +103,7 @@ export const products: Product[] = [
         id: 'color-4',
         name: 'Đen',
         code: '#000000',
-        image: 'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/91b7dd603a0d4f178221af1600321d2e_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_01_standard.jpg',
+        image: 'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/91b7dd603a0d4f178221af1600321d2e_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_01_standard.jpg',
         sizes: [
           { id: 'size-13', size: '39', quantity: 5, price: 4200000 },
           { id: 'size-14', size: '40', quantity: 10, price: 4200000 },
@@ -155,15 +155,15 @@ export const products: Product[] = [
   },
   {
     id: 'prod-5',
-    name: 'Puma Suede Classic',
-    brand: 'Puma',
-    description: 'Giày thời trang Puma Suede Classic chính hãng',
+    name: 'Balenciaga Suede Classic',
+    brand: 'Balenciaga',
+    description: 'Giày thời trang Balenciaga Suede Classic chính hãng',
     colors: [
       {
         id: 'color-7',
         name: 'Đen',
         code: '#000000',
-        image: 'https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/374915/01/sv01/fnd/PNA/fmt/png/Suede-Classic-XXI-AllwearStudios',
+        image: 'https://images.Balenciaga.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/374915/01/sv01/fnd/PNA/fmt/png/Suede-Classic-XXI-AllwearStudios',
         sizes: [
           { id: 'size-25', size: '39', quantity: 9, price: 2000000 },
           { id: 'size-26', size: '40', quantity: 11, price: 2000000 },
@@ -175,7 +175,7 @@ export const products: Product[] = [
         id: 'color-8',
         name: 'Đỏ',
         code: '#DC2626',
-        image: 'https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/374915/05/sv01/fnd/PNA/fmt/png/Suede-Classic-XXI-AllwearStudios',
+        image: 'https://images.Balenciaga.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/374915/05/sv01/fnd/PNA/fmt/png/Suede-Classic-XXI-AllwearStudios',
         sizes: [
           { id: 'size-29', size: '39', quantity: 4, price: 2000000 },
           { id: 'size-30', size: '40', quantity: 7, price: 2000000 },

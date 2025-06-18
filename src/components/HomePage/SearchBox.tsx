@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 
 //                                                                                                                     Dữ liệu mẫu cho kết quả tìm kiếm
 const searchResults = [
-  { id: 1, name: 'Nike Air Max 270', price: 3200000, category: 'Giày thể thao' },
-  { id: 2, name: 'Adidas Ultraboost 21', price: 4500000, category: 'Giày chạy bộ' },
-  { id: 3, name: 'Puma RS-X³', price: 2800000, category: 'Giày thời trang' },
+  { id: 1, name: 'Prada Air Max 270', price: 3200000, category: 'Giày thể thao' },
+  { id: 2, name: 'Uniqlo Ultraboost 21', price: 4500000, category: 'Giày chạy bộ' },
+  { id: 3, name: 'Balenciaga RS-X³', price: 2800000, category: 'Giày thời trang' },
   { id: 4, name: 'New Balance 990v5', price: 4200000, category: 'Giày thể thao' },
-  { id: 5, name: 'Converse Chuck 70', price: 1800000, category: 'Giày thời trang' },
+  { id: 5, name: 'Chanel Chuck 70', price: 1800000, category: 'Giày thời trang' },
 ];
 
 //                                                                                                                     Format giá tiền theo VND

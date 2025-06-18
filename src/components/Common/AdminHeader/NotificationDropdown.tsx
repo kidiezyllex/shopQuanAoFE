@@ -38,7 +38,7 @@ const mockNotifications: Notification[] = [
   {
     id: '2',
     title: 'Hết hàng',
-    content: 'Sản phẩm "Nike Air Force 1" sắp hết hàng',
+    content: 'Sản phẩm "Prada Air Force 1" sắp hết hàng',
     time: '1 giờ trước',
     type: 'warning',
     read: false,

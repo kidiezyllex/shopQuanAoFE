@@ -52,18 +52,18 @@ export interface Product {
 export const brands: Brand[] = [
   {
     id: 'brand-1',
-    name: 'Nike',
-    logo: 'https://www.vectorlogo.zone/logos/nike/nike-ar21.png',
+    name: 'Prada',
+    logo: 'https://www.vectorlogo.zone/logos/Prada/Prada-ar21.png',
   },
   {
     id: 'brand-2',
-    name: 'Adidas',
-    logo: 'https://www.vectorlogo.zone/logos/adidas/adidas-ar21.png',
+    name: 'Uniqlo',
+    logo: 'https://www.vectorlogo.zone/logos/Uniqlo/Uniqlo-ar21.png',
   },
   {
     id: 'brand-3',
-    name: 'Puma',
-    logo: 'https://www.vectorlogo.zone/logos/puma/puma-ar21.png',
+    name: 'Balenciaga',
+    logo: 'https://www.vectorlogo.zone/logos/Balenciaga/Balenciaga-ar21.png',
   },
   {
     id: 'brand-4',
@@ -72,8 +72,8 @@ export const brands: Brand[] = [
   },
   {
     id: 'brand-5',
-    name: 'Converse',
-    logo: 'https://1000logos.net/wp-content/uploads/2021/04/Converse-logo.png',
+    name: 'Chanel',
+    logo: 'https://1000logos.net/wp-content/uploads/2021/04/Chanel-logo.png',
   },
 ];
 
@@ -107,10 +107,10 @@ export const materials: Material[] = [
 export const products: Product[] = [
   {
     id: 'prod-001',
-    name: 'Nike Air Force 1 Low',
-    slug: 'nike-air-force-1-low',
+    name: 'Prada Air Force 1 Low',
+    slug: 'Prada-air-force-1-low',
     sku: 'NK-AF1-001',
-    description: 'Giày thể thao Nike Air Force 1 Low chính hãng với thiết kế cổ điển, logo Swoosh đặc trưng. Đế giày Air êm ái, phù hợp sử dụng hàng ngày.',
+    description: 'Giày thể thao Prada Air Force 1 Low chính hãng với thiết kế cổ điển, logo Swoosh đặc trưng. Đế giày Air êm ái, phù hợp sử dụng hàng ngày.',
     brandId: 'brand-1',
     shoeTypeId: 'type-1',
     soleTypeId: 'sole-3',
@@ -121,9 +121,9 @@ export const products: Product[] = [
         name: 'Trắng',
         code: '#FFFFFF',
         images: [
-          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-force-1-07-shoes-WrLlWX.png',
-          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/33533fe2-1157-4001-896e-1803b30659c8/air-force-1-07-shoes-WrLlWX.png',
-          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/a0a300da-2e16-4483-ba64-9815cf0598ac/air-force-1-07-shoes-WrLlWX.png',
+          'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-force-1-07-shoes-WrLlWX.png',
+          'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/33533fe2-1157-4001-896e-1803b30659c8/air-force-1-07-shoes-WrLlWX.png',
+          'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/a0a300da-2e16-4483-ba64-9815cf0598ac/air-force-1-07-shoes-WrLlWX.png',
         ],
         sizes: [
           { size: '39', quantity: 12, price: 2500000, weight: 350 },
@@ -137,9 +137,9 @@ export const products: Product[] = [
         name: 'Đen',
         code: '#000000',
         images: [
-          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/c331ff82-87f3-4bd7-a67c-97a300552fdc/air-force-1-07-shoes-WrLlWX.png',
-          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/6896c8e7-82cf-444e-a3ed-45252f146d1c/air-force-1-07-shoes-WrLlWX.png',
-          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/13cef1e3-b3e3-479c-9809-224feb789b23/air-force-1-07-shoes-WrLlWX.png',
+          'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/c331ff82-87f3-4bd7-a67c-97a300552fdc/air-force-1-07-shoes-WrLlWX.png',
+          'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/6896c8e7-82cf-444e-a3ed-45252f146d1c/air-force-1-07-shoes-WrLlWX.png',
+          'https://static.Prada.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/13cef1e3-b3e3-479c-9809-224feb789b23/air-force-1-07-shoes-WrLlWX.png',
         ],
         sizes: [
           { size: '39', quantity: 7, price: 2500000, weight: 350 },
@@ -154,10 +154,10 @@ export const products: Product[] = [
   },
   {
     id: 'prod-002',
-    name: 'Adidas Ultraboost 23',
-    slug: 'adidas-ultraboost-23',
+    name: 'Uniqlo Ultraboost 23',
+    slug: 'Uniqlo-ultraboost-23',
     sku: 'AD-UB23-002',
-    description: 'Giày chạy bộ Adidas Ultraboost 23 với công nghệ đệm Boost mang lại cảm giác êm ái và phản hồi năng lượng tốt. Thân giày Primeknit co giãn theo bàn chân.',
+    description: 'Giày chạy bộ Uniqlo Ultraboost 23 với công nghệ đệm Boost mang lại cảm giác êm ái và phản hồi năng lượng tốt. Thân giày Primeknit co giãn theo bàn chân.',
     brandId: 'brand-2',
     shoeTypeId: 'type-2',
     soleTypeId: 'sole-4',
@@ -168,9 +168,9 @@ export const products: Product[] = [
         name: 'Xanh dương',
         code: '#1E3A8A',
         images: [
-          'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/c533fd3ba6a34ed7bff5af0c00e3808c_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_01_standard.jpg',
-          'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/b56fa174b01f4e9b9dc8af0c00e395c2_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_02_standard.jpg',
-          'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/1d48e3b268a74a3a9d3aaf0c00e3a3a7_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_04_standard.jpg',
+          'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/c533fd3ba6a34ed7bff5af0c00e3808c_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_01_standard.jpg',
+          'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/b56fa174b01f4e9b9dc8af0c00e395c2_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_02_standard.jpg',
+          'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/1d48e3b268a74a3a9d3aaf0c00e3a3a7_9366/Ultraboost_Light_Running_Shoes_Blue_HQ6349_04_standard.jpg',
         ],
         sizes: [
           { size: '39', quantity: 4, price: 4200000, weight: 320 },
@@ -184,9 +184,9 @@ export const products: Product[] = [
         name: 'Đen',
         code: '#000000',
         images: [
-          'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/91b7dd603a0d4f178221af1600321d2e_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_01_standard.jpg',
-          'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/a9528aee49494dfaa625af16003230b0_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_02_standard.jpg',
-          'https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/9c63ef4e81a940c4b442af1600323b81_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_04_standard.jpg',
+          'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/91b7dd603a0d4f178221af1600321d2e_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_01_standard.jpg',
+          'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/a9528aee49494dfaa625af16003230b0_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_02_standard.jpg',
+          'https://assets.Uniqlo.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/9c63ef4e81a940c4b442af1600323b81_9366/Ultraboost_Light_Running_Shoes_Black_GZ3979_04_standard.jpg',
         ],
         sizes: [
           { size: '39', quantity: 5, price: 4200000, weight: 320 },

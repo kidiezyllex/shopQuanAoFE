@@ -153,7 +153,7 @@ export default function EditProductPage() {
 
       const payload: IProductImageUpdate = {
         variantId,
-        images: newImages
+        images: newImages as any
       };
 
       await updateProductImages.mutateAsync(
@@ -333,7 +333,7 @@ export default function EditProductPage() {
                         <SelectValue placeholder="Chọn thương hiệu" />
                       </SelectTrigger>
                       <SelectContent>
-                        {['Nike', 'Adidas', 'Puma', 'Converse', 'Vans'].map(brand => (
+                        {['Prada', 'Uniqlo', 'Balenciaga', 'Chanel', 'Louis Vuitton'].map(brand => (
                           <SelectItem key={brand} value={brand}>
                             {brand}
                           </SelectItem>
@@ -532,7 +532,7 @@ export default function EditProductPage() {
                                 style={{ aspectRatio: '1/1' }}
                               >
                                 <img
-                                  src={image}
+                                  src={image.imageUrl as any}
                                   alt={`Variant image ${index + 1}`}
                                   className="object-cover w-full h-full"
                                 />
