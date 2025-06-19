@@ -582,7 +582,7 @@ export default function ProductDetail() {
   const [productId, setProductId] = useState<string>('');
   const { data: productData, isLoading } = useProductDetail(productId);
   const { data: allProductsData } = useProducts({ limit: 8 });
-  const { data: promotionsData } = usePromotions({ status: "HOAT_DONG" });
+  const { data: promotionsData } = usePromotions({ status: "ACTIVE" });
   const { addToCart } = useCartStore();
 
   const [selectedVariant, setSelectedVariant] = useState<IPopulatedProductVariant | null>(null);
@@ -634,7 +634,6 @@ export default function ProductDetail() {
 
   // Xử lý chọn màu sắc
   const handleColorSelect = (colorId: string) => {
-    console.log('Color selected:', colorId);
     setSelectedColor(colorId);
 
     // Try to find a variant with the selected color and current size
@@ -643,7 +642,6 @@ export default function ProductDetail() {
     );
 
     if (matchingVariant) {
-      console.log('Found matching variant:', matchingVariant);
       setSelectedVariant(matchingVariant);
       setCurrentImageIndex(0);
     } else {
@@ -652,7 +650,6 @@ export default function ProductDetail() {
         (v) => String(v.color?.id || v.colorId) === String(colorId)
       );
       if (firstVariantWithColor) {
-        console.log('Found first variant with color:', firstVariantWithColor);
         setSelectedVariant(firstVariantWithColor);
         setSelectedSize(String(firstVariantWithColor.size?.id || firstVariantWithColor.sizeId || ''));
         setCurrentImageIndex(0);
@@ -662,8 +659,6 @@ export default function ProductDetail() {
 
   // Xử lý chọn kích thước
   const handleSizeSelect = (sizeId: string) => {
-    console.log('Size selected:', sizeId);
-    console.log('Current selected color:', selectedColor);
     setSelectedSize(sizeId);
 
     const matchingVariant = productData?.data?.variants.find(
@@ -671,11 +666,8 @@ export default function ProductDetail() {
     );
 
     if (matchingVariant) {
-      console.log('Found matching variant for size:', matchingVariant);
       setSelectedVariant(matchingVariant);
-    } else {
-      console.log('No matching variant found for size');
-    }
+    } 
   };
 
   // Xử lý thêm vào giỏ hàng

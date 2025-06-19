@@ -1,5 +1,5 @@
 export interface IPromotionFilter {
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'UNACTIVE';
   search?: string;
   startDate?: string;
   endDate?: string;
@@ -23,5 +23,5 @@ export interface IPromotionUpdate {
   products?: string[];
   startDate?: string | Date;
   endDate?: string | Date;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'UNACTIVE';
 } 

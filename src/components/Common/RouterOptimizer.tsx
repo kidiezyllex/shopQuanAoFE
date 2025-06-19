@@ -48,9 +48,8 @@ const preloadRoute = async (routePath: string): Promise<void> => {
     
     await routeCache.get(routePath);
     preloadedRoutes.add(routePath);
-    console.log(`✅ Preloaded route: ${routePath}`);
   } catch (error) {
-    console.warn(`❌ Failed to preload route ${routePath}:`, error);
+    console.warn(error);
   }
 };
 
@@ -128,38 +127,6 @@ const useLinkPreloading = () => {
   }, []);
 };
 
-// Performance monitoring
-const usePerformanceMonitoring = () => {
-  const navigate = useNavigate();
-  
-  const optimizedNavigate = useCallback((to: string, options?: any) => {
-    const startTime = performance.now();
-    
-    // Check if route is preloaded
-    const isPreloaded = preloadedRoutes.has(to);
-    
-    if (isPreloaded) {
-      console.log(`🚀 Fast navigation to ${to} (preloaded)`);
-    } else {
-      console.log(`⏳ Loading ${to}...`);
-      // Preload immediately for better UX
-      preloadRoute(to);
-    }
-    
-    navigate(to, options);
-    
-    // Measure navigation time
-    requestAnimationFrame(() => {
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-      console.log(`📊 Navigation to ${to} took ${duration.toFixed(2)}ms`);
-    });
-  }, [navigate]);
-
-  return optimizedNavigate;
-};
-
-// Main RouterOptimizer component
 export const RouterOptimizer: React.FC<RouterOptimizerProps> = ({
   children,
   preloadRoutes: initialPreloadRoutes = [],

@@ -8,18 +8,6 @@ export const measureWebVitals = () => {
     // Measure First Contentful Paint (FCP)
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        if (entry.entryType === 'paint' && entry.name === 'first-contentful-paint') {
-          console.log(`🎨 FCP: ${entry.startTime.toFixed(2)}ms`);
-        }
-        
-        if (entry.entryType === 'largest-contentful-paint') {
-          console.log(`🖼️ LCP: ${entry.startTime.toFixed(2)}ms`);
-        }
-        
-        if (entry.entryType === 'first-input') {
-          const fidEntry = entry as any;
-          console.log(`⚡ FID: ${fidEntry.processingStart - entry.startTime}ms`);
-        }
       }
     });
 
@@ -64,21 +52,17 @@ export const registerServiceWorker = async () => {
   if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('✅ Service Worker registered:', registration);
-      
-      // Update available
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('🔄 New version available! Please refresh.');
             }
           });
         }
       });
     } catch (error) {
-      console.error('❌ Service Worker registration failed:', error);
+      console.error(error);
     }
   }
 };
@@ -137,10 +121,6 @@ export const analyzeBundleSize = () => {
         fetch(src, { method: 'HEAD' })
           .then(response => {
             const size = response.headers.get('content-length');
-            if (size) {
-              const kb = Math.round(parseInt(size) / 1024);
-              console.log(`📦 ${src.split('/').pop()}: ${kb}KB`);
-            }
           })
           .catch(() => {});
       }
@@ -181,14 +161,6 @@ export const monitorPerformanceBudget = () => {
         continue;
       }
 
-      const status = value <= budget ? '✅' : '❌';
-      const percentage = Math.round((value / budget) * 100);
-      
-      console.log(`${status} ${metric}: ${value.toFixed(2)}ms (${percentage}% of budget)`);
-      
-      if (value > budget) {
-        console.warn(`⚠️ ${metric} exceeded budget by ${(value - budget).toFixed(2)}ms`);
-      }
     }
   });
 

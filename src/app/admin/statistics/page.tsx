@@ -83,13 +83,6 @@ export default function StatisticsPage() {
   const { data: accountsData } = useAccounts({ role: 'CUSTOMER' });
   const { data: statisticsDetailData, isLoading: isDetailLoading } = useStatisticsDetail(selectedStatisticsId || '');
 
-  console.log("statisticsData", statisticsData?.data)
-  console.log("overviewStatistics", overviewStatistics?.data)
-  console.log("revenueData", revenueData?.data)
-  console.log("topProductsData", topProductsData?.data)
-  console.log("accountsData", accountsData?.data)
-  console.log("statisticsDetailData", statisticsDetailData?.data)
-  
   const handleRevenueFilterChange = (key: keyof IRevenueReportFilter, value: any) => {
     setRevenueFilters({ ...revenueFilters, [key]: value });
   };

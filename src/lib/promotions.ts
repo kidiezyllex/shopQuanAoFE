@@ -10,8 +10,9 @@ export interface ProductWithDiscount {
 export const calculateProductDiscount = (
   productId: string,
   originalPrice: number,
-  activePromotions: IPromotion[]
+  activePromotions: any[]
 ): ProductWithDiscount => {
+  
   if (!activePromotions || activePromotions.length === 0) {
     return {
       originalPrice,
@@ -23,41 +24,53 @@ export const calculateProductDiscount = (
   const now = new Date();
 
   const applicablePromotions = activePromotions.filter(promotion => {
-    if (promotion.status !== 'HOAT_DONG') {
+    
+    // Check status - handle both 'ACTIVE' and 'HOAT_DONG'
+    if (promotion.status !== 'ACTIVE' && promotion.status !== 'HOAT_DONG') {
       return false;
     }
 
     const startDate = new Date(promotion.startDate);
     const endDate = new Date(promotion.endDate);
     
-    // Create new dates with 7 hours subtracted
-    const newStartDate = new Date(startDate.getTime() - 7 * 60 * 60 * 1000);
-    const newEndDate = new Date(endDate.getTime() - 7 * 60 * 60 * 1000);
-    if (now < newStartDate || now > newEndDate) {
-      return false;
+
+
+    let productIds = [];
+    if (promotion.productIds) {
+      if (typeof promotion.productIds === 'string') {
+        try {
+          productIds = JSON.parse(promotion.productIds);
+        } catch (e) {
+          productIds = [];
+        }
+      } else if (Array.isArray(promotion.productIds)) {
+        productIds = promotion.productIds;
+      }
+    } else if (promotion.products) {
+      productIds = promotion.products;
     }
 
-    if (!promotion.products || promotion.products.length === 0) {
+    if (!productIds || productIds.length === 0) {
       return true;
     }
 
-    const isApplicable = promotion.products.some((p: any) => {
+    const isApplicable = productIds.some((p: any) => {
       let promotionProductId: string;
 
       if (typeof p === 'string') {
         promotionProductId = p;
       } else if (p && typeof p === 'object') {
-        promotionProductId = p.id || p.id;
+        promotionProductId = p.id || p._id || String(p);
       } else {
-        return false;
+        promotionProductId = String(p);
       }
 
-      return promotionProductId === productId;
+      const matches = promotionProductId === productId || promotionProductId === String(productId);
+      return matches;
     });
 
     return isApplicable;
   });
-
   if (applicablePromotions.length === 0) {
     return {
       originalPrice,
@@ -67,16 +80,19 @@ export const calculateProductDiscount = (
   }
 
   const bestPromotion = applicablePromotions.reduce((best, current) => {
-    return current.discountPercent > best.discountPercent ? current : best;
+    const bestDiscount = parseFloat(String(best.discountPercent));
+    const currentDiscount = parseFloat(String(current.discountPercent));
+    return currentDiscount > bestDiscount ? current : best;
   });
 
-  const discountAmount = (originalPrice * bestPromotion.discountPercent) / 100;
+  const discountPercent = parseFloat(String(bestPromotion.discountPercent));
+  const discountAmount = (originalPrice * discountPercent) / 100;
   const discountedPrice = originalPrice - discountAmount;
   
   const result = {
     originalPrice,
     discountedPrice: Math.max(0, Math.round(discountedPrice)),
-    discountPercent: bestPromotion.discountPercent,
+    discountPercent: discountPercent,
     appliedPromotion: bestPromotion,
   };
   
@@ -85,7 +101,7 @@ export const calculateProductDiscount = (
 
 export const applyPromotionsToProducts = (
   products: any[],
-  activePromotions: IPromotion[]
+  activePromotions: any[]
 ): any[] => {
   if (!activePromotions || activePromotions.length === 0) {
     return products;
@@ -104,8 +120,11 @@ export const applyPromotionsToProducts = (
       };
     }
 
+    // Ensure product.id is a string for comparison
+    const productId = String(product.id || product._id);
+
     const discountInfo = calculateProductDiscount(
-      product.id,
+      productId,
       basePrice,
       activePromotions
     );
@@ -137,17 +156,14 @@ export const formatPrice = (price: number): string => {
 /**
  * Check if a promotion is currently active
  */
-export const isPromotionActive = (promotion: IPromotion): boolean => {
-  if (promotion.status !== 'HOAT_DONG') return false;
+export const isPromotionActive = (promotion: any): boolean => {
+  // Handle both 'ACTIVE' and 'HOAT_DONG' status
+  if (promotion.status !== 'ACTIVE' && promotion.status !== 'HOAT_DONG') return false;
 
   const now = new Date();
   
   const startDate = new Date(promotion.startDate);
   const endDate = new Date(promotion.endDate);
-  
-  // Create dates in Vietnam timezone by using toLocaleString
-  const startDateVietnam = new Date(startDate.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
-  const endDateVietnam = new Date(endDate.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
 
-  return now >= startDateVietnam && now <= endDateVietnam;
+  return now >= startDate && now <= endDate;
 }; 

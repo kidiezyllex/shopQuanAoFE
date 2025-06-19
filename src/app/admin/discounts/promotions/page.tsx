@@ -103,11 +103,11 @@ export default function PromotionsPage() {
     const startUTC = new Date(promotion.startDate).getTime();
     const endUTC = new Date(promotion.endDate).getTime();
     
-    if (promotion.status === 'KHONG_HOAT_DONG') {
+    if (promotion.status === 'UNACTIVE') {
       return <Badge variant="destructive">Không hoạt động</Badge>;
     }
 
-    if (promotion.status === 'HOAT_DONG') {
+    if (promotion.status === 'ACTIVE') {
       if (nowUTC < startUTC) {
         return <Badge variant="secondary">Chưa bắt đầu</Badge>;
       }

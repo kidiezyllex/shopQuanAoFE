@@ -299,7 +299,6 @@ export default function POSPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<ApiProduct | null>(null);
   const [selectedApiVariant, setSelectedApiVariant] = useState<ApiVariant | null>(null);
-  console.log(selectedProduct)
 
   // Pending carts store
   const {
@@ -318,7 +317,6 @@ export default function POSPage() {
 
   const activeCart = getActiveCart();
   const cartItems = activeCart?.items || [];
-  console.log(cartItems)
   const appliedDiscount = activeCart?.appliedDiscount || 0;
   const appliedVoucher = activeCart?.appliedVoucher || null;
   const couponCode = activeCart?.couponCode || '';
@@ -443,16 +441,14 @@ export default function POSPage() {
   } = isSearching ? searchQueryHook : productsQuery;
 
   // Get promotions data with stable params
-  const promotionsParams = useMemo(() => ({ status: 'HOAT_DONG' as const }), []);
+  const promotionsParams = useMemo(() => ({ status: 'ACTIVE' as const }), []);
   const { data: promotionsData } = usePromotions(promotionsParams);
-
   // Optimize promotions application - only when data changes
   const dataWithPromotions = useMemo(() => {
     if (!rawData?.data?.products) return rawData;
 
     let products = rawData.data.products;
 
-    // Apply promotions only if promotions data exists and has changed
     if (promotionsData?.data?.promotions?.length > 0) {
       products = applyPromotionsToProducts([...products], promotionsData.data.promotions);
     }
@@ -835,10 +831,6 @@ export default function POSPage() {
         setDiscount(0);
       }
     }
-  };
-
-  const calculateDiscount = () => {
-    return appliedDiscount;
   };
 
   const formatCurrency = (amount: number) => {
