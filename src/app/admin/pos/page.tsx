@@ -240,33 +240,70 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
     };
   }
 
-  return {
-    id: variant.id?.toString() || variant._id?.toString() || '',
-    colorId: variant.color ? {
-      id: variant.color.id?.toString() || variant.colorId?.toString() || '',
+  // Handle color data - check for populated vs non-populated
+  let colorData = undefined;
+  if (variant.color) {
+    // Populated format
+    colorData = {
+      id: variant.color.id?.toString() || '',
       name: variant.color.name || 'N/A',
       code: variant.color.code || '#000000',
       images: variant.color.images || []
-    } : (variant.colorId ? {
-      id: variant.colorId.toString(),
-      name: 'N/A',
-      code: '#000000',
-      images: []
-    } : undefined),
-    sizeId: variant.size ? {
-      id: variant.size.id?.toString() || variant.sizeId?.toString() || '',
+    };
+  } else if (variant.colorId) {
+    // Non-populated format - colorId might be string or object
+    if (typeof variant.colorId === 'object') {
+      colorData = {
+        id: variant.colorId.id?.toString() || '',
+        name: variant.colorId.name || 'N/A',
+        code: variant.colorId.code || '#000000',
+        images: variant.colorId.images || []
+      };
+    } else {
+      colorData = {
+        id: variant.colorId.toString(),
+        name: 'N/A',
+        code: '#000000',
+        images: []
+      };
+    }
+  }
+
+  // Handle size data - check for populated vs non-populated
+  let sizeData = undefined;
+  if (variant.size) {
+    // Populated format
+    sizeData = {
+      id: variant.size.id?.toString() || '',
       name: variant.size.name || (variant.size.value ? getSizeLabel(Number(variant.size.value)) : 'N/A'),
       value: variant.size.value?.toString()
-    } : (variant.sizeId ? {
-      id: variant.sizeId.toString(),
-      name: 'N/A',
-      value: undefined
-    } : undefined),
+    };
+  } else if (variant.sizeId) {
+    // Non-populated format - sizeId might be string or object
+    if (typeof variant.sizeId === 'object') {
+      sizeData = {
+        id: variant.sizeId.id?.toString() || '',
+        name: variant.sizeId.name || (variant.sizeId.value ? getSizeLabel(Number(variant.sizeId.value)) : 'N/A'),
+        value: variant.sizeId.value?.toString()
+      };
+    } else {
+      sizeData = {
+        id: variant.sizeId.toString(),
+        name: 'N/A',
+        value: undefined
+      };
+    }
+  }
+
+  return {
+    id: variant.id?.toString() || variant._id?.toString() || '',
+    colorId: colorData,
+    sizeId: sizeData,
     price: parseFloat(variant.price?.toString() || '0'),
     stock: parseInt(variant.stock?.toString() || '0'),
     images: variant.images?.map((img: any) => typeof img === 'string' ? img : img.imageUrl || img.url) || [],
     sku: variant.sku || '',
-    actualSizeId: variant.size?.id?.toString() || variant.sizeId?.toString() || ''
+    actualSizeId: sizeData?.id || ''
   };
 };
 
@@ -317,6 +354,7 @@ export default function POSPage() {
 
   const activeCart = getActiveCart();
   const cartItems = activeCart?.items || [];
+  console.log(cartItems)
   const appliedDiscount = activeCart?.appliedDiscount || 0;
   const appliedVoucher = activeCart?.appliedVoucher || null;
   const couponCode = activeCart?.couponCode || '';
@@ -590,6 +628,8 @@ export default function POSPage() {
     const convertedProduct = isAlreadyConverted ? product : convertProductToApiProduct(product);
     const convertedVariant = isAlreadyConverted ? variant : convertVariantToApiVariant(variant);
 
+
+
     const cartItemId = `${convertedProduct.id}-${convertedVariant.id}`;
     
     // Apply promotions to get the correct price
@@ -625,7 +665,7 @@ export default function POSPage() {
       variantId: convertedVariant.id,
       name: convertedProduct.name,
       colorName: convertedVariant.colorId?.name || 'N/A',
-      colorCode: convertedVariant.colorId?.code,
+      colorCode: convertedVariant.colorId?.code || '#000000',
       sizeName: convertedVariant.sizeId?.name || 'N/A',
       price: finalPrice,
       originalPrice: originalPrice,
@@ -634,8 +674,8 @@ export default function POSPage() {
       quantity: 1,
       image: getVariantImageUrl(convertedVariant) || '/placeholder.svg',
       stock: convertedVariant.stock,
-      actualColorId: convertedVariant.colorId?.id,
-      actualSizeId: convertedVariant.actualSizeId,
+      actualColorId: convertedVariant.colorId?.id || '',
+      actualSizeId: convertedVariant.sizeId?.id || '',
     };
 
     if (activeCartId) {
