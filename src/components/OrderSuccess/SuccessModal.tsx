@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { mdiCheckCircle } from '@mdi/js';
+import { useNavigate } from 'react-router-dom';
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;

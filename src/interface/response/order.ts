@@ -35,8 +35,53 @@ export interface IOrderItem {
   // Add other necessary fields if IOrderItem is used elsewhere or has more props
 }
 
+export interface IProductVariant {
+  id: number;
+  productId: number;
+  colorId: number;
+  sizeId: number;
+  price: string;
+  stock: number;
+  createdAt: string;
+  updatedAt: string;
+  product: {
+    id: number;
+    code: string;
+    name: string;
+    description: string;
+    weight: string;
+    status: string;
+    brand: {
+      id: number;
+      name: string;
+    };
+    category: {
+      id: number;
+      name: string;
+    };
+    material: {
+      id: number;
+      name: string;
+    };
+  };
+  color: {
+    id: number;
+    name: string;
+    code: string;
+  };
+  size: {
+    id: number;
+    value: string;
+  };
+  images: Array<{
+    id: number;
+    imageUrl: string;
+  }>;
+}
+
 export interface IPopulatedOrderItem extends Omit<IOrderItem, 'product'> {
-  product: IOrderProduct;
+  product?: IOrderProduct;
+  productVariant?: IProductVariant;
 }
 
 // Define IShippingAddress locally for IOrder

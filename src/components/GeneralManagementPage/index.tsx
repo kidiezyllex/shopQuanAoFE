@@ -405,16 +405,20 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
                   <CardContent className="space-y-4 text-sm">
                     <div className="flex items-start">
                       <span className="text-muted-foreground w-32">Người nhận:</span>
-                      <span className="font-medium">{orderData.data.shippingAddress.name}</span>
+                      <span className="font-medium">
+                        {(orderData.data as any).shippingName || orderData.data.customer?.fullName || 'Chưa cập nhật'}
+                      </span>
                     </div>
                     <div className="flex items-start">
                       <span className="text-muted-foreground w-32">Số điện thoại:</span>
-                      <span>{orderData.data.shippingAddress.phoneNumber}</span>
+                      <span>
+                        {(orderData.data as any).shippingPhoneNumber || orderData.data.customer?.phoneNumber || 'Chưa cập nhật'}
+                      </span>
                     </div>
                     <div className="flex items-start">
                       <span className="text-muted-foreground w-32">Địa chỉ:</span>
                       <span>
-                        {orderData.data.shippingAddress.specificAddress}
+                        {(orderData.data as any).shippingSpecificAddress || 'Chưa cập nhật địa chỉ giao hàng'}
                       </span>
                     </div>
                   </CardContent>
@@ -471,26 +475,20 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
                     </TableHeader>
                     <TableBody>
                       {orderData.data.items.map((item, index) => {
-                        const product = item.product as any;
-                        const variant = product?.variants?.[0];
-                        const imageUrl = variant?.images?.[0];
+                        const productVariant = item.productVariant as any;
+                        const product = productVariant?.product;
+                        const imageUrl = productVariant?.images?.[0]?.imageUrl;
+                        const color = productVariant?.color;
+                        const size = productVariant?.size;
 
                         return (
                           <TableRow key={index}>
                             <TableCell>
-                              {imageUrl ? (
-                                <img
-                                  src={imageUrl}
-                                  alt={product?.name || ''}
-                                  className="w-16 h-16 object-contain rounded-md"
-                                />
-                              ) : (
-                                <img
-                                  src={"/images/white-image.png"}
-                                  alt={product?.name || ''}
-                                  className="w-16 h-16 object-contain rounded-md"
-                                />
-                              )}
+                              <img
+                                src={imageUrl || "/images/white-image.png"}
+                                alt={product?.name || ''}
+                                className="w-16 h-16 object-contain rounded-md"
+                              />
                             </TableCell>
                             <TableCell className="font-medium">
                               <div>
@@ -503,11 +501,21 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
                                     Thương hiệu: {product.brand.name}
                                   </div>
                                 )}
+                                {color && (
+                                  <div className="text-xs text-muted-foreground">
+                                    Màu: {color.name}
+                                  </div>
+                                )}
+                                {size && (
+                                  <div className="text-xs text-muted-foreground">
+                                    Size: {size.value}
+                                  </div>
+                                )}
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">{formatPrice(item.price)}</TableCell>
+                            <TableCell className="text-right">{formatPrice(parseFloat(item.price.toString()))}</TableCell>
                             <TableCell className="text-center">{item.quantity}</TableCell>
-                            <TableCell className="text-right font-medium">{formatPrice(item.price * item.quantity)}</TableCell>
+                            <TableCell className="text-right font-medium">{formatPrice(parseFloat(item.price.toString()) * item.quantity)}</TableCell>
                           </TableRow>
                         );
                       })}
@@ -517,21 +525,21 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
                   <div className="mt-6 space-y-4 border-t pt-4">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Tạm tính:</span>
-                      <span>{formatPrice(orderData.data.subTotal)}</span>
+                      <span>{formatPrice(parseFloat(orderData.data.subTotal.toString()))}</span>
                     </div>
-                    {orderData.data.discount > 0 && (
+                    {parseFloat(orderData.data.discount.toString()) > 0 && (
                       <div className="flex justify-between items-center text-green-600">
                         <span>Giảm giá:</span>
-                        <span>-{formatPrice(orderData.data.discount)}</span>
+                        <span>-{formatPrice(parseFloat(orderData.data.discount.toString()))}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Phí vận chuyển:</span>
-                      <span>{formatPrice((orderData.data.total - orderData.data.subTotal + orderData.data.discount) || 0)}</span>
+                      <span>{formatPrice((parseFloat(orderData.data.total.toString()) - parseFloat(orderData.data.subTotal.toString()) + parseFloat(orderData.data.discount.toString())) || 0)}</span>
                     </div>
                     <div className="flex justify-between items-center text-lg font-bold border-t pt-3">
                       <span>Tổng tiền:</span>
-                      <span className="text-primary">{formatPrice(orderData.data.total)}</span>
+                      <span className="text-primary">{formatPrice(parseFloat(orderData.data.total.toString()))}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -653,20 +661,18 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
   const order = displayOrder || returnableOrder;
 
   const handleAddItem = (item: any) => {
-    if (!item.product) return;
-
-    const product = item.product as any;
-    const variant = product?.variants?.[0];
+    const productVariant = item.productVariant as any;
+    const product = productVariant?.product;
     
-    if (!variant) {
-      toast.error("Không thể xác định thông tin variant của sản phẩm");
+    if (!product || !productVariant) {
+      toast.error("Không thể xác định thông tin sản phẩm");
       return;
     }
 
     const existingIndex = selectedItems.findIndex(
       si => si.product === product.id && 
-           si.variant.colorId === variant.colorId && 
-           si.variant.sizeId === variant.sizeId
+           si.variant.colorId === productVariant.colorId && 
+           si.variant.sizeId === productVariant.sizeId
     );
 
     if (existingIndex >= 0) {
@@ -677,10 +683,10 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
       }
     } else {
       setSelectedItems([...selectedItems, {
-        product: product.id, // This is already correct - using product.id
+        product: product.id,
         variant: {
-          colorId: variant.colorId,
-          sizeId: variant.sizeId
+          colorId: productVariant.colorId,
+          sizeId: productVariant.sizeId
         },
         quantity: 1,
         maxQuantity: item.quantity,
@@ -747,9 +753,11 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
             <h4 className="font-medium mb-3">Sản phẩm trong đơn hàng:</h4>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {order.items.map((item, index) => {
-                const product = item.product as any;
-                const variant = product?.variants?.[0];
-                const imageUrl = variant?.images?.[0];
+                const productVariant = item.productVariant as any;
+                const product = productVariant?.product;
+                const imageUrl = productVariant?.images?.[0]?.imageUrl;
+                const color = productVariant?.color;
+                const size = productVariant?.size;
                 
                 if (!product) {
                   return (
@@ -795,6 +803,16 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
                         {product?.code && (
                           <p className="text-xs text-muted-foreground">
                             Mã: {product.code}
+                          </p>
+                        )}
+                        {color && (
+                          <p className="text-xs text-muted-foreground">
+                            Màu: {color.name}
+                          </p>
+                        )}
+                        {size && (
+                          <p className="text-xs text-muted-foreground">
+                            Size: {size.value}
                           </p>
                         )}
                       </div>
@@ -971,9 +989,12 @@ const ReturnDetailDialog: React.FC<ReturnDetailDialogProps> = ({
                 <CardContent>
                   <div className="space-y-3">
                     {returnData.data.items.map((item: any, index) => {
-                      const product = item.product as any;
-                      const variant = product?.variants?.[0];
-                      const imageUrl = variant?.images?.[0];
+                      // Check if it's the new structure with productVariant or old structure with product
+                      const productVariant = item.productVariant as any;
+                      const product = productVariant?.product || item.product;
+                      const imageUrl = productVariant?.images?.[0]?.imageUrl || product?.variants?.[0]?.images?.[0];
+                      const color = productVariant?.color;
+                      const size = productVariant?.size;
 
                       return (
                         <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
@@ -990,6 +1011,16 @@ const ReturnDetailDialog: React.FC<ReturnDetailDialogProps> = ({
                             {product?.code && (
                               <p className="text-xs text-muted-foreground">
                                 Mã: {product.code}
+                              </p>
+                            )}
+                            {color && (
+                              <p className="text-xs text-muted-foreground">
+                                Màu: {color.name}
+                              </p>
+                            )}
+                            {size && (
+                              <p className="text-xs text-muted-foreground">
+                                Size: {size.value}
                               </p>
                             )}
                             {item.reason && (
@@ -1920,9 +1951,9 @@ export default function GeneralManagementPage() {
                                 <TableCell className="px-3 py-2">
                                   <div className="flex gap-1 flex-wrap">
                                     {order.items.slice(0, 3).map((item, index) => {
-                                      const product = item.product as any;
-                                      const variant = product?.variants?.[0];
-                                      const imageUrl = variant?.images?.[0];
+                                      const productVariant = item.productVariant as any;
+                                      const product = productVariant?.product;
+                                      const imageUrl = productVariant?.images?.[0]?.imageUrl;
                                       
                                       return (
                                         <div key={index} className="relative">
@@ -1946,7 +1977,7 @@ export default function GeneralManagementPage() {
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-right font-medium px-3 py-2 whitespace-nowrap text-maintext">
-                                  {formatPrice(order.total)}
+                                  {formatPrice(parseFloat(order.total.toString()))}
                                 </TableCell>
                                 <TableCell className="px-3 py-2 ">
                                   <OrderStatusBadge status={order.orderStatus} />

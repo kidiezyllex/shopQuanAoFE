@@ -399,9 +399,9 @@ export default function ShippingPage() {
       
       const orderData = {
         orderId: `DH${new Date().getFullYear()}${Date.now().toString().slice(-6)}`,
-        customer: user?.id || '000000000000000000000000',
+        customerId: user?.id || '000000000000000000000000',
         items: items.map(item => ({
-          product: item.productId || item.id, // Use productId if available, fallback to id
+          product: item.productId +"" || item.id +"",
           variant: {
             colorId: item.colorId,
             sizeId: item.sizeId
@@ -484,15 +484,11 @@ export default function ShippingPage() {
       const response = await createOrderMutation.mutateAsync(orderData as any);
       if (response && response.success && response.data) {
         clearCart();
-        // Clear voucher after successful order
         if (appliedVoucher) {
           removeVoucher();
         }
         toast.success('Thanh toán và đặt hàng thành công!');
-        
-        // Gửi email xác nhận đơn hàng
         await sendOrderConfirmationEmail(response.data.id, response.data, formValues.email);
-        
         setOrderResult(response.data);
         setShowSuccessModal(true);
       } else {

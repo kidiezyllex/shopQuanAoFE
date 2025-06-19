@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react"
+"use client"
+
+import { useState, useEffect, useMemo } from "react"
  
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -10,6 +12,7 @@ import { mdiCartOutline, mdiHeartOutline, mdiEye, mdiFilterOutline, mdiClose, md
 import { useProducts, useSearchProducts } from "@/hooks/product"
 import { usePromotions } from "@/hooks/promotion"
 import { applyPromotionsToProducts, calculateProductDiscount } from "@/lib/promotions"
+import { getSizeLabel } from "@/utils/sizeMapping"
 import type { IProductFilter } from "@/interface/request/product"
 import {
   Breadcrumb,
@@ -50,12 +53,11 @@ interface ProductFiltersProps {
   filters: IProductFilter
   onChange: (filters: Partial<IProductFilter>) => void
 }
-
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price)
 }
 
-const ProductsPage: React.FC = () => {
+export default function ProductsPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [pagination, setPagination] = useState({
     page: 1,
@@ -121,7 +123,7 @@ const ProductsPage: React.FC = () => {
     if (filters.color) {
       filteredProducts = filteredProducts.filter((product) =>
         product.variants.some((variant: any) => {
-          const colorId = typeof variant.colorId === "object" ? variant.colorId.id : variant.colorId
+          const colorId = variant.color?.id || variant.colorId
           return colorId === filters.color
         }),
       )
@@ -130,7 +132,7 @@ const ProductsPage: React.FC = () => {
     if (filters.size) {
       filteredProducts = filteredProducts.filter((product) =>
         product.variants.some((variant: any) => {
-          const sizeId = typeof variant.sizeId === "object" ? variant.sizeId.id : variant.sizeId
+          const sizeId = variant.size?.id || variant.sizeId
           return sizeId === filters.size
         }),
       )
@@ -199,6 +201,7 @@ const ProductsPage: React.FC = () => {
       })
     }
 
+    // Giữ nguyên thông tin phân trang từ API
     return {
       ...rawData,
       data: {
@@ -206,12 +209,16 @@ const ProductsPage: React.FC = () => {
         products: filteredProducts,
       },
     }
-  }, [rawData, filters, sortOption, promotionsData])
+  }, [rawData, filters, sortOption, pagination, promotionsData])
 
   const handleFilterChange = (updatedFilters: Partial<IProductFilter>) => {
     setFilters((prev) => ({
       ...prev,
       ...updatedFilters,
+    }))
+    setPagination((prev) => ({
+      ...prev,
+      page: 1,
     }))
   }
 
@@ -227,400 +234,896 @@ const ProductsPage: React.FC = () => {
   }
 
   const handleAddToCart = (product: any) => {
-    // Find the first available variant
-    const availableVariant = product.variants.find((variant: any) => variant.stock > 0)
-    
-    if (!availableVariant) {
-      toast.error("Sản phẩm đã hết hàng")
-      return
-    }
+    if (!product.variants?.[0]) return;
 
-    // Calculate discount from promotions data if available
-    let price = availableVariant.price;
-    let discountPercent = 0;
+    const firstVariant = product.variants[0];
     
+    if (firstVariant.stock === 0) {
+      toast.error('Sản phẩm đã hết hàng');
+      return;
+    }
+    
+    // Calculate discount from promotions data if available
+    let finalPrice = firstVariant.price;
+    let originalPrice = undefined;
+    let discountPercent = 0;
+    let hasDiscount = false;
+
+    // Check if promotions data is available and calculate discount
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
         product.id,
-        price,
+        firstVariant.price,
         promotionsData.data.promotions
       );
       
       if (discount.discountPercent > 0) {
-        price = discount.discountedPrice;
+        finalPrice = discount.discountedPrice;
+        originalPrice = discount.originalPrice;
         discountPercent = discount.discountPercent;
+        hasDiscount = true;
       }
     }
 
     const cartItem = {
-      id: `${product.id}-${availableVariant.id}`,
+      id: firstVariant.id,
       productId: product.id,
-      variantId: availableVariant.id,
       name: product.name,
-      price: price,
-      originalPrice: availableVariant.price,
+      price: finalPrice,
+      originalPrice: originalPrice,
       discountPercent: discountPercent,
+      hasDiscount: hasDiscount,
+      image: firstVariant.images?.[0]?.imageUrl || firstVariant.images?.[0] || '',
       quantity: 1,
-      image: product.images?.[0] || "/placeholder-image.jpg",
-      color: typeof availableVariant.colorId === "object" ? availableVariant.colorId.name : "N/A",
-      size: typeof availableVariant.sizeId === "object" ? availableVariant.sizeId.name : "N/A",
-      stock: availableVariant.stock,
-    }
+      slug: product.code,
+      brand: typeof product.brand === 'string' ? product.brand : product.brand.name,
+      size: firstVariant.size?.code || firstVariant.size?.name,
+      colors: [firstVariant.color?.name || 'Default'],
+      stock: firstVariant.stock,
+      // New variant information
+      colorId: firstVariant.color?.id || firstVariant.colorId || '',
+      sizeId: firstVariant.size?.id || firstVariant.sizeId || '',
+      colorName: firstVariant.color?.name || 'Default',
+      sizeName: firstVariant.size?.value ? getSizeLabel(firstVariant.size.value) : (firstVariant.size?.code || firstVariant.size?.name || '')
+    };
 
-    addToCart(cartItem, 1)
-    toast.success(`Đã thêm ${product.name} vào giỏ hàng`)
-  }
+    addToCart(cartItem, 1);
+    toast.success('Đã thêm sản phẩm vào giỏ hàng');
+  };
 
   const handleQuickView = (product: any) => {
+    window.location.href = `/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`
   }
 
   const handleAddToWishlist = (product: any) => {
-    // Implement wishlist functionality
-    toast.success(`Đã thêm ${product.name} vào danh sách yêu thích`)
+    toast.success("Đã thêm sản phẩm vào danh sách yêu thích")
   }
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <Card key={index} className="overflow-hidden">
-              <Skeleton className="h-64 w-full" />
-              <div className="p-4 space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
+  const handleApplyVoucher = (voucherData: { code: string; discount: number; voucherId: string }) => {
+    setAppliedVoucher(voucherData)
+    toast.success(`Đã áp dụng mã giảm giá: ${voucherData.code}`)
   }
 
-  if (isError) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Có lỗi xảy ra</h2>
-          <p className="text-gray-600">Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.</p>
-        </div>
-      </div>
-    )
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null)
+    toast.info("Đã xóa mã giảm giá")
   }
 
-  const products = data?.data?.products || []
-  const totalPages = Math.ceil((data?.data?.pagination?.totalItems || 0) / pagination.limit)
+  const filteredProducts = useMemo(() => {
+    if (!data || !data.data || !data.data.products) return []
+    return data.data.products
+  }, [data])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Trang chủ</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Sản phẩm</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </div>
+    <div className="container mx-auto py-8 relative">
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/" className="!text-maintext hover:!text-maintext">
+              Trang chủ
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="!text-maintext hover:!text-maintext">Tất cả sản phẩm</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="flex flex-col lg:flex-row gap-4 items-start">
+        {/* Filters - Mobile */}
+        <AnimatePresence>
+          {isFilterOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="lg:hidden w-full"
+            >
+              <div className="bg-white rounded-[6px] shadow-sm border p-4 mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="font-medium">Bộ lọc sản phẩm</h2>
+                  <Button variant="ghost" size="sm" onClick={toggleFilter}>
+                    <Icon path={mdiClose} size={0.7} />
+                  </Button>
+                </div>
+                <ProductFilters filters={filters} onChange={handleFilterChange} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Search and Filter Bar */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          <div className="flex-1">
-            <div className="relative">
-              <Icon path={mdiMagnify} size={1} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+        <div className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 ">
+          <div className="bg-white rounded-[6px] shadow-sm border p-4 sticky top-20">
+            <h2 className="font-medium mb-4">Bộ lọc sản phẩm</h2>
+            <ProductFilters filters={filters} onChange={handleFilterChange} />
+
+            {data && data.data.products && data.data.products.length > 0 && (
+              <VoucherForm
+                orderValue={data.data.products.reduce((sum, product) => sum + (product.variants[0]?.price || 0), 0)}
+                onApplyVoucher={handleApplyVoucher}
+                onRemoveVoucher={handleRemoveVoucher}
+                appliedVoucher={appliedVoucher}
               />
-            </div>
+            )}
           </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={toggleFilter} className="lg:hidden">
-              <Icon path={mdiFilterOutline} size={1} className="mr-2" />
-              Bộ lọc
-            </Button>
-            
-            <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="w-48">
+        </div>
+
+        {/* Products */}
+        <div className="w-full lg:w-3/4 xl:w-4/5">
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+            <div className="flex gap-2 flex-1">
+              <Button
+                variant="outline"
+                onClick={toggleFilter}
+                className="lg:hidden flex items-center gap-2"
+              >
+                <Icon path={mdiFilterOutline} size={0.7} />
+                Bộ lọc
+              </Button>
+              <div className="relative flex-1">
+                <Icon
+                  path={mdiMagnify}
+                  size={0.7}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                />
+                <Input
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            <Select defaultValue="default" value={sortOption} onValueChange={setSortOption}>
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Sắp xếp theo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="default">Mặc định</SelectItem>
-                <SelectItem value="price-asc">Giá tăng dần</SelectItem>
-                <SelectItem value="price-desc">Giá giảm dần</SelectItem>
+                <SelectItem value="price-asc">Giá: Thấp đến cao</SelectItem>
+                <SelectItem value="price-desc">Giá: Cao đến thấp</SelectItem>
                 <SelectItem value="newest">Mới nhất</SelectItem>
-                <SelectItem value="popularity">Phổ biến</SelectItem>
+                <SelectItem value="popularity">Phổ biến nhất</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        <div className="flex gap-8">
-          {/* Filters Sidebar */}
-          <div className={`lg:block ${isFilterOpen ? 'block' : 'hidden'} lg:w-64 w-full`}>
-            <ProductFilters filters={filters} onChange={handleFilterChange} />
-          </div>
-
-          {/* Products Grid */}
-          <div className="flex-1">
-            {products.length === 0 ? (
-              <div className="text-center py-12">
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">Không tìm thấy sản phẩm</h3>
-                <p className="text-gray-500">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(9)].map((_, index) => (
+                <Card key={index} className="overflow-hidden h-full">
+                  <div className="aspect-square w-full">
+                    <Skeleton className="h-full w-full" />
+                  </div>
+                  <div className="p-4 space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : isError ? (
+            <div className="text-center py-12">
+              <p className="text-red-500 mb-4">Đã xảy ra lỗi khi tải dữ liệu</p>
+              <Button onClick={() => setPagination({ ...pagination })}>Thử lại</Button>
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-maintext font-semibold">Tìm thấy <span className="text-primary text-lg">{filteredProducts.length}</span> sản phẩm</p>
               </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                  {products.map((product: any) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      promotionsData={promotionsData}
-                      onAddToCart={() => handleAddToCart(product)}
-                      onQuickView={() => handleQuickView(product)}
-                      onAddToWishlist={() => handleAddToWishlist(product)}
-                    />
-                  ))}
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    promotionsData={promotionsData}
+                    onAddToCart={() => handleAddToCart(product)}
+                    onQuickView={() => handleQuickView(product)}
+                    onAddToWishlist={() => handleAddToWishlist(product)}
+                  />
+                ))}
+              </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            if (pagination.page > 1) {
-                              handlePageChange(pagination.page - 1)
-                            }
-                          }}
-                        />
-                      </PaginationItem>
-                      
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            href="#"
-                            isActive={page === pagination.page}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handlePageChange(page)
-                            }}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            if (pagination.page < totalPages) {
-                              handlePageChange(pagination.page + 1)
-                            }
-                          }}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </>
-            )}
-          </div>
+              {/* Phân trang */}
+              <div className="flex justify-center mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationPrevious
+                      href="#"
+                      disabled={(data?.data?.pagination as any)?.currentPage <= 1}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if ((data?.data?.pagination as any)?.currentPage > 1)
+                          handlePageChange((data?.data?.pagination as any)?.currentPage - 1)
+                      }}
+                    />
+                    {(() => {
+                      const pages = []
+                      const totalPages = (data?.data?.pagination as any)?.totalPages || 1
+                      const currentPage = (data?.data?.pagination as any)?.currentPage || 1
+
+                      // Hiển thị trang đầu
+                      if (totalPages > 0) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === 1}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(1)
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>,
+                        )
+                      }
+
+                      // Hiển thị dấu ... nếu cần
+                      if (currentPage > 3) {
+                        pages.push(
+                          <PaginationItem key="start-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        )
+                      }
+
+                      // Hiển thị các trang gần currentPage
+                      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                        if (i !== 1 && i !== totalPages) {
+                          pages.push(
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === i}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  handlePageChange(i)
+                                }}
+                              >
+                                {i}
+                              </PaginationLink>
+                            </PaginationItem>,
+                          )
+                        }
+                      }
+
+                      if (currentPage < totalPages - 2) {
+                        pages.push(
+                          <PaginationItem key="end-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        )
+                      }
+
+                      if (totalPages > 1) {
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === totalPages}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(totalPages)
+                              }}
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>,
+                        )
+                      }
+
+                      return pages
+                    })()}
+                    <PaginationNext
+                      href="#"
+                      disabled={
+                        (data?.data?.pagination as any)?.currentPage >= (data?.data?.pagination?.totalPages || 1)
+                      }
+                      onClick={(e) => {
+                        e.preventDefault()
+                        const totalPages = data?.data?.pagination?.totalPages || 1
+                        const currentPage = data?.data?.pagination?.currentPage || 1
+                        if (currentPage < totalPages) handlePageChange(currentPage + 1)
+                      }}
+                    />
+                  </PaginationContent>
+                </Pagination>
+              </div>
+
+              <div className="lg:hidden mt-8 bg-white rounded-[6px] shadow-sm border p-4">
+                <VoucherForm
+                  orderValue={filteredProducts.reduce((sum, product) => sum + (product.variants[0]?.price || 0), 0)}
+                  onApplyVoucher={handleApplyVoucher}
+                  onRemoveVoucher={handleRemoveVoucher}
+                  appliedVoucher={appliedVoucher}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-maintext mb-4">Không tìm thấy sản phẩm nào</p>
+              {(searchQuery || Object.keys(filters).length > 0) && (
+                <Button
+                  onClick={() => {
+                    setSearchQuery("")
+                    setFilters({})
+                  }}
+                >
+                  Xóa bộ lọc
+                </Button>
+              )}
+            </div>
+          )}
         </div>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-50 shadow-lg rounded-full bg-primary p-2 hover:bg-primary/80 transition-all duration-300">
+        <CartIcon className="text-white" />
       </div>
     </div>
   )
 }
 
-// Product Card Component
 const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddToWishlist }: ProductCardProps & { promotionsData?: any }) => {
   const [isHovered, setIsHovered] = useState(false)
-  
-  // Calculate discount from promotions data if available
-  const basePrice = product.variants[0]?.price || 0;
-  let finalPrice = basePrice;
-  let discountPercent = 0;
-  
-  if (promotionsData?.data?.promotions) {
-    const discount = calculateProductDiscount(
-      product.id,
-      basePrice,
-      promotionsData.data.promotions
-    );
-    
-    if (discount.discountPercent > 0) {
-      finalPrice = discount.discountedPrice;
-      discountPercent = discount.discountPercent;
-    }
-  }
-
-  const isOutOfStock = product.variants.every((variant: any) => variant.stock === 0)
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      transition={{ duration: 0.5 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
     >
-      <Card className="overflow-hidden group hover:shadow-lg transition-shadow duration-300 relative">
-        {discountPercent > 0 && (
-          <div className="absolute top-2 left-2 z-10">
-            <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
-              <Icon path={mdiPercent} size={0.5} className="mr-1" />
-              -{discountPercent}%
-            </div>
-          </div>
-        )}
-        
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-            <span className="text-white font-bold text-lg">Hết hàng</span>
-          </div>
-        )}
+      <Card className="group overflow-visible border rounded-lg hover:shadow-2xl shadow-lg transition-all duration-500 h-full flex flex-col transform bg-white relative backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
 
-        <div className="relative overflow-hidden">
-          <img
-            src={checkImageUrl(product.images?.[0]) || "/placeholder-image.jpg"}
-            alt={product.name}
-            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          
-          <AnimatePresence>
-            {isHovered && (
+        <div className="relative overflow-visible bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl">
+          <a href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`} className="block">
+            <div className="aspect-square overflow-visible relative flex items-center justify-center">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"
+                className="w-full h-full relative z-20"
               >
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={onQuickView}
-                    className="rounded-full p-2"
-                  >
-                    <Icon path={mdiEye} size={0.8} />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={onAddToWishlist}
-                    className="rounded-full p-2"
-                  >
-                    <Icon path={mdiHeartOutline} size={0.8} />
-                  </Button>
-                </div>
+                <img
+                  src={checkImageUrl(product.variants[0]?.images?.[0]?.imageUrl || product.variants[0]?.images?.[0]) || "/placeholder.svg"}
+                  alt={product.name}
+                  className="object-contain w-full h-full drop-shadow-2xl filter group-hover:brightness-110 transition-all duration-500"
+                />
               </motion.div>
-            )}
-          </AnimatePresence>
+            </div>
+          </a>
+
+          {/* Enhanced badges */}
+          <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
+            {(() => {
+              if (promotionsData?.data?.promotions && product.variants?.[0]) {
+                const discount = calculateProductDiscount(
+                  product.id,
+                  product.variants[0].price,
+                  promotionsData.data.promotions
+                );
+                
+                if (discount.discountPercent > 0) {
+                  return (
+                    <motion.div
+                      initial={{ scale: 0, rotate: 180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="bg-gradient-to-r from-green-500 via-emerald-500 to-lime-500 text-white text-xs font-bold px-3 rounded-full shadow-xl border border-white/50 backdrop-blur-sm animate-pulse flex-shrink-0 w-fit flex items-center justify-center gap-1"
+                    >
+                      💥
+                      <span className="text-base">-{discount.discountPercent}%</span>
+                    </motion.div>
+                  );
+                }
+              }
+              return null;
+            })()}
+            {/* Stock badge */}
+            {(() => {
+              const totalStock = product.variants.reduce((sum: number, variant: any) => sum + (variant.stock || 0), 0);
+              if (totalStock === 0) {
+                return (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-xl border-2 border-white/50 backdrop-blur-sm"
+                  >
+                    Hết hàng
+                  </motion.div>
+                );
+              } else if (totalStock <= 5) {
+                return (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-xl border-2 border-white/50 backdrop-blur-sm"
+                  >
+                    Sắp hết
+                  </motion.div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+
+          {/* Enhanced quick action buttons */}
+          <motion.div
+            className="absolute right-2 top-2 transform -translate-y-1/2 flex flex-col gap-4 z-50"
+            initial={{ x: 60, opacity: 0 }}
+            animate={{
+              x: isHovered ? 0 : 60,
+              opacity: isHovered ? 1 : 0,
+            }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full h-10 w-10 bg-white/90 backdrop-blur-md hover:!bg-primary hover:text-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 group/btn"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onAddToCart()
+                }}
+                aria-label="Thêm vào giỏ hàng"
+              >
+                <Icon path={mdiCartOutline} size={0.7} className="group-hover/btn:animate-bounce" />
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full h-10 w-10 bg-white/90 backdrop-blur-md hover:!bg-pink-500 hover:text-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 group/btn"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onAddToWishlist()
+                }}
+                aria-label="Yêu thích"
+              >
+                <Icon path={mdiHeartOutline} size={0.7} className="group-hover/btn:animate-pulse" />
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full h-10 w-10 bg-white/90 backdrop-blur-md hover:!bg-blue-500 hover:text-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 group/btn"
+                onClick={(e) => {
+                  e.preventDefault()
+                  onQuickView()
+                }}
+                aria-label="Xem nhanh"
+              >
+                <Icon path={mdiEye} size={0.7} className="group-hover/btn:animate-ping" />
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
 
-        <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2">{product.name}</h3>
-          
-          <div className="flex items-center gap-2 mb-3">
-            {discountPercent > 0 ? (
-              <>
-                <span className="text-lg font-bold text-red-600">{formatPrice(finalPrice)}</span>
-                <span className="text-sm text-gray-500 line-through">{formatPrice(basePrice)}</span>
-              </>
-            ) : (
-              <span className="text-lg font-bold text-gray-900">{formatPrice(finalPrice)}</span>
+        <div className="p-4 flex flex-col flex-grow bg-gradient-to-b from-white via-gray-50/30 to-white border-t border-gray-100/50 rounded-b-2xl relative">
+          <div className="text-xs text-primary/80 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-pink-400 animate-pulse"></div>
+            <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent">
+              {typeof product.brand === "string" ? product.brand : product.brand.name}
+            </span>
+          </div>
+
+          <a
+            href={`/products/${product.name.toLowerCase().replace(/\s+/g, "-")}-${product.id}`}
+            className="hover:text-primary transition-colors group/link"
+          >
+            <h3 className="font-bold text-base mb-2 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
+              {product.name}
+            </h3>
+          </a>
+
+          <div>
+            <div className="flex items-center justify-between">
+              <motion.div
+                className="font-extrabold text-lg text-active"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                {(() => {
+                  // Calculate discount from promotions data if available
+                  if (promotionsData?.data?.promotions) {
+                    const discount = calculateProductDiscount(
+                      product.id,
+                      product.variants[0].price,
+                      promotionsData.data.promotions
+                    );
+                    
+                    if (discount.discountPercent > 0) {
+                      return formatPrice(discount.discountedPrice);
+                    }
+                  }
+                  
+                  return formatPrice(product.variants[0]?.price || 0);
+                })()}
+              </motion.div>
+              {(() => {
+                if (promotionsData?.data?.promotions) {
+                  const discount = calculateProductDiscount(
+                    product.id,
+                    product.variants[0].price,
+                    promotionsData.data.promotions
+                  );
+                  
+                  if (discount.discountPercent > 0) {
+                    return (
+                      <div className="text-xs text-maintext line-through font-medium bg-gray-100 px-2 py-1 rounded-sm italic">
+                        {formatPrice(discount.originalPrice)}
+                      </div>
+                    );
+                  }
+                }
+                return null;
+              })()}
+            </div>
+
+            {product.variants.length > 0 && (
+              <div className="flex flex-col gap-1 items-start justify-start mt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-maintext/70 font-semibold">Màu sắc:</span>
+                  <div className="flex gap-1 text-sm items-center">
+                    {Array.from(
+                      new Set(
+                        product.variants.map((v: any) => v.color?.id || v.colorId),
+                      ),
+                    )
+                      .slice(0, 4)
+                      .map((colorId, index: number) => {
+                        const variant = product.variants.find(
+                          (v: any) => (v.color?.id || v.colorId) === colorId,
+                        )
+                        const color = variant?.color || { code: "#000000", name: "Unknown" }
+
+                        return (
+                          <motion.div
+                            key={index}
+                            className="w-4 h-4 flex-shrink-0 rounded-full border-2 border-white shadow-lg ring-2 ring-gray-200 cursor-pointer"
+                            style={{ backgroundColor: color.code }}
+                            title={color.name}
+                            whileHover={{ scale: 1.3, rotate: 360 }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        )
+                      })}
+
+                    {Array.from(
+                      new Set(
+                        product.variants.map((v: any) => v.color?.id || v.colorId),
+                      ),
+                    ).length > 4 && (
+                        <motion.span
+                          className="text-xs border text-maintext ml-1 bg-gray-100 px-3 py-0.5 rounded-full font-medium"
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          +
+                          {Array.from(
+                            new Set(
+                              product.variants.map((v: any) => v.color?.id || v.colorId),
+                            ),
+                          ).length - 4}
+                        </motion.span>
+                      )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-maintext/70 font-semibold">Kích thước:</span>
+                  <div className="flex gap-1 text-maintext text-sm">
+                    {Array.from(
+                      new Set(
+                        product.variants.map((v: any) =>
+                          v.size?.value ? getSizeLabel(v.size.value) : (v.size?.code || v.size?.name || "Unknown")
+                        )
+                      )
+                    ).join(", ")}
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              {product.variants.reduce((total: number, variant: any) => total + variant.stock, 0)} có sẵn
-            </div>
-            
-            <Button
-              size="sm"
-              onClick={onAddToCart}
-              disabled={isOutOfStock}
-              className="flex items-center gap-1"
-            >
-              <Icon path={mdiCartOutline} size={0.7} />
-              Thêm
-            </Button>
-          </div>
+          {/* Decorative bottom border */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
       </Card>
     </motion.div>
   )
 }
-
-// Product Filters Component
 const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
-  // This would need to be implemented with actual filter data
-  // For now, returning a placeholder
-  return (
-    <Card className="p-4">
-      <h3 className="font-semibold mb-4">Bộ lọc</h3>
+  const productsQuery = useProducts({ limit: 100, status: "HOAT_DONG" })
+  const products = productsQuery.data?.data.products || []
+  const [selectedBrand, setSelectedBrand] = useState<string | undefined>(
+    filters.brands ? (Array.isArray(filters.brands) ? filters.brands[0] : filters.brands) : undefined,
+  )
+
+  useEffect(() => {
+    if (filters.brands) {
+      setSelectedBrand(Array.isArray(filters.brands) ? filters.brands[0] : filters.brands)
+    } else {
+      setSelectedBrand(undefined)
+    }
+  }, [filters.brands])
+
+  const handleBrandChange = (brandId: string) => {
+    if (selectedBrand === brandId) {
+      setSelectedBrand(undefined)
+      onChange({ brands: undefined })
+    } else {
+      setSelectedBrand(brandId)
+      onChange({ brands: brandId })
+    }
+  }
+
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
+    filters.categories ? (Array.isArray(filters.categories) ? filters.categories[0] : filters.categories) : undefined,
+  )
+
+  useEffect(() => {
+    if (filters.categories) {
+      setSelectedCategory(Array.isArray(filters.categories) ? filters.categories[0] : filters.categories)
+    } else {
+      setSelectedCategory(undefined)
+    }
+  }, [filters.categories])
+
+  const handleCategoryChange = (categoryId: string) => {
+    if (selectedCategory === categoryId) {
+      setSelectedCategory(undefined)
+      onChange({ categories: undefined })
+    } else {
+      setSelectedCategory(categoryId)
+      onChange({ categories: categoryId })
+    }
+  }
+
+  const handleColorChange = (colorId: string) => {
+    onChange({
+      color: filters.color === colorId ? undefined : colorId,
+    })
+  }
+  const handleSizeChange = (sizeId: string) => {
+    onChange({
+      size: filters.size === sizeId ? undefined : sizeId,
+    })
+  }
+  const brands = useMemo(() => {
+    if (!products || products.length === 0) return []
+
+    const uniqueBrands = Array.from(
+      new Set(
+        products.map((product) => {
+          const brand = typeof product.brand === "object" ? product.brand : { id: product.brand, name: product.brand }
+          return JSON.stringify(brand)
+        }),
+      ),
+    ).map((brandStr) => JSON.parse(brandStr))
+
+    return uniqueBrands
+  }, [products])
+
+  const categories = useMemo(() => {
+    if (!products || products.length === 0) return []
+
+    const uniqueCategories = Array.from(
+      new Set(
+        products.map((product) => {
+          const category =
+            typeof product.category === "object" ? product.category : { id: product.category, name: product.category }
+          return JSON.stringify(category)
+        }),
+      ),
+    ).map((categoryStr) => JSON.parse(categoryStr))
+
+    return uniqueCategories
+  }, [products])
+
+  const colors = useMemo(() => {
+    if (!products || products.length === 0) return []
+
+    const allColors = products.flatMap((product) =>
+      product.variants.map((variant) =>
+        variant.color || { id: variant.colorId, name: variant.colorId, code: "#000000" },
+      ),
+    )
+
+    const uniqueColors = Array.from(new Set(allColors.map((color) => JSON.stringify(color)))).map((colorStr) =>
+      JSON.parse(colorStr),
+    )
+
+    return uniqueColors
+  }, [products])
+
+  const sizes = useMemo(() => {
+    if (!products || products.length === 0) return []
+
+    const allSizes = products.flatMap((product) =>
+      product.variants.map((variant) =>
+        variant.size || { id: variant.sizeId, value: variant.sizeId },
+      ),
+    )
+
+    const uniqueSizes = Array.from(new Set(allSizes.map((size) => JSON.stringify(size))))
+      .map((sizeStr) => JSON.parse(sizeStr))
+      .sort((a, b) => (a.value || 0) - (b.value || 0)) // Sắp xếp theo kích thước tăng dần
+
+    return uniqueSizes
+  }, [products])
+
+  const priceRange = useMemo(() => {
+    if (!products || products.length === 0) {
+      return { min: 0, max: 5000000 }
+    }
+
+    const prices = products.flatMap((product) => product.variants.map((variant) => variant.price || 0))
+
+    return {
+      min: Math.min(...prices, 0),
+      max: Math.max(...prices, 5000000),
+    }
+  }, [products])
+
+  const [selectedPriceRange, setSelectedPriceRange] = useState<[number, number]>([
+    filters.minPrice || priceRange.min,
+    filters.maxPrice || priceRange.max,
+  ])
+
+  const handlePriceChange = (values: number[]) => {
+    setSelectedPriceRange(values as [number, number])
+
+    // Áp dụng thay đổi giá vào bộ lọc sau một khoảng thời gian ngắn
+    const timerId = setTimeout(() => {
+      onChange({
+        minPrice: values[0],
+        maxPrice: values[1],
+      })
+    }, 300)
+
+    return () => clearTimeout(timerId)
+  }
+
+  const handleResetFilters = () => {
+    setSelectedPriceRange([priceRange.min, priceRange.max])
+    setSelectedCategory(undefined)
+    onChange({
+      categories: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      color: undefined,
+      size: undefined,
+    })
+    toast.info("Đã đặt lại bộ lọc")
+  }
+
+  if (productsQuery.isLoading) {
+    return (
       <div className="space-y-4">
-        <div>
-          <h4 className="font-medium mb-2">Giá</h4>
-          <Slider
-            defaultValue={[0, 1000000]}
-            max={1000000}
-            step={10000}
-            className="w-full"
-            onValueChange={(values) => {
-              onChange({
-                minPrice: values[0],
-                maxPrice: values[1]
-              })
-            }}
-          />
-        </div>
-        
-        <div>
-          <h4 className="font-medium mb-2">Thương hiệu</h4>
-          <div className="space-y-2">
-            {/* Brand filters would go here */}
-            <p className="text-sm text-gray-500">Đang tải...</p>
-          </div>
-        </div>
-        
-        <div>
-          <h4 className="font-medium mb-2">Danh mục</h4>
-          <div className="space-y-2">
-            {/* Category filters would go here */}
-            <p className="text-sm text-gray-500">Đang tải...</p>
-          </div>
-        </div>
-        
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={() => onChange({})}
-        >
-          Xóa bộ lọc
-        </Button>
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
       </div>
-    </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-medium mb-3">Giá</h3>
+        <div className="px-2">
+          <Slider
+            defaultValue={[priceRange.min, priceRange.max]}
+            min={priceRange.min}
+            max={priceRange.max}
+            step={100000}
+            value={selectedPriceRange}
+            onValueChange={(value) => handlePriceChange(value as [number, number])}
+          />
+          <div className="flex justify-between mt-2 text-sm text-maintext">
+            <span>{formatPrice(selectedPriceRange[0])}</span>
+            <span>{formatPrice(selectedPriceRange[1])}</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-3">Thương hiệu</h3>
+        <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+          {brands.map((brand) => (
+            <div key={(brand as any)?.id} className="flex items-center gap-2">
+              <Checkbox
+                id={`brand-${(brand as any)?.id}`}
+                checked={selectedBrand === (brand as any)?.id}
+                onCheckedChange={() => handleBrandChange((brand as any)?.id)}
+              />
+              <label htmlFor={`brand-${(brand as any)?.id}`} className="text-sm">
+                {brand.name}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-3">Danh mục</h3>
+        <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+          {categories.map((category) => (
+            <div key={(category as any)?.id} className="flex items-center gap-2">
+              <Checkbox
+                id={`category-${(category as any)?.id}`}
+                checked={selectedCategory === (category as any)?.id}
+                onCheckedChange={() => handleCategoryChange((category as any)?.id)}
+              />
+              <label htmlFor={`category-${(category as any)?.id}`} className="text-sm">
+                {category.name}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-3">Màu sắc</h3>
+        <div className="flex flex-wrap gap-2">
+          {colors.map((color) => (
+            <button
+              key={color.id}
+              className={`w-8 h-8 rounded-full border overflow-hidden relative transition-all duration-300 ${filters.color === color.id ? "ring-2 ring-primary ring-offset-2" : "border-gray-300"}`}
+              style={{ backgroundColor: color.code }}
+              title={color.name}
+              onClick={() => handleColorChange(color.id)}
+            />
+          ))}
+        </div>
+      </div>
+      <div>
+        <h3 className="text-sm font-medium mb-3">Kích cỡ</h3>
+        <div className="flex flex-wrap gap-2">
+          {sizes.map((size) => (
+            <button
+              key={size.id}
+              className={`px-2 py-1 border rounded text-sm transition-all duration-300 ${filters.size === size.id ? "bg-primary text-white border-primary" : "border-gray-300 hover:border-primary"}`}
+              onClick={() => handleSizeChange(size.id)}
+            >
+              {size.value ? getSizeLabel(size.value) : size.name || size.id}
+            </button>
+          ))}
+        </div>
+      </div>
+      <Button variant="outline" className="w-full" onClick={handleResetFilters}>
+        Đặt lại
+      </Button>
+    </div>
   )
 }
-
-export default ProductsPage

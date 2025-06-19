@@ -23,8 +23,9 @@ export interface IColor {
 
 export interface ISize {
   id: string;
-  name: string;
-  code: string;
+  name?: string;
+  code?: string;
+  value: number;
 }
 
 export interface IProductImage {
@@ -34,8 +35,10 @@ export interface IProductImage {
 
 export interface IPopulatedProductVariant {
   id: string;
-  colorId: IColor;
-  sizeId: ISize;
+  colorId: string;
+  sizeId: string;
+  color: IColor;
+  size: ISize;
   price: number;
   stock: number;
   images: IProductImage[];
