@@ -96,7 +96,7 @@ import { useVouchers, useIncrementVoucherUsage } from '@/hooks/voucher';
 import { getAllVouchers } from '@/api/voucher';
 import { useProducts, useSearchProducts } from '@/hooks/product';
 import { usePromotions } from '@/hooks/promotion';
-import { applyPromotionsToProducts } from '@/lib/promotions';
+import { applyPromotionsToProducts, filterActivePromotions } from '@/lib/promotions';
 import { IProductFilter } from '@/interface/request/product';
 import { usePosStore } from '@/stores/posStore';
 import { useCreatePOSOrder } from '@/hooks/order';
@@ -106,11 +106,6 @@ import { usePendingCartsStore, PendingCart } from '@/stores/usePendingCartsStore
 import { useAccounts } from '@/hooks/account';
 import { IAccount } from '@/interface/response/account';
 import { getSizeLabel } from '@/utils/sizeMapping';
-
-import jsPDF from "jspdf";
-import { CustomScrollArea } from '@/components/ui/custom-scroll-area';
-import { toPng } from 'html-to-image';
-import { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -488,7 +483,8 @@ export default function POSPage() {
     let products = rawData.data.products;
 
     if (promotionsData?.data?.promotions?.length > 0) {
-      products = applyPromotionsToProducts([...products], promotionsData.data.promotions);
+      const activePromotions = filterActivePromotions(promotionsData.data.promotions);
+      products = applyPromotionsToProducts([...products], activePromotions);
     }
 
     return {
@@ -646,7 +642,8 @@ export default function POSPage() {
       hasDiscount = true;
     } else if (promotionsData?.data?.promotions?.length > 0) {
       // Apply promotions if not already applied
-      const productWithPromotions = applyPromotionsToProducts([convertedProduct], promotionsData.data.promotions);
+      const activePromotions = filterActivePromotions(promotionsData.data.promotions);
+      const productWithPromotions = applyPromotionsToProducts([convertedProduct], activePromotions);
       const promotedProduct = productWithPromotions[0];
       
       if (promotedProduct?.hasDiscount) {

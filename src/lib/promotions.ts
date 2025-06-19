@@ -33,11 +33,9 @@ export const calculateProductDiscount = (
     const startDate = new Date(promotion.startDate);
     const endDate = new Date(promotion.endDate);
     
-    // Check date range - temporarily disabled for testing
-    // TODO: Fix promotion dates in database (currently using 2025 dates)
-    // if (now < startDate || now > endDate) {
-    //   return false;
-    // }
+    if (now < startDate || now > endDate) {
+      return false;
+    }
 
     // Handle productIds from API - could be string or array
     let productIds = [];
@@ -170,5 +168,20 @@ export const isPromotionActive = (promotion: any): boolean => {
   const startDate = new Date(promotion.startDate);
   const endDate = new Date(promotion.endDate);
 
+  // Check if current time is within the promotion period
   return now >= startDate && now <= endDate;
-}; 
+};
+
+/**
+ * Filter promotions to only include those that are currently active
+ */
+export const filterActivePromotions = (promotions: any[]): any[] => {
+  if (!promotions || promotions.length === 0) return [];
+  
+  const now = new Date();
+  const activePromotions = promotions.filter(promotion => {
+    const isActive = isPromotionActive(promotion);
+    return isActive;
+  });
+  return activePromotions;
+};

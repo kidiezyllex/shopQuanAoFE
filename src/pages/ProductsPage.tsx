@@ -94,11 +94,10 @@ export default function ProductsPage() {
   const searchQuery2 = useSearchProducts(isSearching ? { keyword: searchQuery, status: "ACTIVE" } : { keyword: "" })
   const { data: rawData, isLoading, isError } = isSearching ? searchQuery2 : productsQuery
   const { data: promotionsData } = usePromotions({status: "ACTIVE"});
-  
+  console.log(promotionsData)
   const data = useMemo(() => {
     if (!rawData || !rawData.data || !rawData.data.products) return rawData
     let filteredProducts = [...rawData.data.products]
-    // Apply promotions first to get correct pricing
     if (promotionsData?.data?.promotions) {
       filteredProducts = applyPromotionsToProducts(filteredProducts, promotionsData.data.promotions)
     } 

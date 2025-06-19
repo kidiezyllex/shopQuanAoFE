@@ -45,7 +45,7 @@ if (typeof document !== 'undefined') {
 }
 import { useProductDetail, useProducts } from '@/hooks/product';
 import { usePromotions } from '@/hooks/promotion';
-import { calculateProductDiscount, formatPrice as formatPromotionPrice, applyPromotionsToProducts } from '@/lib/promotions';
+import { calculateProductDiscount, formatPrice as formatPromotionPrice, applyPromotionsToProducts, filterActivePromotions } from '@/lib/promotions';
 import { getSizeLabel } from '@/utils/sizeMapping';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -274,10 +274,11 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
 
     // Check if promotions data is available and calculate discount
     if (promotionsData?.data?.promotions) {
+      const activePromotions = filterActivePromotions(promotionsData.data.promotions);
       const discount = calculateProductDiscount(
         product.id,
         firstVariant.price,
-        promotionsData.data.promotions
+        activePromotions
       );
       
       if (discount.discountPercent > 0) {
@@ -366,10 +367,11 @@ const SimilarProductCard = ({ product, promotionsData }: { product: any; promoti
             {(() => {
               // Calculate discount from promotions data if available
               if (promotionsData?.data?.promotions && product.variants?.[0]) {
+                const activePromotions = filterActivePromotions(promotionsData.data.promotions);
                 const discount = calculateProductDiscount(
                   product.id,
                   product.variants[0].price,
-                  promotionsData.data.promotions
+                  activePromotions
                 );
                 
                 if (discount.discountPercent > 0) {
@@ -619,11 +621,11 @@ export default function ProductDetail() {
   // Calculate product discount when promotions data is available
   useEffect(() => {
     if (productData?.data && selectedVariant && promotionsData?.data?.promotions) {
-      
+      const activePromotions = filterActivePromotions(promotionsData.data.promotions);
       const discount = calculateProductDiscount(
         productData.data.id,
         selectedVariant.price,
-        promotionsData.data.promotions
+        activePromotions
       );
       setProductDiscount(discount);
     } else {
@@ -750,9 +752,10 @@ export default function ProductDetail() {
     
     let filteredProducts = allProductsData.data.products.filter((p: IProduct) => p.id !== productData.data.id).slice(0, 4);
     
-    // Apply promotions to similar products
+    // Apply promotions to similar products - but only active promotions
     if (promotionsData?.data?.promotions) {
-      filteredProducts = applyPromotionsToProducts(filteredProducts, promotionsData.data.promotions);
+      const activePromotions = filterActivePromotions(promotionsData.data.promotions);
+      filteredProducts = applyPromotionsToProducts(filteredProducts, activePromotions);
     }
     
     return filteredProducts;
