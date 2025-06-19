@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import CartIcon from "@/components/ui/CartIcon"
+import { useNavigate } from 'react-router-dom';
 
 // Add custom styles for zoom cursor
 const zoomStyles = `
@@ -78,7 +79,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { checkImageUrl } from '@/lib/utils';
 import { useCartStore } from '@/stores/useCartStore';
-import { IProduct, IBrand, ICategory, IPopulatedProductVariant } from '@/interface/response/product';
+import { IProduct, IBrand, ICategory, IPopulatedProductVariant, IProductImage } from '@/interface/response/product';
 import { motion, AnimatePresence } from 'framer-motion';
 const ImageZoom = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
   const [isZooming, setIsZooming] = useState(false);
@@ -181,40 +182,6 @@ const ImageZoom = ({ src, alt, className }: { src: string; alt: string; classNam
           </motion.div>
         )}
       </div>
-       {isZooming && !isMobile && (
-         <motion.div 
-           className="absolute top-0 left-full ml-6 w-80 h-80 border-2 border-primary/20 bg-white rounded-xl overflow-hidden z-40 hidden lg:block zoom-preview"
-           initial={{ opacity: 0, x: -20, scale: 0.95 }}
-           animate={{ opacity: 1, x: 0, scale: 1 }}
-           transition={{ duration: 0.3, ease: "easeOut" }}
-         >
-          <div 
-            className="w-full h-full relative bg-white"
-            style={{
-              backgroundImage: `url(${src})`,
-              backgroundSize: '300%',
-              backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
-              backgroundRepeat: 'no-repeat',
-              imageRendering: 'crisp-edges',
-            }}
-          />
-          <div className="absolute top-3 left-3 bg-primary/90 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-            <Icon path={mdiMagnify} size={0.7} className="inline mr-1" />
-            Zoom Preview
-          </div>
-          {/* Zoom indicator */}
-          <div className="absolute bottom-3 right-3 w-16 h-16 border-2 border-primary/30 rounded-lg bg-white/80 backdrop-blur-sm">
-            <div 
-              className="w-2 h-2 bg-primary rounded-full absolute transition-all duration-75"
-              style={{
-                left: `${(mousePosition.x / 100) * (64 - 8)}px`,
-                top: `${(mousePosition.y / 100) * (64 - 8)}px`,
-              }}
-            />
-          </div>
-        </motion.div>
-      )}
-
       {/* Mobile Zoom Overlay */}
       {isZooming && isMobile && (
         <motion.div 
@@ -643,8 +610,9 @@ export default function ProductDetail() {
     if (productData?.data?.variants?.length && productData.data.variants.length > 0) {
       const firstVariant = productData.data.variants[0];
       setSelectedVariant(firstVariant);
-      setSelectedColor(firstVariant.colorId.id);
-      setSelectedSize(firstVariant.sizeId.id);
+      setSelectedColor(String(firstVariant.color?.id || firstVariant.colorId || ''));
+      setSelectedSize(String(firstVariant.size?.id || firstVariant.sizeId || ''));
+      setCurrentImageIndex(0);
     }
   }, [productData]);
 
@@ -666,22 +634,27 @@ export default function ProductDetail() {
 
   // Xử lý chọn màu sắc
   const handleColorSelect = (colorId: string) => {
+    console.log('Color selected:', colorId);
     setSelectedColor(colorId);
 
+    // Try to find a variant with the selected color and current size
     const matchingVariant = productData?.data?.variants.find(
-      (v) => v.colorId.id === colorId && v.sizeId.id === selectedSize
+      (v) => String(v.color?.id || v.colorId) === String(colorId) && String(v.size?.id || v.sizeId) === String(selectedSize)
     );
 
     if (matchingVariant) {
+      console.log('Found matching variant:', matchingVariant);
       setSelectedVariant(matchingVariant);
       setCurrentImageIndex(0);
     } else {
+      // If no exact match, find first variant with the selected color
       const firstVariantWithColor = productData?.data?.variants.find(
-        (v) => v.colorId.id === colorId
+        (v) => String(v.color?.id || v.colorId) === String(colorId)
       );
       if (firstVariantWithColor) {
+        console.log('Found first variant with color:', firstVariantWithColor);
         setSelectedVariant(firstVariantWithColor);
-        setSelectedSize(firstVariantWithColor.sizeId.id);
+        setSelectedSize(String(firstVariantWithColor.size?.id || firstVariantWithColor.sizeId || ''));
         setCurrentImageIndex(0);
       }
     }
@@ -689,14 +662,19 @@ export default function ProductDetail() {
 
   // Xử lý chọn kích thước
   const handleSizeSelect = (sizeId: string) => {
+    console.log('Size selected:', sizeId);
+    console.log('Current selected color:', selectedColor);
     setSelectedSize(sizeId);
 
     const matchingVariant = productData?.data?.variants.find(
-      (v) => v.colorId.id === selectedColor && v.sizeId.id === sizeId
+      (v) => String(v.color?.id || v.colorId) === String(selectedColor) && String(v.size?.id || v.sizeId) === String(sizeId)
     );
 
     if (matchingVariant) {
+      console.log('Found matching variant for size:', matchingVariant);
       setSelectedVariant(matchingVariant);
+    } else {
+      console.log('No matching variant found for size');
     }
   };
 
@@ -731,18 +709,18 @@ export default function ProductDetail() {
       originalPrice: originalPrice,
       discountPercent: productDiscount?.discountPercent || 0,
       hasDiscount: Boolean(productDiscount && productDiscount.discountPercent > 0),
-      image: selectedVariant.images?.[0] || '',
+      image: selectedVariant.images?.[0]?.imageUrl || selectedVariant.images?.[0] || '',
       quantity: quantity,
       slug: productData.data.code,
       brand: typeof productData.data.brand === 'string' ? productData.data.brand : productData.data.brand.name,
-      size: selectedVariant.sizeId.code,
-      colors: [selectedVariant.colorId.name],
+      size: String(selectedVariant.size?.value || selectedVariant.sizeId || ''),
+      colors: [selectedVariant.color?.name || 'Default'],
       stock: selectedVariant.stock,
       // New variant information
-      colorId: selectedVariant.colorId.id,
-      sizeId: selectedVariant.sizeId.id,
-      colorName: selectedVariant.colorId.name,
-      sizeName: selectedVariant.sizeId.value ? getSizeLabel(selectedVariant.sizeId.value) : (selectedVariant.sizeId.name || selectedVariant.sizeId.code || '')
+      colorId: String(selectedVariant.color?.id || selectedVariant.colorId || ''),
+      sizeId: String(selectedVariant.size?.id || selectedVariant.sizeId || ''),
+      colorName: selectedVariant.color?.name || 'Default',
+      sizeName: selectedVariant.size?.value ? getSizeLabel(selectedVariant.size.value) : String(selectedVariant.sizeId || '')
     };
 
     addToCart(cartItem, quantity);
@@ -865,20 +843,20 @@ export default function ProductDetail() {
           </Breadcrumb>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8">
           {/* Enhanced Product Images Section */}
           <motion.div
-            className="w-full lg:w-3/5"
+            className="w-full"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
             {/* Main Image */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-white border shadow-lg">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-white border flex items-center justify-center">
               {selectedVariant && selectedVariant.images && selectedVariant.images.length > 0 ? (
                 <>
                   <ImageZoom
-                    src={checkImageUrl(selectedVariant.images[currentImageIndex])}
+                    src={checkImageUrl(selectedVariant.images[currentImageIndex]?.imageUrl || selectedVariant.images[currentImageIndex])}
                     alt={product.name}
                     className="aspect-square"
                   />
@@ -913,7 +891,7 @@ export default function ProductDetail() {
             {/* Thumbnail Images */}
             {selectedVariant && selectedVariant.images && selectedVariant.images.length > 1 && (
               <div className="grid grid-cols-5 gap-4 mt-4">
-                {selectedVariant.images.map((image: string, index: number) => (
+                {selectedVariant.images.map((image: IProductImage, index: number) => (
                   <motion.div
                     key={index}
                     onClick={() => handleImageChange(index)}
@@ -929,7 +907,7 @@ export default function ProductDetail() {
                     whileTap={{ scale: 0.98 }}
                   >
                     <img
-                      src={checkImageUrl(image)}
+                      src={checkImageUrl(image.imageUrl)}
                       alt={`${product.name} - ${index + 1}`}
                       className="object-contain p-2"
                       sizes="(max-width: 768px) 20vw, 10vw"
@@ -942,7 +920,7 @@ export default function ProductDetail() {
 
           {/* Enhanced Product Information Section */}
           <motion.div
-            className="w-full lg:w-2/5 space-y-4"
+            className="w-full space-y-4"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -1046,35 +1024,39 @@ export default function ProductDetail() {
                   <Icon path={mdiPalette} size={1} className="!text-maintext" />
                   <span className="font-semibold text-maintext">Màu sắc</span>
                 </div>
-                {selectedVariant?.colorId && (
+                {selectedColor && (
                   <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {selectedVariant.colorId.name}
+                    {(() => {
+                      const colorVariant = product.variants.find(v => String(v.color?.id || v.colorId) === String(selectedColor));
+                      return colorVariant?.color?.name || 'Màu sắc đã chọn';
+                    })()}
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-4">
                 {product.variants
-                  .filter((variant, index, self) =>
-                    index === self.findIndex((v) => v.colorId.id === variant.colorId.id)
-                  )
+                  .filter((variant, index, self) => {
+                    const colorId = variant.color?.id || variant.colorId;
+                    return colorId && index === self.findIndex((v) => (v.color?.id || v.colorId) === colorId);
+                  })
                   .map((variant) => (
                     <motion.button
-                      key={variant.colorId.id}
-                      onClick={() => handleColorSelect(variant.colorId.id)}
+                      key={variant.color?.id || variant.colorId}
+                      onClick={() => handleColorSelect(String(variant.color?.id || variant.colorId))}
                       className={`
                         relative group flex items-center justify-center w-10 h-10 rounded-full
                         transition-all duration-300 border-2
-                        ${selectedColor === variant.colorId.id
+                        ${String(selectedColor) === String(variant.color?.id || variant.colorId)
                           ? 'border-primary ring-4 ring-primary/20 scale-110'
                           : 'border-gray-200 hover:border-gray-300 hover:scale-105'
                         }
                       `}
-                      style={{ backgroundColor: variant.colorId.code }}
-                      title={variant.colorId.name}
-                      whileHover={{ scale: selectedColor === variant.colorId.id ? 1.1 : 1.05 }}
+                      style={{ backgroundColor: variant.color?.code }}
+                      title={variant.color?.name}
+                      whileHover={{ scale: String(selectedColor) === String(variant.color?.id || variant.colorId) ? 1.1 : 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      {selectedColor === variant.colorId.id && (
+                      {String(selectedColor) === String(variant.color?.id || variant.colorId) && (
                         <Icon
                           path={mdiCheck}
                           size={1}
@@ -1093,24 +1075,27 @@ export default function ProductDetail() {
                   <Icon path={mdiRuler} size={1} className="!text-maintext" />
                   <span className="font-semibold text-maintext">Kích thước</span>
                 </div>
-                {selectedVariant?.sizeId && (
+                {selectedSize && (
                   <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {getSizeLabel((selectedVariant.sizeId as any).value)}
+                    {(() => {
+                      const sizeVariant = product.variants.find(v => String(v.size?.id || v.sizeId) === String(selectedSize));
+                      return sizeVariant?.size?.value ? getSizeLabel(sizeVariant.size.value) : (sizeVariant?.size?.name || sizeVariant?.size?.code || 'Size đã chọn');
+                    })()}
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-4">
-                {Array.from(new Set(product.variants.map(v => v.sizeId.id)))
+                {Array.from(new Set(product.variants.map(v => String(v.size?.id || v.sizeId)).filter(Boolean)))
                   .map(sizeId => {
-                    const sizeVariant = product.variants.find(v => v.sizeId.id === sizeId);
+                    const sizeVariant = product.variants.find(v => String(v.size?.id || v.sizeId) === sizeId);
                     const variantForColorAndSize = product.variants.find(
-                      v => v.colorId.id === selectedColor && v.sizeId.id === sizeId
+                      v => String(v.color?.id || v.colorId) === String(selectedColor) && String(v.size?.id || v.sizeId) === sizeId
                     );
                     const isAvailable = !!variantForColorAndSize && variantForColorAndSize.stock > 0;
                     
                     return (
                       <Button
-                        variant={selectedSize === sizeId ? "default" : "outline"}
+                        variant={String(selectedSize) === sizeId ? "default" : "outline"}
                         size="icon"
                         key={sizeId}
                         onClick={() => handleSizeSelect(sizeId)}
@@ -1118,7 +1103,7 @@ export default function ProductDetail() {
                         className={!isAvailable ? "opacity-50 cursor-not-allowed" : ""}
                         title={!isAvailable ? "Không có sẵn cho màu này" : ""}
                       >
-                        {getSizeLabel((sizeVariant?.sizeId as any)?.value)}
+                        {getSizeLabel(sizeVariant?.size?.value || 0)}
                       </Button>
                     );
                   })}
@@ -1337,13 +1322,13 @@ export default function ProductDetail() {
                       <div className="flex justify-between py-2 border-b border-gray-100">
                         <span className="!text-maintext">Số màu sắc</span>
                         <span className="font-medium">
-                          {Array.from(new Set(product.variants.map(v => v.colorId.id))).length} màu
+                          {Array.from(new Set(product.variants.map(v => v.color?.id || v.colorId))).length} màu
                         </span>
                       </div>
                       <div className="flex justify-between py-2 border-b border-gray-100">
                         <span className="!text-maintext">Số kích thước</span>
                         <span className="font-medium">
-                          {Array.from(new Set(product.variants.map(v => v.sizeId.id))).length} size
+                          {Array.from(new Set(product.variants.map(v => v.size?.id || v.sizeId))).length} size
                         </span>
                       </div>
                       <div className="flex justify-between py-2">
@@ -1390,7 +1375,7 @@ export default function ProductDetail() {
               <AnimatePresence>
                 {similarProducts.map((similarProduct: IProduct, index: number) => (
                   <motion.div
-                    key={similarproduct.id}
+                    key={similarProduct.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}

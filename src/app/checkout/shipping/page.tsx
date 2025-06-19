@@ -44,6 +44,7 @@ import { useUserProfile } from '@/hooks/account';
 import VNPayModal from '@/components/VNPayPayment/VNPayModal';
 import SuccessModal from '@/components/OrderSuccess/SuccessModal';
 import React from 'react';
+import { getSizeLabel } from '@/utils/sizeMapping';
 
 const shippingFormSchema = z.object({
   fullName: z.string().min(1, "Vui lòng nhập họ tên"),
@@ -805,7 +806,7 @@ export default function ShippingPage() {
                       <h4 className="font-medium text-maintext">{item.name}</h4>
                       <p className="text-sm text-muted-foreground">
                         {item.brand}
-                        {item.size && ` • Size ${item.size}`}
+                        {item.size && ` • Size ${getSizeLabel(Number(item.size))}`}
                       </p>
                       <div className="flex justify-between mt-2 text-maintext">
                         <span>x{item.quantity}</span>
