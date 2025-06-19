@@ -511,8 +511,30 @@ export default function POSPage() {
   }, [dataWithPromotions?.data?.products?.length]);
 
   const handleProductSelect = (product: any) => {
+    // Keep the product with promotion info intact
+    const productWithPromotion = { ...product };
+    
+    // Convert only for variant handling, but preserve promotion info
     const convertedProduct = convertProductToApiProduct(product);
+    
+    // Merge promotion info back to the converted product
+    if ((product as any).hasDiscount) {
+      (convertedProduct as any).hasDiscount = (product as any).hasDiscount;
+      (convertedProduct as any).discountedPrice = (product as any).discountedPrice;
+      (convertedProduct as any).originalPrice = (product as any).originalPrice;
+      (convertedProduct as any).discountPercent = (product as any).discountPercent;
+      (convertedProduct as any).appliedPromotion = (product as any).appliedPromotion;
+      
+      console.log('Product selected with promotion:', {
+        name: convertedProduct.name,
+        originalPrice: (convertedProduct as any).originalPrice,
+        discountedPrice: (convertedProduct as any).discountedPrice,
+        discountPercent: (convertedProduct as any).discountPercent
+      });
+    }
+    
     setSelectedProduct(convertedProduct);
+    
     if (convertedProduct.variants && convertedProduct.variants.length > 0) {
       // Prioritize variants with stock, but still allow selection of out-of-stock variants
       const variantWithStock = convertedProduct.variants.find(v => v.stock > 0);
@@ -569,7 +591,33 @@ export default function POSPage() {
     const convertedVariant = isAlreadyConverted ? variant : convertVariantToApiVariant(variant);
 
     const cartItemId = `${convertedProduct.id}-${convertedVariant.id}`;
-    const finalPrice = (product as any).hasDiscount ? (product as any).discountedPrice : convertedVariant.price;
+    
+    // Apply promotions to get the correct price
+    let finalPrice = convertedVariant.price;
+    let originalPrice = undefined;
+    let discountPercent = undefined;
+    let hasDiscount = false;
+
+    // Check if product already has discount applied (from product list)
+    if ((product as any).hasDiscount) {
+      finalPrice = (product as any).discountedPrice;
+      originalPrice = (product as any).originalPrice;
+      discountPercent = (product as any).discountPercent;
+      hasDiscount = true;
+    } else if (promotionsData?.data?.promotions?.length > 0) {
+      // Apply promotions if not already applied
+      const productWithPromotions = applyPromotionsToProducts([convertedProduct], promotionsData.data.promotions);
+      const promotedProduct = productWithPromotions[0];
+      
+      if (promotedProduct?.hasDiscount) {
+        finalPrice = promotedProduct.discountedPrice;
+        originalPrice = promotedProduct.originalPrice;
+        discountPercent = promotedProduct.discountPercent;
+        hasDiscount = true;
+        // Optional: Add success notification for promotion
+        console.log(`Promotion applied: ${discountPercent}% off on ${convertedProduct.name}`);
+      }
+    }
 
     const newItem: POSCartItem = {
       id: cartItemId,
@@ -580,9 +628,9 @@ export default function POSPage() {
       colorCode: convertedVariant.colorId?.code,
       sizeName: convertedVariant.sizeId?.name || 'N/A',
       price: finalPrice,
-      originalPrice: (product as any).hasDiscount ? (product as any).originalPrice : undefined,
-      discountPercent: (product as any).hasDiscount ? (product as any).discountPercent : undefined,
-      hasDiscount: (product as any).hasDiscount || false,
+      originalPrice: originalPrice,
+      discountPercent: discountPercent,
+      hasDiscount: hasDiscount,
       quantity: 1,
       image: getVariantImageUrl(convertedVariant) || '/placeholder.svg',
       stock: convertedVariant.stock,
@@ -634,7 +682,8 @@ export default function POSPage() {
       return;
     }
 
-    addItemToCorrectCart(selectedProduct, selectedApiVariant, true);
+    // Use selectedProduct which already has promotion info preserved
+    addItemToCorrectCart(selectedProduct, selectedApiVariant, false);
 
     setSelectedProduct(null);
     setSelectedApiVariant(null);
@@ -905,9 +954,7 @@ export default function POSPage() {
       const orderResponse = await createOrderMutation.mutateAsync(orderPayload);
 
       if (orderResponse.success && orderResponse.data) {
-        const orderId = orderResponse.data.id;
         const orderCode = orderResponse.data.orderNumber || `POS-${Math.floor(1000 + Math.random() * 9000)}`;
-
         updateStatsOnCheckout(totalAmount);
         const newTransaction = {
           id: orderCode,
@@ -966,15 +1013,10 @@ export default function POSPage() {
         };
         setCurrentInvoiceData(invoiceData);
         setShowInvoiceDialog(true);
-
-
         clearCartStore();
-
-        // Clear active pending cart if exists
         if (activeCartId) {
           clearPendingCartItems(activeCartId);
         }
-
         setCustomerName('');
         setCustomerPhone('');
         setSelectedUserId('guest');
@@ -999,10 +1041,7 @@ export default function POSPage() {
       toast.error('Giỏ hàng đang trống');
       return;
     }
-
-    // Sync active cart to main cart for checkout
     syncActiveCartToMainCart();
-
     setCashReceived('');
     setSelectedUserId('guest');
     setCustomerName('');
@@ -1033,14 +1072,10 @@ export default function POSPage() {
 
       if (e.altKey && e.key === 'c') {
         if (cartItems.length > 0 || appliedVoucher) {
-          // Clear main cart
           clearCartStore();
-
-          // Clear active pending cart if exists
           if (activeCartId) {
             clearPendingCartItems(activeCartId);
           }
-
           setSelectedProduct(null);
           setSelectedApiVariant(null);
           toast.success('Đã xóa giỏ hàng và mã giảm giá.');
@@ -1434,12 +1469,22 @@ export default function POSPage() {
                         <Badge variant="outline" className="text-maintext">
                           Admin POS
                         </Badge>
-                        {/* Badge giảm giá */}
+                        {(selectedProduct as any).hasDiscount && (
+                          <Badge variant="destructive" className="bg-green-500">
+                            -{(selectedProduct as any).discountPercent}% OFF
+                          </Badge>
+                        )}
                       </div>
 
                       <h2 className="text-2xl font-bold text-maintext leading-tight">
                         {selectedProduct.name}
                       </h2>
+                      
+                      {(selectedProduct as any).hasDiscount && (selectedProduct as any).appliedPromotion && (
+                        <div className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                          🎉 Đang áp dụng khuyến mãi: <span className="font-semibold">{(selectedProduct as any).appliedPromotion.name}</span>
+                        </div>
+                      )}
 
                       <motion.div
                         className="space-y-2"
@@ -1447,7 +1492,7 @@ export default function POSPage() {
                         transition={{ duration: 0.2 }}
                       >
                         <div className="text-4xl font-bold text-primary">
-                          {formatCurrency(selectedApiVariant.price)}
+                          {formatCurrency((selectedProduct as any).hasDiscount ? (selectedProduct as any).discountedPrice : selectedApiVariant.price)}
                         </div>
                         {(selectedProduct as any).hasDiscount && (
                           <div className="flex items-center gap-2">
@@ -1786,10 +1831,10 @@ export default function POSPage() {
                                               disabled={product.variants.every(v => v.stock === 0)}
                                               onClick={(e) => {
                                                 e.stopPropagation();
-                                                const convertedProduct = convertProductToApiProduct(product);
-                                                const convertedFirstAvailableVariant = convertedProduct.variants.find(v => v.stock > 0);
-                                                if (convertedFirstAvailableVariant) {
-                                                  addItemToCorrectCart(convertedProduct, convertedFirstAvailableVariant, true);
+                                                // Use the product from the list (which already has promotions applied)
+                                                const firstAvailableVariant = product.variants.find((v: any) => v.stock > 0);
+                                                if (firstAvailableVariant) {
+                                                  addItemToCorrectCart(product, firstAvailableVariant, false);
                                                 } else {
                                                   toast.warn('Sản phẩm này đã hết hàng.');
                                                 }
@@ -2040,9 +2085,16 @@ export default function POSPage() {
                               {formatCurrency(item.price)}
                             </span>
                             {item.hasDiscount && item.originalPrice && (
-                              <span className="text-sm text-maintext line-through">
-                                {formatCurrency(item.originalPrice)}
-                              </span>
+                              <>
+                                <span className="text-sm text-maintext line-through">
+                                  {formatCurrency(item.originalPrice)}
+                                </span>
+                                {item.discountPercent && (
+                                  <Badge variant="destructive" className="bg-green-500 text-xs">
+                                    -{item.discountPercent}%
+                                  </Badge>
+                                )}
+                              </>
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-2">

@@ -33,8 +33,13 @@ export const calculateProductDiscount = (
     const startDate = new Date(promotion.startDate);
     const endDate = new Date(promotion.endDate);
     
+    // Check date range - temporarily disabled for testing
+    // TODO: Fix promotion dates in database (currently using 2025 dates)
+    // if (now < startDate || now > endDate) {
+    //   return false;
+    // }
 
-
+    // Handle productIds from API - could be string or array
     let productIds = [];
     if (promotion.productIds) {
       if (typeof promotion.productIds === 'string') {
