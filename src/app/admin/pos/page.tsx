@@ -93,9 +93,7 @@ import {
 } from "@/components/ui/pagination";
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table';
 import { useVouchers, useIncrementVoucherUsage } from '@/hooks/voucher';
-import { useQuery } from '@tanstack/react-query';
 import { getAllVouchers } from '@/api/voucher';
-import { IVouchersResponse } from "@/interface/response/voucher";
 import { useProducts, useSearchProducts } from '@/hooks/product';
 import { usePromotions } from '@/hooks/promotion';
 import { applyPromotionsToProducts } from '@/lib/promotions';
@@ -667,18 +665,18 @@ export default function POSPage() {
       // Check voucher validity after quantity update
       if (appliedVoucher) {
         const subtotal = calculateCartSubtotal();
-        if (subtotal < appliedVoucher.minOrderValue) {
+        if (subtotal < parseFloat(appliedVoucher.minOrderValue)) {
           toast.warn(`Đơn hàng không còn đủ điều kiện cho mã "${appliedVoucher.code}". Đã xóa mã.`);
           setPendingCartDiscount(activeCartId, 0, null, '');
         } else {
           let newDiscountAmount = 0;
           if (appliedVoucher.type === 'PERCENTAGE') {
-            newDiscountAmount = (subtotal * appliedVoucher.value) / 100;
-            if ((appliedVoucher as any).maxValue && newDiscountAmount > (appliedVoucher as any).maxValue) {
-              newDiscountAmount = (appliedVoucher as any).maxValue;
+            newDiscountAmount = (subtotal * parseFloat(appliedVoucher.value)) / 100;
+            if (appliedVoucher.maxDiscount && newDiscountAmount > parseFloat(appliedVoucher.maxDiscount)) {
+              newDiscountAmount = parseFloat(appliedVoucher.maxDiscount);
             }
           } else if (appliedVoucher.type === 'FIXED_AMOUNT') {
-            newDiscountAmount = appliedVoucher.value;
+            newDiscountAmount = parseFloat(appliedVoucher.value);
           }
           newDiscountAmount = Math.min(newDiscountAmount, subtotal);
           setPendingCartDiscount(activeCartId, newDiscountAmount, appliedVoucher, couponCode);
@@ -712,7 +710,7 @@ export default function POSPage() {
       // Check voucher validity after item removal
       if (appliedVoucher) {
         const subtotal = calculateCartSubtotal();
-        if (subtotal < appliedVoucher.minOrderValue || cartItems.length <= 1) {
+        if (subtotal < parseFloat(appliedVoucher.minOrderValue) || cartItems.length <= 1) {
           toast.warn(`Đơn hàng không còn đủ điều kiện cho mã "${appliedVoucher.code}" hoặc giỏ hàng trống. Đã xóa mã.`);
           setPendingCartDiscount(activeCartId, 0, null, '');
         }
@@ -734,93 +732,102 @@ export default function POSPage() {
     // Check voucher validity after item removal if this is the active cart
     if (cartId === activeCartId && appliedVoucher) {
       const subtotal = calculateCartSubtotal();
-      if (subtotal < appliedVoucher.minOrderValue || cartItems.length <= 1) {
+      if (subtotal < parseFloat(appliedVoucher.minOrderValue) || cartItems.length <= 1) {
         toast.warn(`Đơn hàng không còn đủ điều kiện cho mã "${appliedVoucher.code}" hoặc giỏ hàng trống. Đã xóa mã.`);
         setPendingCartDiscount(cartId, 0, null, '');
       }
     }
   };
 
-  const { data: foundVoucherData, isLoading: isFetchingVoucher, refetch: fetchVoucherByCode } = useQuery<IVouchersResponse, Error>({
-    queryKey: ['voucherByCodeToApply', couponCode],
-    queryFn: () => getAllVouchers({ code: couponCode, status: 'HOAT_DONG', limit: 1, page: 1 }),
-    enabled: false,
-  });
+
 
   const applyCoupon = async () => {
-    const { data: voucherDataResult, isError: voucherFetchError } = await fetchVoucherByCode();
-
-    if (voucherFetchError) {
-      toast.error('Có lỗi xảy ra khi tìm mã giảm giá.');
-      if (activeCartId) {
-        setPendingCartDiscount(activeCartId, 0, null, '');
-      } else {
-        setVoucher(null);
-        setDiscount(0);
-      }
+    // Get the correct coupon code based on the current context
+    const currentCouponCode = activeCartId ? (activeCart?.couponCode || '') : couponCode;
+    
+    if (!currentCouponCode.trim()) {
+      toast.error('Vui lòng nhập mã giảm giá.');
       return;
     }
 
-    const voucher = voucherDataResult?.data?.vouchers?.[0];
+    try {
+      // Manually fetch voucher data with the current coupon code
+      const voucherDataResult = await getAllVouchers({ 
+        code: currentCouponCode, 
+        status: 'HOAT_DONG', 
+        limit: 1, 
+        page: 1 
+      });
 
-    if (voucher) {
-      const subtotal = calculateCartSubtotal();
-      if (subtotal < voucher.minOrderValue) {
-        toast.error(`Đơn hàng chưa đạt giá trị tối thiểu ${formatCurrency(voucher.minOrderValue)} để áp dụng mã này.`);
+            const voucher = voucherDataResult?.data?.vouchers?.[0];
+
+      if (voucher) {
+        const subtotal = calculateCartSubtotal();
+        if (subtotal < parseFloat(voucher.minOrderValue.toString())) {
+          toast.error(`Đơn hàng chưa đạt giá trị tối thiểu ${formatCurrency(parseFloat(voucher.minOrderValue.toString()))} để áp dụng mã này.`);
+          if (activeCartId) {
+            setPendingCartDiscount(activeCartId, 0, null, '');
+          } else {
+            setVoucher(null);
+            setDiscount(0);
+          }
+          return;
+        }
+
+        if (voucher.quantity <= voucher.usedCount) {
+          toast.error('Mã giảm giá này đã hết lượt sử dụng.');
+          if (activeCartId) {
+            setPendingCartDiscount(activeCartId, 0, null, '');
+          } else {
+            setVoucher(null);
+            setDiscount(0);
+          }
+          return;
+        }
+
+        if (new Date(voucher.endDate) < new Date()) {
+          toast.error('Mã giảm giá đã hết hạn.');
+          if (activeCartId) {
+            setPendingCartDiscount(activeCartId, 0, null, '');
+          } else {
+            setVoucher(null);
+            setDiscount(0);
+          }
+          return;
+        }
+
+        let discountAmount = 0;
+        if (voucher.type === 'PERCENTAGE') {
+          discountAmount = (subtotal * parseFloat(voucher.value.toString())) / 100;
+          if (voucher.maxDiscount && discountAmount > parseFloat(voucher.maxDiscount.toString())) {
+            discountAmount = parseFloat(voucher.maxDiscount.toString());
+          }
+        } else if (voucher.type === 'FIXED_AMOUNT') {
+          discountAmount = parseFloat(voucher.value.toString());
+        }
+
+        discountAmount = Math.min(discountAmount, subtotal);
+
         if (activeCartId) {
-          setPendingCartDiscount(activeCartId, 0, null, '');
+          setPendingCartDiscount(activeCartId, discountAmount, voucher, currentCouponCode);
         } else {
-          setVoucher(null);
-          setDiscount(0);
+          setDiscount(discountAmount);
+          setVoucher(voucher);
         }
-        return;
-      }
 
-      if (voucher.quantity <= voucher.usedCount) {
-        toast.error('Mã giảm giá này đã hết lượt sử dụng.');
-        if (activeCartId) {
-          setPendingCartDiscount(activeCartId, 0, null, '');
-        } else {
-          setVoucher(null);
-          setDiscount(0);
-        }
-        return;
-      }
-
-      if (new Date(voucher.endDate) < new Date()) {
-        toast.error('Mã giảm giá đã hết hạn.');
-        if (activeCartId) {
-          setPendingCartDiscount(activeCartId, 0, null, '');
-        } else {
-          setVoucher(null);
-          setDiscount(0);
-        }
-        return;
-      }
-
-      let discountAmount = 0;
-      if (voucher.discountType === 'PERCENTAGE') {
-        discountAmount = (subtotal * voucher.discountValue) / 100;
-        if ((voucher as any).maxValue && discountAmount > (voucher as any).maxValue) {
-          discountAmount = (voucher as any).maxValue;
-        }
-      } else if (voucher.discountType === 'FIXED_AMOUNT') {
-        discountAmount = voucher.discountValue;
-      }
-
-      discountAmount = Math.min(discountAmount, subtotal);
-
-      // Update the correct cart store based on whether there's an active pending cart
-      if (activeCartId) {
-        setPendingCartDiscount(activeCartId, discountAmount, voucher, couponCode);
+        toast.success(`Đã áp dụng mã giảm giá "${voucher.code}".`);
       } else {
-        setDiscount(discountAmount);
-        setVoucher(voucher);
+        toast.error('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+        if (activeCartId) {
+          setPendingCartDiscount(activeCartId, 0, null, '');
+        } else {
+          setVoucher(null);
+          setDiscount(0);
+          setCouponCode('');
+        }
       }
-
-      toast.success(`Đã áp dụng mã giảm giá "${voucher.code}".`);
-    } else {
-      toast.error('Mã giảm giá không hợp lệ hoặc không tìm thấy.');
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi tìm mã giảm giá.');
       if (activeCartId) {
         setPendingCartDiscount(activeCartId, 0, null, '');
       } else {
@@ -1115,6 +1122,30 @@ export default function POSPage() {
   const getBrandName = useCallback((brand: ApiProduct['brand']) =>
     typeof brand === 'object' ? brand.name : brand, []
   );
+
+  // Helper function to safely get color info from variants
+  const getColorInfo = useCallback((colorId: any) => {
+    if (!colorId) return null;
+    if (typeof colorId === 'object' && colorId.id) {
+      return colorId;
+    }
+    return null;
+  }, []);
+
+  // Helper function to safely get unique colors from variants
+  const getUniqueColors = useCallback((variants: any[]) => {
+    if (!variants?.length) return [];
+    const colorMap = new Map();
+    
+    variants.forEach((v, index) => {
+      const colorInfo = getColorInfo(v.colorId);
+      if (colorInfo) {
+        colorMap.set(colorInfo.id, colorInfo);
+      }
+    });
+    
+    return Array.from(colorMap.values());
+  }, [getColorInfo]);
 
   // Handle creating new pending cart
   const handleCreateNewCart = () => {
@@ -1578,7 +1609,7 @@ export default function POSPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {processedProducts.map((product) => {
                           const firstVariant = product.variants?.[0];
-                          const uniqueColorsCount = new Set(product.variants.map(v => v.colorId?.id)).size;
+                          const uniqueColors = getUniqueColors(product.variants);
                           return (
                             <motion.div
                               key={product.id}
@@ -1623,9 +1654,9 @@ export default function POSPage() {
                                       </p>
                                     )}
                                   </div>
-                                  {product.variants.length > 0 && (
+                                  {uniqueColors.length > 0 && (
                                     <div className="flex -space-x-1">
-                                      {Array.from(new Map(product.variants.map(v => [v.colorId?.id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
+                                      {uniqueColors.slice(0, 3).map((color, idx) => (
                                         <div
                                           key={color.id || `color-${idx}`}
                                           className="h-5 w-5 rounded-full border border-white"
@@ -1633,9 +1664,9 @@ export default function POSPage() {
                                           title={color.name}
                                         />
                                       ))}
-                                      {uniqueColorsCount > 3 && (
+                                      {uniqueColors.length > 3 && (
                                         <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-maintext">
-                                          +{uniqueColorsCount - 3}
+                                          +{uniqueColors.length - 3}
                                         </div>
                                       )}
                                     </div>
@@ -1674,7 +1705,7 @@ export default function POSPage() {
                             {processedProducts.map((product) => {
                               const firstVariant = product.variants?.[0];
                               const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-                              const uniqueColorsCount = new Set(product.variants.map(v => v.colorId?.id)).size;
+                              const uniqueColorsCount = new Set(product.variants.map(v => (v.colorId as any)?.id)).size;
                               const firstAvailableVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
                               return (
                                 <tr
@@ -1709,12 +1740,12 @@ export default function POSPage() {
                                   <td className="py-3 px-4" onClick={() => handleProductSelect(product)}>
                                     {product.variants.length > 0 && (
                                       <div className="flex -space-x-1">
-                                        {Array.from(new Map(product.variants.map(v => [v.colorId?.id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
+                                        {Array.from(new Map(product.variants.map(v => [(v.colorId as any)?.id, v.colorId])).values()).slice(0, 3).map((color, idx) => color && (
                                           <div
-                                            key={color.id || `table-color-${idx}`}
+                                            key={(color as any).id || `table-color-${idx}`}
                                             className="h-5 w-5 rounded-full border"
-                                            style={{ backgroundColor: color.code }}
-                                            title={color.name}
+                                            style={{ backgroundColor: (color as any).code }}
+                                            title={(color as any).name}
                                           />
                                         ))}
                                         {uniqueColorsCount > 3 && (
@@ -2114,9 +2145,9 @@ export default function POSPage() {
                     <Button
                       variant="default"
                       onClick={applyCoupon}
-                      disabled={!couponCode || isFetchingVoucher}
+                      disabled={!couponCode.trim()}
                     >
-                      {isFetchingVoucher ? 'Đang kiểm tra...' : 'Áp dụng'}
+                      Áp dụng
                     </Button>
                   </div>
                   <Button
