@@ -91,9 +91,9 @@ export default function ProductsPage() {
   }
 
   const productsQuery = useProducts(paginationParams)
-  const searchQuery2 = useSearchProducts(isSearching ? { keyword: searchQuery, status: "HOAT_DONG" } : { keyword: "" })
+  const searchQuery2 = useSearchProducts(isSearching ? { keyword: searchQuery, status: "ACTIVE" } : { keyword: "" })
   const { data: rawData, isLoading, isError } = isSearching ? searchQuery2 : productsQuery
-  const { data: promotionsData } = usePromotions({status: "HOAT_DONG"});
+  const { data: promotionsData } = usePromotions({status: "ACTIVE"});
   
   const data = useMemo(() => {
     if (!rawData || !rawData.data || !rawData.data.products) return rawData
