@@ -456,7 +456,7 @@ export default function ShippingPage() {
       
       const orderData = {
         orderId: `DH${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`,
-        customer: user?.id || '000000000000000000000000',
+        customerId: user?.id || '000000000000000000000000',
         items: items.map(item => ({
           product: item.productId || item.id, // Use productId if available, fallback to id
           variant: {
