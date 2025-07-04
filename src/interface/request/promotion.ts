@@ -20,7 +20,7 @@ export interface IPromotionUpdate {
   name?: string;
   description?: string;
   discountPercent?: number;
-  products?: string[];
+  productIds?: string[];
   startDate?: string | Date;
   endDate?: string | Date;
   status?: 'ACTIVE' | 'UNACTIVE';

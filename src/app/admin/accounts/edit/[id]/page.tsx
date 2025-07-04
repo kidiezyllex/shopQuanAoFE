@@ -36,7 +36,7 @@ export default function EditAccountPage() {
     email: '',
     phoneNumber: '',
     gender: undefined,
-    status: 'HOAT_DONG'
+    status: 'ACTIVE'
   });
 
   const [displayGender, setDisplayGender] = useState<string>('Khác'); // Default display value
@@ -103,14 +103,14 @@ export default function EditAccountPage() {
 
   const handleToggleStatus = async () => {
     const newStatus: IAccountStatusUpdate = {
-      status: formData.status === 'HOAT_DONG' ? 'KHONG_HOAT_DONG' : 'HOAT_DONG'
+      status: formData.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
     };
 
     try {
       await updateAccountStatus.mutateAsync(newStatus, {
         onSuccess: () => {
           setFormData(prev => ({ ...prev, status: newStatus.status }));
-          toast.success(`Tài khoản đã được ${newStatus.status === 'HOAT_DONG' ? 'kích hoạt' : 'vô hiệu hóa'}`);
+          toast.success(`Tài khoản đã được ${newStatus.status === 'ACTIVE' ? 'kích hoạt' : 'vô hiệu hóa'}`);
         },
         onError: (error) => {
           toast.error('Cập nhật trạng thái thất bại: ' + (error.message || 'Không xác định'));
@@ -194,13 +194,13 @@ export default function EditAccountPage() {
           <p className="text-maintext text-lg">{accountData.data.role === 'ADMIN' ? 'Quản trị viên' : accountData.data.role === 'STAFF' ? 'Nhân viên' : 'Khách hàng'}</p>
           <div className="flex items-center pt-3">
             <Switch
-              checked={formData.status === 'HOAT_DONG'}
+              checked={formData.status === 'ACTIVE'}
               onCheckedChange={handleToggleStatus}
               id="status"
               className="data-[state=checked]:bg-green-500"
             />
             <Label htmlFor="status" className="ml-3 text-sm font-medium">
-              {formData.status === 'HOAT_DONG' ? 'Đang hoạt động' : 'Không hoạt động'}
+              {formData.status === 'ACTIVE' ? 'Đang hoạt động' : 'Không hoạt động'}
             </Label>
           </div>
         </div>

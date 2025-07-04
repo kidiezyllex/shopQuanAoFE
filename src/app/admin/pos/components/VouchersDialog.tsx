@@ -31,7 +31,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
   onVoucherSelect,
   formatCurrency,
 }) => {
-  const { data: vouchersData, isLoading, isError } = useVouchers({ page: 1, limit: 100, status: 'HOAT_DONG' });
+  const { data: vouchersData, isLoading, isError } = useVouchers({ page: 1, limit: 100, status: 'ACTIVE' });
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code).then(() => {
       toast.success(`Đã sao chép mã: ${code}`);

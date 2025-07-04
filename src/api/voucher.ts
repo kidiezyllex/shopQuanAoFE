@@ -1,23 +1,30 @@
+// ===== Import các interface yêu cầu từ phía client ===== //
 import {
-  IVoucherFilter,
-  IVoucherCreate,
-  IVoucherUpdate,
-  IVoucherValidate,
-  IUserVoucherParams
+  IVoucherFilter,        // Bộ lọc để tìm kiếm voucher
+  IVoucherCreate,        // Interface để tạo mới voucher
+  IVoucherUpdate,        // Interface để cập nhật voucher
+  IVoucherValidate,      // Interface để kiểm tra tính hợp lệ của voucher
+  IUserVoucherParams     // Tham số để lọc voucher theo người dùng
 } from "@/interface/request/voucher";
+
+// ===== Import các interface phản hồi từ server ===== //
 import {
-  IVouchersResponse,
-  IVoucherResponse,
-  IVoucherValidationResponse,
-  INotificationResponse,
-  IActionResponse
+  IVouchersResponse,             // Danh sách voucher trả về
+  IVoucherResponse,              // Một voucher đơn lẻ trả về
+  IVoucherValidationResponse,    // Kết quả xác thực voucher
+  INotificationResponse,         // Kết quả gửi thông báo
+  IActionResponse                // Kết quả thực hiện một hành động
 } from "@/interface/response/voucher";
+
+// ===== Import các hàm gọi API sử dụng axios ===== //
 import { sendGet, sendPost, sendPut, sendDelete } from "./axios";
 
-// === Admin Voucher API ===
+// ===== Admin Voucher API ===== //
+
 /**
- * Get all vouchers with optional filtering
- * Endpoint: GET /api/vouchers
+ * Lấy danh sách tất cả các voucher có thể áp dụng bộ lọc
+ * @param params - IVoucherFilter
+ * @returns IVouchersResponse
  */
 export const getAllVouchers = async (params: IVoucherFilter): Promise<IVouchersResponse> => {
   const res = await sendGet("/vouchers", params);
@@ -25,8 +32,9 @@ export const getAllVouchers = async (params: IVoucherFilter): Promise<IVouchersR
 };
 
 /**
- * Get voucher details by ID
- * Endpoint: GET /api/vouchers/{id}
+ * Lấy chi tiết một voucher theo ID
+ * @param voucherId - string
+ * @returns IVoucherResponse
  */
 export const getVoucherById = async (voucherId: string): Promise<IVoucherResponse> => {
   const res = await sendGet(`/vouchers/${voucherId}`);
@@ -34,8 +42,9 @@ export const getVoucherById = async (voucherId: string): Promise<IVoucherRespons
 };
 
 /**
- * Create a new voucher
- * Endpoint: POST /api/vouchers
+ * Tạo một voucher mới
+ * @param payload - IVoucherCreate
+ * @returns IVoucherResponse
  */
 export const createVoucher = async (payload: IVoucherCreate): Promise<IVoucherResponse> => {
   const res = await sendPost("/vouchers", payload);
@@ -43,8 +52,10 @@ export const createVoucher = async (payload: IVoucherCreate): Promise<IVoucherRe
 };
 
 /**
- * Update an existing voucher
- * Endpoint: PUT /api/vouchers/{id}
+ * Cập nhật thông tin voucher theo ID
+ * @param voucherId - string
+ * @param payload - IVoucherUpdate
+ * @returns IVoucherResponse
  */
 export const updateVoucher = async (voucherId: string, payload: IVoucherUpdate): Promise<IVoucherResponse> => {
   const res = await sendPut(`/vouchers/${voucherId}`, payload);
@@ -52,8 +63,9 @@ export const updateVoucher = async (voucherId: string, payload: IVoucherUpdate):
 };
 
 /**
- * Delete a voucher
- * Endpoint: DELETE /api/vouchers/{id}
+ * Xóa voucher theo ID
+ * @param voucherId - string
+ * @returns IActionResponse
  */
 export const deleteVoucher = async (voucherId: string): Promise<IActionResponse> => {
   const res = await sendDelete(`/vouchers/${voucherId}`);
@@ -61,8 +73,9 @@ export const deleteVoucher = async (voucherId: string): Promise<IActionResponse>
 };
 
 /**
- * Validate a voucher code for a given order value
- * Endpoint: POST /api/vouchers/validate
+ * Kiểm tra tính hợp lệ của mã giảm giá (voucher)
+ * @param payload - IVoucherValidate
+ * @returns IVoucherValidationResponse
  */
 export const validateVoucher = async (payload: IVoucherValidate): Promise<IVoucherValidationResponse> => {
   const res = await sendPost("/vouchers/validate", payload);
@@ -70,8 +83,9 @@ export const validateVoucher = async (payload: IVoucherValidate): Promise<IVouch
 };
 
 /**
- * Increment the usage count of a voucher
- * Endpoint: PUT /api/vouchers/{id}/increment-usage
+ * Tăng số lần sử dụng của voucher (sau khi người dùng sử dụng)
+ * @param voucherId - string
+ * @returns IVoucherResponse
  */
 export const incrementVoucherUsage = async (voucherId: string): Promise<IVoucherResponse> => {
   const res = await sendPut(`/vouchers/${voucherId}/increment-usage`, {});
@@ -79,20 +93,27 @@ export const incrementVoucherUsage = async (voucherId: string): Promise<IVoucher
 };
 
 /**
- * Send notification about a voucher to users
- * Endpoint: POST /api/vouchers/{id}/notify
+ * Gửi thông báo đến người dùng về voucher (ví dụ khi có khuyến mãi mới)
+ * @param voucherId - string
+ * @returns INotificationResponse
  */
 export const notifyVoucher = async (voucherId: string): Promise<INotificationResponse> => {
   const res = await sendPost(`/vouchers/${voucherId}/notify`, {});
   return res as INotificationResponse;
 };
 
-// === User Voucher API ===
+// ===== User Voucher API ===== //
+
 /**
- * Get available vouchers for a specific user
- * Endpoint: GET /api/vouchers/user/{userId}
+ * Lấy danh sách voucher mà người dùng có thể sử dụng
+ * @param userId - string
+ * @param params - IUserVoucherParams (tùy chọn)
+ * @returns IVouchersResponse
  */
-export const getAvailableVouchersForUser = async (userId: string, params?: IUserVoucherParams): Promise<IVouchersResponse> => {
+export const getAvailableVouchersForUser = async (
+  userId: string,
+  params?: IUserVoucherParams
+): Promise<IVouchersResponse> => {
   const res = await sendGet(`/vouchers/user/${userId}`, params);
   return res as IVouchersResponse;
-}; 
+};

@@ -10,7 +10,7 @@ export interface IAccount {
   gender?: 'Nam' | 'Nữ' | 'Khác';
   birthday?: string | Date;
   citizenId?: string;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
   avatar?: string;
   addresses: IAddress[];
   createdAt: string;

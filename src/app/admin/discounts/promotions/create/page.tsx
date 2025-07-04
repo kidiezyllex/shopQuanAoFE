@@ -23,7 +23,7 @@ import { mdiArrowLeft, mdiPercent, mdiInformation, mdiLoading } from '@mdi/js';
 export default function CreatePromotionPage() {
   const navigate = useNavigate();
   const createPromotion = useCreatePromotion();
-  const { data: productsData } = useProducts({ limit: 100, status: 'HOAT_DONG' });
+  const { data: productsData } = useProducts({ limit: 100, status: 'ACTIVE' });
 
   const [formData, setFormData] = useState<IPromotionCreate>({
     name: '',

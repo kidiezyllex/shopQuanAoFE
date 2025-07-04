@@ -28,6 +28,8 @@ export const usePromotions = (params: IPromotionFilter = {}): UseQueryResult<IPr
   return useQuery<IPromotionsResponse, Error>({
     queryKey: ["promotions", params],
     queryFn: () => getAllPromotions(params),
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -36,6 +38,8 @@ export const usePromotionDetail = (promotionId: string): UseQueryResult<IPromoti
     queryKey: ["promotion", promotionId],
     queryFn: () => getPromotionById(promotionId),
     enabled: !!promotionId, // Chỉ fetch khi có promotionId
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -66,6 +70,8 @@ export const useProductPromotions = (productId: string): UseQueryResult<IProduct
     queryKey: ["productPromotions", productId],
     queryFn: () => getProductPromotions(productId),
     enabled: !!productId, // Chỉ fetch khi có productId
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 

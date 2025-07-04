@@ -1,76 +1,76 @@
 // Brand interfaces
 export interface IBrandFilter {
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IBrandCreate {
   name: string;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IBrandUpdate {
   name?: string;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 // Category interfaces
 export interface ICategoryFilter {
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface ICategoryCreate {
   name: string;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface ICategoryUpdate {
   name?: string;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 // Material interfaces
 export interface IMaterialFilter {
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IMaterialCreate {
   name: string;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IMaterialUpdate {
   name?: string;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 // Color interfaces
 export interface IColorFilter {
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IColorCreate {
   name: string;
   code: string;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IColorUpdate {
   name?: string;
   code?: string;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 // Size interfaces
 export interface ISizeFilter {
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface ISizeCreate {
   value: number;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface ISizeUpdate {
   value?: number;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 } 

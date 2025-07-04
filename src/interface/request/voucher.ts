@@ -4,7 +4,7 @@
 export interface IVoucherFilter {
   code?: string;                                 // Filter by voucher code
   name?: string;                                 // Filter by voucher name
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';     // Filter by voucher status
+  status?: 'ACTIVE' | 'INACTIVE';     // Filter by voucher status
   startDate?: string;                            // Filter by start date
   endDate?: string;                              // Filter by end date
   page?: number;                                 // Page number for pagination
@@ -24,7 +24,7 @@ export interface IVoucherCreate {
   endDate: string | Date;                        // End date (when voucher expires)
   minOrderValue?: number;                        // Minimum order value required to apply voucher
   maxDiscount?: number;                          // Maximum discount amount (for percentage vouchers)
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';     // Voucher status (active or inactive)
+  status?: 'ACTIVE' | 'INACTIVE';     // Voucher status (active or inactive)
 }
 
 /**
@@ -38,7 +38,7 @@ export interface IVoucherUpdate {
   endDate?: string | Date;                       // End date (when voucher expires)
   minOrderValue?: number;                        // Minimum order value required to apply voucher
   maxDiscount?: number;                          // Maximum discount amount (for percentage vouchers)
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';     // Voucher status (active or inactive)
+  status?: 'ACTIVE' | 'INACTIVE';     // Voucher status (active or inactive)
 }
 
 /**

@@ -34,8 +34,8 @@ export type PaymentMethod =
   | 'MIXED';
 
 export type EntityStatus = 
-  | 'HOAT_DONG' 
-  | 'KHONG_HOAT_DONG';
+  | 'ACTIVE' 
+  | 'INACTIVE';
 
 export type ReturnStatus = 
   | 'CHO_XU_LY' 

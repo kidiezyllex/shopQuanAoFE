@@ -94,9 +94,12 @@ export default function ProductsPage() {
           toast.success('Đã xóa sản phẩm thành công');
           queryClient.invalidateQueries({ queryKey: ['products'] });
         },
+        onError: (error: any) => {
+          toast.error(`Xóa sản phẩm thất bại: ${error?.response?.data?.message || error.message || 'Đã có lỗi xảy ra'}`);
+        }
       });
-    } catch (error) {
-      toast.error('Xóa sản phẩm thất bại');
+    } catch (error: any) {
+      toast.error(`Xóa sản phẩm thất bại: ${error?.response?.data?.message || error.message || 'Đã có lỗi xảy ra'}`);
     }
   };
 
@@ -252,9 +255,9 @@ export default function ProductsPage() {
                     <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Tất cả trạng thái">
-                          {filters.status === 'HOAT_DONG' 
+                          {filters.status === 'ACTIVE' 
                             ? 'Hoạt động' 
-                            : filters.status === 'KHONG_HOAT_DONG' 
+                            : filters.status === 'INACTIVE' 
                             ? 'Không hoạt động' 
                             : 'Tất cả trạng thái'
                           }
@@ -262,8 +265,8 @@ export default function ProductsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                        <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                        <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                        <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                        <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -377,11 +380,11 @@ export default function ProductsPage() {
                         })()}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${product.status === 'HOAT_DONG'
+                        <span className={`px-2 py-1 text-xs rounded-full ${product.status === 'ACTIVE'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                           }`}>
-                          {product.status === 'HOAT_DONG' ? 'Hoạt động' : 'Không hoạt động'}
+                          {product.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                         </span>
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
@@ -398,12 +401,7 @@ export default function ProductsPage() {
                               <Icon path={mdiPencilCircle} size={0.7} />
                             </Button>
                           </a>
-                          <Dialog open={isDeleteDialogOpen && productToDelete === product.id} onOpenChange={(open) => {
-                            if (!open) {
-                              setIsDeleteDialogOpen(false);
-                              setProductToDelete(null);
-                            }
-                          }}>
+                          <Dialog>
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
@@ -417,27 +415,27 @@ export default function ProductsPage() {
                                 <Icon path={mdiDeleteCircle} size={0.7} />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Xác nhận xóa sản phẩm</DialogTitle>
-                              </DialogHeader>
-                              <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
-                              <DialogFooter>
-                                <DialogClose asChild>
+                            {isDeleteDialogOpen && productToDelete === product.id && (
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Xác nhận xóa sản phẩm</DialogTitle>
+                                </DialogHeader>
+                                <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
+                                <DialogFooter>
                                   <Button variant="outline" onClick={() => {
                                     setIsDeleteDialogOpen(false);
                                     setProductToDelete(null);
                                   }}>Hủy</Button>
-                                </DialogClose>
-                                <Button variant="destructive" onClick={() => {
-                                  if (productToDelete) {
-                                    handleDeleteProduct(productToDelete);
-                                    setIsDeleteDialogOpen(false);
-                                    setProductToDelete(null);
-                                  }
-                                }}>Xóa</Button>
-                              </DialogFooter>
-                            </DialogContent>
+                                  <Button variant="destructive" onClick={() => {
+                                    if (productToDelete) {
+                                      handleDeleteProduct(productToDelete);
+                                      setIsDeleteDialogOpen(false);
+                                      setProductToDelete(null);
+                                    }
+                                  }}>Xóa</Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            )}
                           </Dialog>
                         </div>
                       </TableCell>

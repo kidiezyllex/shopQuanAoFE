@@ -1,81 +1,90 @@
-'use client';
+'use client'; // Kích hoạt rendering phía client trong Next.js
 
-import { useState } from 'react';
- 
-import { useNavigate } from 'react-router-dom';
-import { IAccountCreate } from '@/interface/request/account';
+import { useState } from 'react'; // Hook useState để quản lý state
+import { useNavigate } from 'react-router-dom'; // Hook điều hướng trong React Router
+import { IAccountCreate } from '@/interface/request/account'; // Interface định nghĩa dữ liệu tạo tài khoản
+
+// Import các thành phần giao diện tùy chỉnh
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Icon } from '@mdi/react';
-import { mdiArrowLeft, mdiLoading } from '@mdi/js';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useRegister } from '@/hooks/authentication';
-import { Eye, EyeOff } from "lucide-react";
+import { toast } from 'react-toastify'; // Thư viện thông báo toast
+import 'react-toastify/dist/ReactToastify.css'; // CSS cho toast
+import { Icon } from '@mdi/react'; // Component icon
+import { mdiArrowLeft, mdiLoading } from '@mdi/js'; // Icon SVG
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // Radio button
+import { useRegister } from '@/hooks/authentication'; // Hook xử lý đăng ký tài khoản
+import { Eye, EyeOff } from 'lucide-react'; // Icon ẩn/hiện mật khẩu
 
+// Giá trị khởi tạo cho form tài khoản
 const initialAccount: IAccountCreate = {
-  fullName: '',
-  email: '',
-  password: '',
-  phoneNumber: '',
-  role: 'CUSTOMER',
-  gender: 'male',
-  birthday: '',
-  citizenId: ''
+  fullName: '', // Họ và tên
+  email: '', // Email
+  password: '', // Mật khẩu
+  phoneNumber: '', // Số điện thoại
+  role: 'CUSTOMER', // Vai trò mặc định
+  gender: 'male', // Giới tính mặc định
+  birthday: '', // Ngày sinh
+  citizenId: '' // CCCD
 };
 
+// Component chính
 export default function CreateAccountPage() {
-  const navigate = useNavigate();
-  const [account, setAccount] = useState<IAccountCreate>(initialAccount);
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const createAccount = useRegister();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate(); // Hook điều hướng quay lại
+  const [account, setAccount] = useState<IAccountCreate>(initialAccount); // State tài khoản
+  const [confirmPassword, setConfirmPassword] = useState(''); // State xác nhận mật khẩu
+  const createAccount = useRegister(); // Hook đăng ký
+  const [showPassword, setShowPassword] = useState(false); // Ẩn/hiện mật khẩu
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Ẩn/hiện xác nhận mật khẩu
 
+  // Xử lý thay đổi input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setAccount({ ...account, [name]: value });
+    const { name, value } = e.target; // Lấy name và value
+    setAccount({ ...account, [name]: value }); // Cập nhật state
   };
 
+  // Xử lý select hoặc radio
   const handleSelectChange = (name: string, value: string) => {
     setAccount({ ...account, [name]: value });
   };
 
+  // Toggle hiển thị mật khẩu
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  // Toggle hiển thị xác nhận mật khẩu
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  // Gửi form
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Ngăn reload trang
 
-    // Validate form
+    // Kiểm tra bắt buộc
     if (!account.fullName || !account.email || !account.password || !account.phoneNumber) {
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
 
+    // Kiểm tra xác nhận mật khẩu
     if (account.password !== confirmPassword) {
       toast.error('Mật khẩu xác nhận không khớp');
       return;
     }
 
-    // Email validation
+    // Regex email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(account.email)) {
       toast.error('Email không hợp lệ');
       return;
     }
 
-    // Phone number validation (Vietnamese format)
+    // Regex số điện thoại
     const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
     if (!phoneRegex.test(account.phoneNumber)) {
       toast.error('Số điện thoại không hợp lệ');
@@ -83,6 +92,7 @@ export default function CreateAccountPage() {
     }
 
     try {
+      // Gửi dữ liệu tạo tài khoản
       await createAccount.mutateAsync({
         ...account,
         birthday: account.birthday ? new Date(account.birthday) : undefined,
@@ -107,9 +117,10 @@ export default function CreateAccountPage() {
     }
   };
 
+  // Giao diện JSX
   return (
-    <div className="space-y-4">
-      <div className='flex justify-between items-start'>
+    <div className="space-y-4"> {/* Container chính */}
+      <div className='flex justify-between items-start'> {/* Breadcrumb và nút quay lại */}
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -135,13 +146,13 @@ export default function CreateAccountPage() {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}> {/* Form */}
         <Card>
           <CardHeader>
             <CardTitle>Thông tin tài khoản</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-maintext">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Chia 2 cột */}
               <div className="space-y-2">
                 <Label htmlFor="fullName">Họ và tên <span className="text-red-500">*</span></Label>
                 <Input
@@ -173,7 +184,7 @@ export default function CreateAccountPage() {
                   <Input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={account.password}
                     onChange={handleInputChange}
                     placeholder="Nhập mật khẩu"
@@ -196,7 +207,7 @@ export default function CreateAccountPage() {
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Xác nhận mật khẩu"
@@ -227,10 +238,7 @@ export default function CreateAccountPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="role">Vai trò <span className="text-red-500">*</span></Label>
-                <Select 
-                  value={account.role} 
-                  onValueChange={(value) => handleSelectChange('role', value)}
-                >
+                <Select value={account.role} onValueChange={(value) => handleSelectChange('role', value)}>
                   <SelectTrigger id="role">
                     <SelectValue placeholder="Chọn vai trò" />
                   </SelectTrigger>
@@ -265,11 +273,7 @@ export default function CreateAccountPage() {
 
               <div className="space-y-2">
                 <Label>Giới tính</Label>
-                <RadioGroup 
-                  value={account.gender || 'male'}
-                  onValueChange={(value) => handleSelectChange('gender', value)}
-                  className="flex space-x-4"
-                >
+                <RadioGroup value={account.gender || 'male'} onValueChange={(value) => handleSelectChange('gender', value)} className="flex space-x-4">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="male" id="gender-nam" />
                     <Label htmlFor="gender-nam">Nam</Label>
@@ -286,19 +290,11 @@ export default function CreateAccountPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end space-x-4">
-            <Button 
-              variant="outline" 
-              type="button" 
-              onClick={() => navigate(-1)}
-            >
+          <CardFooter className="flex justify-end space-x-4"> {/* Footer */}
+            <Button variant="outline" type="button" onClick={() => navigate(-1)}>
               Hủy
             </Button>
-            <Button 
-              type="submit" 
-              disabled={createAccount.isPending}
-              className="flex items-center gap-2"
-            >
+            <Button type="submit" disabled={createAccount.isPending} className="flex items-center gap-2">
               {createAccount.isPending ? (
                 <>
                   <Icon path={mdiLoading} size={0.7} className="animate-spin" />
@@ -313,4 +309,4 @@ export default function CreateAccountPage() {
       </form>
     </div>
   );
-} 
+}

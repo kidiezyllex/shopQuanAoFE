@@ -25,11 +25,11 @@ export interface IAccountUpdate {
   birthday?: string | Date;
   citizenId?: string;
   avatar?: string;
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IAccountStatusUpdate {
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IAddress {

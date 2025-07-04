@@ -29,16 +29,16 @@ export default function EditPromotionPage() {
   
   const { data: promotionData, isLoading: isLoadingPromotion } = usePromotionDetail(promotionId);
   const updatePromotion = useUpdatePromotion();
-  const { data: productsData } = useProducts({ limit: 100, status: 'HOAT_DONG' });
+  const { data: productsData } = useProducts({ limit: 100, status: 'ACTIVE' });
 
   const [formData, setFormData] = useState<IPromotionUpdate>({
     name: '',
     description: '',
     discountPercent: 0,
-    products: [],
+    productIds: [],
     startDate: '',
     endDate: '',
-    status: 'HOAT_DONG',
+    status: 'ACTIVE',
   });
 
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -55,10 +55,10 @@ export default function EditPromotionPage() {
         name: promotion.name,
         description: promotion.description || '',
         discountPercent: promotion.discountPercent,
-        products: Array.isArray(promotion.products) ? promotion.products.map((p: any) => typeof p === 'string' ? p : p.id) : [],
+        productIds: Array.isArray(promotion.productIds) ? promotion.productIds.map((p: any) => typeof p === 'string' ? p : p.id) : [],
         startDate: startDate.toISOString().slice(0, 16),
         endDate: endDate.toISOString().slice(0, 16),
-        status: promotion.status,
+        status: promotion.status as any,
       });
 
       // Set product selection state
@@ -138,7 +138,7 @@ export default function EditPromotionPage() {
 
     const submitData: IPromotionUpdate = {
       ...formData,
-      products: applyToAllProducts ? [] : selectedProducts,
+      productIds: applyToAllProducts ? [] : selectedProducts,
     };
 
     try {
@@ -318,8 +318,8 @@ export default function EditPromotionPage() {
                     <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                    <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                    <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                    <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -403,7 +403,7 @@ export default function EditPromotionPage() {
                         <p><strong>Giảm giá:</strong> {formData.discountPercent}%</p>
                         <p><strong>Thời gian:</strong> {formData.startDate ? new Date(formData.startDate).toLocaleString('vi-VN') : 'Chưa chọn'} - {formData.endDate ? new Date(formData.endDate).toLocaleString('vi-VN') : 'Chưa chọn'}</p>
                         <p><strong>Áp dụng:</strong> {applyToAllProducts ? 'Tất cả sản phẩm' : `${selectedProducts.length} sản phẩm được chọn`}</p>
-                        <p><strong>Trạng thái:</strong> {formData.status === 'HOAT_DONG' ? 'Hoạt động' : 'Không hoạt động'}</p>
+                        <p><strong>Trạng thái:</strong> {formData.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}</p>
                       </div>
                     </div>
                   </div>

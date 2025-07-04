@@ -116,8 +116,8 @@ export default function BrandsPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                                    <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                                    <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                                    <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                                    <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -214,11 +214,11 @@ export default function BrandsPage() {
                                                 <div className="text-sm font-medium text-maintext">{brand.name}</div>
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap">
-                                                <span className={`px-2 py-1 text-xs rounded-full ${brand.status === 'HOAT_DONG'
+                                                <span className={`px-2 py-1 text-xs rounded-full ${brand.status === 'ACTIVE'
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-red-100 text-red-800'
                                                     }`}>
-                                                    {brand.status === 'HOAT_DONG' ? 'Hoạt động' : 'Không hoạt động'}
+                                                    {brand.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
@@ -320,7 +320,7 @@ function EditBrandDialog({ brandId, isOpen, onClose }: EditBrandDialogProps) {
 
     const [formData, setFormData] = useState({
         name: '',
-        status: 'HOAT_DONG' as 'HOAT_DONG' | 'KHONG_HOAT_DONG'
+        status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
     });
 
     const [errors, setErrors] = useState({
@@ -347,7 +347,7 @@ function EditBrandDialog({ brandId, isOpen, onClose }: EditBrandDialogProps) {
     };
 
     const handleStatusChange = (value: string) => {
-        setFormData((prev) => ({ ...prev, status: value as 'HOAT_DONG' | 'KHONG_HOAT_DONG' }));
+        setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
     };
 
     const validateForm = () => {
@@ -460,8 +460,8 @@ function EditBrandDialog({ brandId, isOpen, onClose }: EditBrandDialogProps) {
                             <SelectValue placeholder="Chọn trạng thái" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                            <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                            <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                            <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -495,7 +495,7 @@ function CreateBrandDialog({ isOpen, onClose }: CreateBrandDialogProps) {
 
     const [formData, setFormData] = useState({
         name: '',
-        status: 'HOAT_DONG' as 'HOAT_DONG' | 'KHONG_HOAT_DONG'
+        status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
     });
 
     const [errors, setErrors] = useState({
@@ -513,7 +513,7 @@ function CreateBrandDialog({ isOpen, onClose }: CreateBrandDialogProps) {
     };
 
     const handleStatusChange = (value: string) => {
-        setFormData((prev) => ({ ...prev, status: value as 'HOAT_DONG' | 'KHONG_HOAT_DONG' }));
+        setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
     };
 
     const validateForm = () => {
@@ -544,7 +544,7 @@ function CreateBrandDialog({ isOpen, onClose }: CreateBrandDialogProps) {
                         // Reset form
                         setFormData({
                             name: '',
-                            status: 'HOAT_DONG'
+                            status: 'ACTIVE'
                         });
                         onClose();
                     },
@@ -587,8 +587,8 @@ function CreateBrandDialog({ isOpen, onClose }: CreateBrandDialogProps) {
                             <SelectValue placeholder="Chọn trạng thái" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                            <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                            <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                            <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

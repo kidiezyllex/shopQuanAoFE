@@ -126,8 +126,8 @@ export default function ColorsPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                                    <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                                    <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                                    <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                                    <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -241,11 +241,11 @@ export default function ColorsPage() {
                                                 {color.code}
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap">
-                                                <span className={`px-2 py-1 text-xs rounded-full ${color.status === 'HOAT_DONG'
+                                                <span className={`px-2 py-1 text-xs rounded-full ${color.status === 'ACTIVE'
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-red-100 text-red-800'
                                                     }`}>
-                                                    {color.status === 'HOAT_DONG' ? 'Hoạt động' : 'Không hoạt động'}
+                                                    {color.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
@@ -355,7 +355,7 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
     const [formData, setFormData] = useState({
         name: '',
         code: '',
-        status: 'HOAT_DONG' as 'HOAT_DONG' | 'KHONG_HOAT_DONG'
+        status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
     });
 
     const [errors, setErrors] = useState({
@@ -383,7 +383,7 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
     };
 
     const handleStatusChange = (value: string) => {
-        setFormData((prev) => ({ ...prev, status: value as 'HOAT_DONG' | 'KHONG_HOAT_DONG' }));
+        setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
     };
 
     const validateForm = () => {
@@ -550,8 +550,8 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
                             <SelectValue placeholder="Chọn trạng thái" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                            <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                            <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                            <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -587,7 +587,7 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
     const [formData, setFormData] = useState({
         name: '',
         code: '',
-        status: 'HOAT_DONG' as 'HOAT_DONG' | 'KHONG_HOAT_DONG'
+        status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
     });
 
     const [errors, setErrors] = useState({
@@ -605,7 +605,7 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
     };
 
     const handleStatusChange = (value: string) => {
-        setFormData((prev) => ({ ...prev, status: value as 'HOAT_DONG' | 'KHONG_HOAT_DONG' }));
+        setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
     };
 
     const validateForm = () => {
@@ -659,7 +659,7 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
                         setFormData({
                             name: '',
                             code: '',
-                            status: 'HOAT_DONG'
+                            status: 'ACTIVE'
                         });
                         onClose();
                     },
@@ -731,8 +731,8 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
                             <SelectValue placeholder="Chọn trạng thái" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                            <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                            <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                            <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

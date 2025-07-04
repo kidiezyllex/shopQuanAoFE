@@ -54,7 +54,7 @@ export interface IProduct {
   description: string;
   weight: number;
   variants: IPopulatedProductVariant[];
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
   updatedAt: string;
   price: number;

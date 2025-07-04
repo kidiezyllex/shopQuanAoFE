@@ -111,7 +111,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import VouchersDialog from './components/VouchersDialog';
 import InvoiceDialog from './components/InvoiceDialog';
-// QR Code Component
+
+/**
+ * QR Code Component
+ * Generates a QR code image using an external API service
+ * Used for displaying payment QR codes and product information
+ * 
+ * @param value - The data to be encoded in the QR code
+ * @param size - The dimensions of the QR code in pixels (default: 200)
+ * @returns A rendered QR code image with border styling
+ */
 const QRCodeComponent = ({ value, size = 200 }: { value: string; size?: number }) => {
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
 
@@ -126,7 +135,18 @@ const QRCodeComponent = ({ value, size = 200 }: { value: string; size?: number }
   );
 };
 
-// Card Skeleton Component
+/**
+ * Card Skeleton Component
+ * Displays a loading placeholder for product cards while data is being fetched
+ * Improves perceived performance by showing a visual representation of the content structure
+ * 
+ * Includes skeleton placeholders for:
+ * - Product image (full width)
+ * - Product name (3/4 width)
+ * - Price information (1/2 width)
+ * - Variant indicators (circular shapes)
+ * - Action button (full width)
+ */
 const CardSkeleton = () => (
   <div className="bg-white rounded-[6px] border border-border shadow-sm overflow-hidden">
     <Skeleton className="h-48 w-full" />
@@ -145,66 +165,96 @@ const CardSkeleton = () => (
   </div>
 );
 
+/**
+ * Interface for product variant data from the API
+ * Represents the different variations of a product (color, size, etc.)
+ */
 interface ApiVariant {
   id: string;
-  colorId?: { id: string; name: string; code: string; images?: string[] };
-  sizeId?: { id: string; name: string; value?: string; };
-  price: number;
-  stock: number;
-  images?: string[];
-  sku?: string;
-  actualSizeId?: string;
+  colorId?: { id: string; name: string; code: string; images?: string[] };  // Color information if applicable
+  sizeId?: { id: string; name: string; value?: string; };                   // Size information if applicable
+  price: number;                                                            // Variant price
+  stock: number;                                                            // Available stock
+  images?: string[];                                                        // Variant-specific images
+  sku?: string;                                                            // Stock Keeping Unit
+  actualSizeId?: string;                                                   // Reference to actual size ID
 }
 
+/**
+ * Interface for product data from the API
+ * Contains core product information and its variants
+ */
 interface ApiProduct {
-  id: string;
-  name: string;
-  brand: { id: string; name: string; } | string;
-  category: { id: string; name: string; } | string;
-  description?: string;
-  variants: ApiVariant[];
-  status?: string;
-  createdAt: string;
+  id: string;                                                              // Unique product identifier
+  name: string;                                                            // Product name
+  brand: { id: string; name: string; } | string;                          // Brand information or brand ID
+  category: { id: string; name: string; } | string;                       // Category information or category ID
+  description?: string;                                                    // Optional product description
+  variants: ApiVariant[];                                                  // Array of product variants
+  status?: string;                                                         // Product status (e.g., active, inactive)
+  createdAt: string;                                                       // Product creation timestamp
 }
+
+/**
+ * Interface for shop information in invoices
+ * Contains business details for receipt printing
+ */
 interface InvoiceShopInfo {
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
+  name: string;                                                            // Shop name
+  address: string;                                                         // Shop address
+  phone: string;                                                          // Contact phone number
+  email: string;                                                          // Contact email
 }
 
+/**
+ * Interface for customer information in invoices
+ * Contains basic customer details for receipt
+ */
 interface InvoiceCustomerInfo {
-  name: string;
-  phone: string;
+  name: string;                                                           // Customer name
+  phone: string;                                                          // Customer phone number
 }
 
+/**
+ * Interface for individual items in an invoice
+ * Represents a purchased product with its details
+ */
 interface InvoiceItem {
-  name: string;
-  quantity: number;
-  price: number;
-  total: number;
-  color: string;
-  size: string;
+  name: string;                                                           // Product name
+  quantity: number;                                                       // Quantity purchased
+  price: number;                                                          // Unit price
+  total: number;                                                          // Total price (quantity * price)
+  color: string;                                                         // Selected color
+  size: string;                                                          // Selected size
 }
 
+/**
+ * Interface for complete invoice data
+ * Contains all information needed for generating a receipt
+ */
 interface InvoiceData {
-  shopInfo: InvoiceShopInfo;
-  customerInfo: InvoiceCustomerInfo;
-  orderId: string;
-  employee: string;
-  createdAt: string;
-  items: InvoiceItem[];
-  subTotal: number;
-  discount: number;
-  voucherCode?: string;
-  total: number;
-  cashReceived: number;
-  changeGiven: number;
-  paymentMethod: string;
+  shopInfo: InvoiceShopInfo;                                             // Shop details
+  customerInfo: InvoiceCustomerInfo;                                     // Customer details
+  orderId: string;                                                       // Unique order identifier
+  employee: string;                                                      // Employee who processed the sale
+  createdAt: string;                                                     // Order timestamp
+  items: InvoiceItem[];                                                  // Array of purchased items
+  subTotal: number;                                                      // Sum before discounts
+  discount: number;                                                      // Applied discount amount
+  voucherCode?: string;                                                  // Applied voucher code if any
+  total: number;                                                         // Final amount after discounts
+  cashReceived: number;                                                   // Cash received from customer
+  changeGiven: number;                                                   // Change to be given to customer
+  paymentMethod: string;                                                 // Payment method used
 }
 
-
-// Fix the image URL extraction for variants
+/**
+ * Extracts and validates the image URL from a product variant
+ * Handles different image data structures and provides a fallback image
+ * 
+ * @param variant - The product variant containing image data
+ * @returns A valid image URL or fallback image path
+ */
 const getVariantImageUrl = (variant: any) => {
   if (!variant?.images || !Array.isArray(variant.images) || variant.images.length === 0) {
     return '/images/white-image.png';
@@ -223,7 +273,13 @@ const getVariantImageUrl = (variant: any) => {
   return '/images/white-image.png';
 };
 
-// Convert API variant to ApiVariant interface
+/**
+ * Converts raw variant data from the API to a standardized ApiVariant interface
+ * Handles both populated and non-populated data structures for color and size
+ * 
+ * @param variant - Raw variant data from the API
+ * @returns Standardized ApiVariant object
+ */
 const convertVariantToApiVariant = (variant: any): ApiVariant => {
   // Handle case where variant might be null or undefined
   if (!variant) {
@@ -238,7 +294,7 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
   // Handle color data - check for populated vs non-populated
   let colorData = undefined;
   if (variant.color) {
-    // Populated format
+    // Populated format - color data is directly available
     colorData = {
       id: variant.color.id?.toString() || '',
       name: variant.color.name || 'N/A',
@@ -267,7 +323,7 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
   // Handle size data - check for populated vs non-populated
   let sizeData = undefined;
   if (variant.size) {
-    // Populated format
+    // Populated format - size data is directly available
     sizeData = {
       id: variant.size.id?.toString() || '',
       name: variant.size.name || (variant.size.value ? getSizeLabel(Number(variant.size.value)) : 'N/A'),
@@ -290,6 +346,7 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
     }
   }
 
+  // Return standardized variant data
   return {
     id: variant.id?.toString() || variant._id?.toString() || '',
     colorId: colorData,
@@ -302,7 +359,13 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
   };
 };
 
-// Convert API product to ApiProduct interface
+/**
+ * Converts raw product data from the API to a standardized ApiProduct interface
+ * Handles missing or incomplete product data with fallback values
+ * 
+ * @param product - Raw product data from the API
+ * @returns Standardized ApiProduct object with converted variants
+ */
 const convertProductToApiProduct = (product: any): ApiProduct => {
   if (!product) {
     return {
@@ -327,29 +390,34 @@ const convertProductToApiProduct = (product: any): ApiProduct => {
   };
 };
 
+/**
+ * Main POS (Point of Sale) page component
+ * Manages product selection, cart operations, and checkout process
+ */
 export default function POSPage() {
+  // State for product selection and search
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<ApiProduct | null>(null);
   const [selectedApiVariant, setSelectedApiVariant] = useState<ApiVariant | null>(null);
 
-  // Pending carts store
+  // Initialize cart management from store
   const {
-    carts: pendingCarts,
-    activeCartId,
-    createNewCart,
-    deleteCart,
-    setActiveCart,
-    addItemToCart: addItemToPendingCart,
-    removeItemFromCart: removeItemFromPendingCart,
-    updateItemQuantityInCart: updateItemQuantityInPendingCart,
-    clearCartItems: clearPendingCartItems,
-    setCartDiscount: setPendingCartDiscount,
-    getActiveCart,
+    carts: pendingCarts,              // All pending shopping carts
+    activeCartId,                     // Currently active cart ID
+    createNewCart,                    // Function to create a new cart
+    deleteCart,                       // Function to delete a cart
+    setActiveCart,                    // Function to switch active cart
+    addItemToCart: addItemToPendingCart,  // Add item to pending cart
+    removeItemFromCart: removeItemFromPendingCart,  // Remove item from pending cart
+    updateItemQuantityInCart: updateItemQuantityInPendingCart,  // Update item quantity
+    clearCartItems: clearPendingCartItems,  // Clear all items from cart
+    setCartDiscount: setPendingCartDiscount,  // Apply discount to cart
+    getActiveCart,                    // Get currently active cart
   } = usePendingCartsStore();
 
+  // Get active cart data
   const activeCart = getActiveCart();
   const cartItems = activeCart?.items || [];
-  console.log(cartItems)
   const appliedDiscount = activeCart?.appliedDiscount || 0;
   const appliedVoucher = activeCart?.appliedVoucher || null;
   const couponCode = activeCart?.couponCode || '';
@@ -379,7 +447,7 @@ export default function POSPage() {
   const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState<boolean>(false);
   const [transferPaymentCompleted, setTransferPaymentCompleted] = useState<boolean>(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 6 });
-  const [filters, setFilters] = useState<IProductFilter>({ status: 'HOAT_DONG' });
+  const [filters, setFilters] = useState<IProductFilter>({ status: 'ACTIVE' });
   const [sortOption, setSortOption] = useState<string>('newest');
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [activeCategoryName, setActiveCategoryName] = useState<string>('Tất cả sản phẩm');
@@ -407,7 +475,7 @@ export default function POSPage() {
 
   const accountsParams = useMemo(() => ({
     role: 'CUSTOMER' as const,
-    status: 'HOAT_DONG' as const,
+    status: 'ACTIVE' as const,
     limit: 100
   }), []);
 
@@ -458,7 +526,7 @@ export default function POSPage() {
     if (!isSearching) return { keyword: '' };
     return {
       keyword: searchQuery,
-      status: 'HOAT_DONG' as const,
+      status: 'ACTIVE' as const,
       page: pagination.page,
       limit: pagination.limit,
       ...(filters.categories && { categories: filters.categories })
@@ -544,6 +612,13 @@ export default function POSPage() {
     return [...baseCategories, ...Array.from(uniqueCatObjects.values())];
   }, [dataWithPromotions?.data?.products?.length]);
 
+  /**
+   * Handles product selection from the product list
+   * Updates the selected product and variant states
+   * Preserves promotion information when converting product data
+   * 
+   * @param product - The selected product from the list
+   */
   const handleProductSelect = (product: any) => {
     // Keep the product with promotion info intact
     const productWithPromotion = { ...product };
@@ -558,13 +633,6 @@ export default function POSPage() {
       (convertedProduct as any).originalPrice = (product as any).originalPrice;
       (convertedProduct as any).discountPercent = (product as any).discountPercent;
       (convertedProduct as any).appliedPromotion = (product as any).appliedPromotion;
-      
-      console.log('Product selected with promotion:', {
-        name: convertedProduct.name,
-        originalPrice: (convertedProduct as any).originalPrice,
-        discountedPrice: (convertedProduct as any).discountedPrice,
-        discountPercent: (convertedProduct as any).discountPercent
-      });
     }
     
     setSelectedProduct(convertedProduct);
@@ -584,6 +652,13 @@ export default function POSPage() {
     }
   };
 
+  /**
+   * Handles color selection from the product detail view
+   * Updates the selected variant based on color choice
+   * Prioritizes variants with available stock
+   * 
+   * @param colorId - ID of the selected color
+   */
   const handleColorSelectFromDetail = (colorId: string) => {
     if (!selectedProduct) return;
 
@@ -602,6 +677,13 @@ export default function POSPage() {
     }
   };
 
+  /**
+   * Handles size selection from the product detail view
+   * Updates the selected variant based on size choice
+   * Maintains the currently selected color
+   * 
+   * @param sizeId - ID of the selected size
+   */
   const handleSizeSelectFromDetail = (sizeId: string) => {
     if (!selectedProduct || !selectedApiVariant?.colorId) return;
 
@@ -618,30 +700,38 @@ export default function POSPage() {
     }
   };
 
-  // Helper function to add item to the correct cart (pending or main)
+  /**
+   * Adds a product to the appropriate cart
+   * Handles product data conversion and promotion pricing
+   * Creates unique cart item IDs and manages stock validation
+   * 
+   * @param product - Product to add to cart
+   * @param variant - Selected variant of the product
+   * @param isAlreadyConverted - Whether the product data is already in API format
+   */
   const addItemToCorrectCart = (product: any, variant: any, isAlreadyConverted = false) => {
-    // Always ensure proper conversion unless explicitly told variant is already converted
+    // Convert product and variant data to standard format if needed
     const convertedProduct = isAlreadyConverted ? product : convertProductToApiProduct(product);
     const convertedVariant = isAlreadyConverted ? variant : convertVariantToApiVariant(variant);
 
-
-
+    // Create unique cart item identifier
     const cartItemId = `${convertedProduct.id}-${convertedVariant.id}`;
     
-    // Apply promotions to get the correct price
+    // Initialize pricing variables
     let finalPrice = convertedVariant.price;
     let originalPrice = undefined;
     let discountPercent = undefined;
     let hasDiscount = false;
 
-    // Check if product already has discount applied (from product list)
+    // Check for promotion and apply discount if applicable
     if ((product as any).hasDiscount) {
+      // If product has a discount, use the discounted price
       finalPrice = (product as any).discountedPrice;
       originalPrice = (product as any).originalPrice;
       discountPercent = (product as any).discountPercent;
       hasDiscount = true;
     } else if (promotionsData?.data?.promotions?.length > 0) {
-      // Apply promotions if not already applied
+      // If no discount applied, check for active promotions
       const activePromotions = filterActivePromotions(promotionsData.data.promotions);
       const productWithPromotions = applyPromotionsToProducts([convertedProduct], activePromotions);
       const promotedProduct = productWithPromotions[0];
@@ -651,11 +741,10 @@ export default function POSPage() {
         originalPrice = promotedProduct.originalPrice;
         discountPercent = promotedProduct.discountPercent;
         hasDiscount = true;
-        // Optional: Add success notification for promotion
-        console.log(`Promotion applied: ${discountPercent}% off on ${convertedProduct.name}`);
       }
     }
 
+    // Create new cart item
     const newItem: POSCartItem = {
       id: cartItemId,
       productId: convertedProduct.id,
@@ -676,11 +765,12 @@ export default function POSPage() {
     };
 
     if (activeCartId) {
-      // Add to pending cart
+      // Add to existing cart if there's an active cart
       const existingItem = cartItems.find(item => item.id === cartItemId);
       const activeCartName = pendingCarts.find(cart => cart.id === activeCartId)?.name || 'Giỏ hàng';
 
       if (existingItem) {
+        // If item already exists, increase quantity
         if (existingItem.quantity < convertedVariant.stock) {
           updateItemQuantityInPendingCart(activeCartId, cartItemId, 1);
           toast.success(`Đã cập nhật số lượng sản phẩm trong ${activeCartName}.`);
@@ -688,11 +778,12 @@ export default function POSPage() {
           toast.warn('Số lượng sản phẩm trong kho không đủ.');
         }
       } else {
+        // If new item, add to cart
         addItemToPendingCart(activeCartId, newItem);
         toast.success(`Đã thêm sản phẩm vào ${activeCartName}`);
       }
     } else {
-      // Fallback to main cart if no pending cart is active
+      // Add to main cart if no active cart
       const existingItem = mainCartItems.find(item => item.id === cartItemId);
       if (existingItem) {
         if (existingItem.quantity < convertedVariant.stock) {
@@ -708,214 +799,135 @@ export default function POSPage() {
     }
   };
 
+  /**
+   * Adds the currently selected product and variant to the cart
+   * Validates stock availability before adding
+   * Shows appropriate success/error messages
+   */
   const addToCart = () => {
     if (!selectedProduct || !selectedApiVariant) {
-      toast.error('Vui lòng chọn sản phẩm, màu và kích thước.');
+      toast.error('Vui lòng chọn sản phẩm và biến thể.');
       return;
     }
 
-    if (selectedApiVariant.stock === 0) {
-      toast.error('Sản phẩm này đã hết hàng.');
+    if (selectedApiVariant.stock <= 0) {
+      toast.error('Sản phẩm đã hết hàng.');
       return;
     }
 
-    // Use selectedProduct which already has promotion info preserved
-    addItemToCorrectCart(selectedProduct, selectedApiVariant, false);
-
-    setSelectedProduct(null);
-    setSelectedApiVariant(null);
+    addItemToCorrectCart(selectedProduct, selectedApiVariant, true);
   };
 
+  /**
+   * Updates the quantity of an item in the cart
+   * Handles both increment and decrement operations
+   * Validates against available stock
+   * 
+   * @param id - Cart item ID
+   * @param amount - Amount to change (positive for increment, negative for decrement)
+   */
   const updateCartItemQuantity = (id: string, amount: number) => {
+    const item = cartItems.find(item => item.id === id);
+    if (!item) return;
+
+    const variant = selectedProduct?.variants.find(v => 
+      `${selectedProduct.id}-${v.id}` === id
+    );
+    
+    if (!variant) return;
+
+    const newQuantity = item.quantity + amount;
+    
+    if (newQuantity <= 0) {
+      removeCartItem(id);
+      return;
+    }
+
+    if (newQuantity > variant.stock) {
+      toast.error('Số lượng vượt quá hàng tồn kho.');
+      return;
+    }
+
     if (activeCartId) {
-      const item = cartItems.find(item => item.id === id);
-      if (!item) return;
-
-      const newQuantity = item.quantity + amount;
-      if (newQuantity <= 0) {
-        removeItemFromPendingCart(activeCartId, id);
-        return;
-      }
-
-      if (newQuantity > item.stock) {
-        toast.warn(`Chỉ còn ${item.stock} sản phẩm trong kho.`);
-        return;
-      }
-
       updateItemQuantityInPendingCart(activeCartId, id, amount);
-
-      // Check voucher validity after quantity update
-      if (appliedVoucher) {
-        const subtotal = calculateCartSubtotal();
-        if (subtotal < parseFloat(appliedVoucher.minOrderValue)) {
-          toast.warn(`Đơn hàng không còn đủ điều kiện cho mã "${appliedVoucher.code}". Đã xóa mã.`);
-          setPendingCartDiscount(activeCartId, 0, null, '');
-        } else {
-          let newDiscountAmount = 0;
-          if (appliedVoucher.type === 'PERCENTAGE') {
-            newDiscountAmount = (subtotal * parseFloat(appliedVoucher.value)) / 100;
-            if (appliedVoucher.maxDiscount && newDiscountAmount > parseFloat(appliedVoucher.maxDiscount)) {
-              newDiscountAmount = parseFloat(appliedVoucher.maxDiscount);
-            }
-          } else if (appliedVoucher.type === 'FIXED_AMOUNT') {
-            newDiscountAmount = parseFloat(appliedVoucher.value);
-          }
-          newDiscountAmount = Math.min(newDiscountAmount, subtotal);
-          setPendingCartDiscount(activeCartId, newDiscountAmount, appliedVoucher, couponCode);
-        }
-      }
     } else {
-      // Fallback to main cart
-      const item = mainCartItems.find(item => item.id === id);
-      if (!item) return;
-
-      const newQuantity = item.quantity + amount;
-      if (newQuantity <= 0) {
-        removeFromCartStore(id);
-        return;
-      }
-
-      if (newQuantity > item.stock) {
-        toast.warn(`Chỉ còn ${item.stock} sản phẩm trong kho.`);
-        return;
-      }
-
-      updateQuantityStore(id, amount);
+      updateQuantityStore(id, amount); // Sửa thành updateQuantityStore
     }
   };
 
+  /**
+   * Removes an item from the cart
+   * Handles removal from both main cart and pending carts
+   * 
+   * @param id - Cart item ID to remove
+   */
   const removeCartItem = (id: string) => {
     if (activeCartId) {
       removeItemFromPendingCart(activeCartId, id);
-      toast.success('Đã xóa sản phẩm khỏi giỏ hàng');
-
-      // Check voucher validity after item removal
-      if (appliedVoucher) {
-        const subtotal = calculateCartSubtotal();
-        if (subtotal < parseFloat(appliedVoucher.minOrderValue) || cartItems.length <= 1) {
-          toast.warn(`Đơn hàng không còn đủ điều kiện cho mã "${appliedVoucher.code}" hoặc giỏ hàng trống. Đã xóa mã.`);
-          setPendingCartDiscount(activeCartId, 0, null, '');
-        }
-      }
+      const cartName = pendingCarts.find(cart => cart.id === activeCartId)?.name || 'Giỏ hàng';
+      toast.success(`Đã xóa sản phẩm khỏi ${cartName}`);
     } else {
-      removeFromCartStore(id);
+      removeFromCartStore(id); // Sửa thành removeFromCartStore
       toast.success('Đã xóa sản phẩm khỏi giỏ hàng');
     }
   };
 
-  // New function to remove item from any specific cart
+  /**
+   * Removes an item from a specific cart by ID
+   * Used for managing multiple pending carts
+   * 
+   * @param cartId - ID of the cart to remove from
+   * @param itemId - ID of the item to remove
+   */
   const removeItemFromSpecificCart = (cartId: string, itemId: string) => {
-    const cart = pendingCarts.find(c => c.id === cartId);
-    if (!cart) return;
-
     removeItemFromPendingCart(cartId, itemId);
-    toast.success(`Đã xóa sản phẩm khỏi ${cart.name}`);
-
-    // Check voucher validity after item removal if this is the active cart
-    if (cartId === activeCartId && appliedVoucher) {
-      const subtotal = calculateCartSubtotal();
-      if (subtotal < parseFloat(appliedVoucher.minOrderValue) || cartItems.length <= 1) {
-        toast.warn(`Đơn hàng không còn đủ điều kiện cho mã "${appliedVoucher.code}" hoặc giỏ hàng trống. Đã xóa mã.`);
-        setPendingCartDiscount(cartId, 0, null, '');
-      }
-    }
+    const cartName = pendingCarts.find(cart => cart.id === cartId)?.name || 'Giỏ hàng';
+    toast.success(`Đã xóa sản phẩm khỏi ${cartName}`);
   };
 
-
-
+  /**
+   * Applies a coupon/voucher code to the cart
+   * Validates the voucher and calculates discounts
+   * Shows appropriate success/error messages
+   */
   const applyCoupon = async () => {
-    // Get the correct coupon code based on the current context
-    const currentCouponCode = activeCartId ? (activeCart?.couponCode || '') : couponCode;
-    
-    if (!currentCouponCode.trim()) {
-      toast.error('Vui lòng nhập mã giảm giá.');
+    if (!couponCode.trim()) {
+      toast.error('Vui lòng nhập mã giảm giá');
       return;
     }
 
     try {
-      // Manually fetch voucher data with the current coupon code
-      const voucherDataResult = await getAllVouchers({ 
-        code: currentCouponCode, 
-        status: 'HOAT_DONG', 
-        limit: 1, 
-        page: 1 
-      });
+      const response = await getAllVouchers({ status: 'ACTIVE' }); // Thêm tham số
+      const vouchers = response.data.vouchers;
+      
+      const validVoucher = vouchers.find(v => 
+        v.code === couponCode && 
+        v.status === 'ACTIVE' &&
+        new Date(v.startDate) <= new Date() &&
+        new Date(v.endDate) >= new Date() &&
+        v.quantity > v.usedCount // Sửa thành quantity và usedCount
+      );
 
-            const voucher = voucherDataResult?.data?.vouchers?.[0];
+      if (!validVoucher) {
+        toast.error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+        return;
+      }
 
-      if (voucher) {
-        const subtotal = calculateCartSubtotal();
-        if (subtotal < parseFloat(voucher.minOrderValue.toString())) {
-          toast.error(`Đơn hàng chưa đạt giá trị tối thiểu ${formatCurrency(parseFloat(voucher.minOrderValue.toString()))} để áp dụng mã này.`);
-          if (activeCartId) {
-            setPendingCartDiscount(activeCartId, 0, null, '');
-          } else {
-            setVoucher(null);
-            setDiscount(0);
-          }
-          return;
+      // Apply voucher to active cart or main cart
+      if (activeCartId) {
+        const cart = pendingCarts.find(c => c.id === activeCartId);
+        if (cart) {
+          const cartName = cart.name || 'Giỏ hàng';
+          setPendingCartDiscount(activeCartId, validVoucher.discountValue); // Sửa để truyền giá trị discount
+          toast.success(`Đã áp dụng mã giảm giá cho ${cartName}`);
         }
-
-        if (voucher.quantity <= voucher.usedCount) {
-          toast.error('Mã giảm giá này đã hết lượt sử dụng.');
-          if (activeCartId) {
-            setPendingCartDiscount(activeCartId, 0, null, '');
-          } else {
-            setVoucher(null);
-            setDiscount(0);
-          }
-          return;
-        }
-
-        if (new Date(voucher.endDate) < new Date()) {
-          toast.error('Mã giảm giá đã hết hạn.');
-          if (activeCartId) {
-            setPendingCartDiscount(activeCartId, 0, null, '');
-          } else {
-            setVoucher(null);
-            setDiscount(0);
-          }
-          return;
-        }
-
-        let discountAmount = 0;
-        if (voucher.type === 'PERCENTAGE') {
-          discountAmount = (subtotal * parseFloat(voucher.value.toString())) / 100;
-          if (voucher.maxDiscount && discountAmount > parseFloat(voucher.maxDiscount.toString())) {
-            discountAmount = parseFloat(voucher.maxDiscount.toString());
-          }
-        } else if (voucher.type === 'FIXED_AMOUNT') {
-          discountAmount = parseFloat(voucher.value.toString());
-        }
-
-        discountAmount = Math.min(discountAmount, subtotal);
-
-        if (activeCartId) {
-          setPendingCartDiscount(activeCartId, discountAmount, voucher, currentCouponCode);
-        } else {
-          setDiscount(discountAmount);
-          setVoucher(voucher);
-        }
-
-        toast.success(`Đã áp dụng mã giảm giá "${voucher.code}".`);
       } else {
-        toast.error('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
-        if (activeCartId) {
-          setPendingCartDiscount(activeCartId, 0, null, '');
-        } else {
-          setVoucher(null);
-          setDiscount(0);
-          setCouponCode('');
-        }
+        setVoucher(validVoucher); // Giữ nguyên vì setVoucher có thể xử lý object voucher
+        toast.success('Đã áp dụng mã giảm giá');
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi tìm mã giảm giá.');
-      if (activeCartId) {
-        setPendingCartDiscount(activeCartId, 0, null, '');
-      } else {
-        setVoucher(null);
-        setDiscount(0);
-      }
+      console.error('Error applying coupon:', error);
+      toast.error('Có lỗi xảy ra khi áp dụng mã giảm giá');
     }
   };
 
@@ -938,27 +950,33 @@ export default function POSPage() {
   };
 
   const handleCheckout = async () => {
+    // Kiểm tra giỏ hàng có trống không
     if (cartItems.length === 0) {
       toast.error('Giỏ hàng đang trống');
       return;
     }
+
+    // Kiểm tra số tiền thanh toán
     const totalAmount = calculateCartTotal();
     const cashReceivedNum = parseFloat(cashReceived.toString());
 
+    // Kiểm tra tiền mặt nếu thanh toán bằng tiền mặt
     if (paymentMethod === 'cash' && (isNaN(cashReceivedNum) || cashReceivedNum < totalAmount)) {
       toast.error('Số tiền khách đưa không đủ hoặc không hợp lệ.');
       return;
     }
 
-
+    // Bắt đầu quá trình thanh toán
     setCheckoutIsLoading(true);
 
+    // Tạo mã đơn hàng từ thời gian hiện tại
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     const generatedOrderId = `POS${hours}${minutes}${seconds}`;
 
+    // Chuẩn bị dữ liệu đơn hàng
     const orderPayload: IPOSOrderCreateRequest = {
       orderId: generatedOrderId,
       customer: customerName || 'Khách tại quầy',
@@ -988,11 +1006,17 @@ export default function POSPage() {
     };
 
     try {
+      // Gọi API tạo đơn hàng
       const orderResponse = await createOrderMutation.mutateAsync(orderPayload);
 
       if (orderResponse.success && orderResponse.data) {
+        // Xử lý khi tạo đơn hàng thành công
         const orderCode = orderResponse.data.orderNumber || `POS-${Math.floor(1000 + Math.random() * 9000)}`;
+        
+        // Cập nhật thống kê
         updateStatsOnCheckout(totalAmount);
+        
+        // Thêm vào danh sách giao dịch gần đây
         const newTransaction = {
           id: orderCode,
           customer: customerName || 'Khách vãng lai',
@@ -1001,8 +1025,11 @@ export default function POSPage() {
           status: 'completed'
         };
         setRecentTransactions([newTransaction, ...recentTransactions.slice(0, 2)]);
+        
+        // Hiển thị thông báo thành công
         toast.success(`Đã tạo đơn hàng ${orderCode} và thanh toán thành công!`);
 
+        // Cập nhật số lượng sử dụng voucher nếu có
         if (appliedVoucher) {
           incrementVoucherUsageMutation(
             appliedVoucher.id,
@@ -1017,7 +1044,10 @@ export default function POSPage() {
           );
         }
 
+        // Tính tiền thừa cho thanh toán tiền mặt
         const currentChangeDue = paymentMethod === 'cash' && !isNaN(cashReceivedNum) && cashReceivedNum >= totalAmount ? cashReceivedNum - totalAmount : 0;
+        
+        // Chuẩn bị dữ liệu cho hóa đơn
         const invoiceData: InvoiceData = {
           shopInfo: {
             name: 'Clothes Shop',
@@ -1048,8 +1078,12 @@ export default function POSPage() {
           changeGiven: currentChangeDue,
           paymentMethod: paymentMethod === 'cash' ? 'Tiền mặt' : 'Chuyển khoản',
         };
+
+        // Hiển thị hóa đơn
         setCurrentInvoiceData(invoiceData);
         setShowInvoiceDialog(true);
+
+        // Reset các state sau khi thanh toán thành công
         clearCartStore();
         if (activeCartId) {
           clearPendingCartItems(activeCartId);
@@ -1063,11 +1097,14 @@ export default function POSPage() {
         setShowCheckoutDialog(false);
 
       } else {
+        // Xử lý khi tạo đơn hàng thất bại
         toast.error((orderResponse as any).message || 'Không thể tạo đơn hàng. Vui lòng thử lại.');
       }
     } catch (error: any) {
+      // Xử lý lỗi
       toast.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra trong quá trình thanh toán.');
     } finally {
+      // Kết thúc loading
       setCheckoutIsLoading(false);
     }
   };
@@ -1285,9 +1322,10 @@ export default function POSPage() {
     setSelectedCartForView(null);
   };
 
+  // JSX return - giao diện của component
   return (
     <div className="h-full">
-
+      {/* Header với breadcrumb navigation */}
       <div className="mb-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <Breadcrumb>
@@ -1302,9 +1340,9 @@ export default function POSPage() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-
       </div>
-      {/* Pending Carts Tabs */}
+
+      {/* Phần quản lý các giỏ hàng đang chờ */}
       <div className='bg-white rounded-[6px] p-4 mb-4 shadow-sm border border-border'>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-maintext flex items-center gap-2">
@@ -1320,6 +1358,7 @@ export default function POSPage() {
           </Button>
         </div>
 
+        {/* Danh sách các giỏ hàng đang chờ */}
         {pendingCarts.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-2">
             {pendingCarts.slice(0, 5).map((cart, index) => (
@@ -1336,15 +1375,20 @@ export default function POSPage() {
                 )}
                 onClick={() => handleSwitchCart(cart.id)}
               >
+                {/* Hiển thị thông tin giỏ hàng */}
                 <div className="flex items-center gap-1 flex-1">
                   <div className={cn(
                     'w-2 h-2 rounded-full',
                     cart.items.length > 0 ? 'bg-green-500' : 'bg-gray-300'
                   )} />
-                  <span className="text-sm font-medium truncate">{cart.name} <span className="text-sm text-maintext/70 font-semibold">({cart.items.reduce((sum, item) => sum + item.quantity, 0)})</span></span>
+                  <span className="text-sm font-medium truncate">
+                    {cart.name} <span className="text-sm text-maintext/70 font-semibold">
+                      ({cart.items.reduce((sum, item) => sum + item.quantity, 0)})
+                    </span>
+                  </span>
                 </div>
+                {/* Nút xóa giỏ hàng */}
                 <button
-                  key={`delete-${cart.id}`}
                   className="opacity-0 group-hover:opacity-100 transition-opacity border border-red-500/70 p-1 hover:bg-red-400 bg-red-400 rounded-full hover:!text-white text-white"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1356,6 +1400,7 @@ export default function POSPage() {
               </motion.button>
             ))}
 
+            {/* Dropdown menu cho các giỏ hàng phụ (nếu có nhiều hơn 5) */}
             {pendingCarts.length > 5 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1400,8 +1445,12 @@ export default function POSPage() {
           </div>
         )}
       </div>
+
+      {/* Layout chính chia làm 2 cột */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Cột trái - Danh sách sản phẩm */}
         <div className="lg:col-span-2 overflow-hidden flex flex-col">
+          {/* Thanh tìm kiếm và lọc */}
           <div className="bg-white rounded-[6px] p-4 mb-4 shadow-sm border border-border hover:shadow-md transition-shadow duration-300">
             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
               <div className="relative flex-1">
@@ -1416,6 +1465,8 @@ export default function POSPage() {
                 />
               </div>
             </div>
+
+            {/* Danh sách danh mục sản phẩm */}
             <div className="flex overflow-x-auto pb-2 scrollbar-thin gap-2">
               {dynamicCategories.map((category) => (
                 <button
@@ -1438,9 +1489,9 @@ export default function POSPage() {
             </div>
           </div>
 
-
-
+          {/* Khu vực hiển thị sản phẩm */}
           <div className="bg-white rounded-xl p-4 flex-1 shadow-lg border border-border/50 hover:shadow-xl transition-all duration-300 min-h-[400px]">
+            {/* Nút quay lại khi đang xem chi tiết sản phẩm */}
             {selectedProduct && <div className='w-full flex items-center justify-between mb-4'>
               <motion.button
                 className="text-sm text-primary font-medium flex items-center gap-2 hover:text-primary/80 transition-colors bg-primary/5 px-4 py-2 rounded-full border border-primary/50"
@@ -1455,7 +1506,10 @@ export default function POSPage() {
                 Quay lại danh sách sản phẩm
               </motion.button>
             </div>}
+
+            {/* Chi tiết sản phẩm hoặc danh sách sản phẩm */}
             {selectedProduct && selectedApiVariant ? (
+              // Hiển thị chi tiết sản phẩm khi có sản phẩm được chọn
               <div className="mb-4">
                 <div className="flex flex-col lg:flex-row gap-8">
                   <motion.div
@@ -1649,6 +1703,7 @@ export default function POSPage() {
                 </div>
               </div>
             ) : (
+              // Hiển thị danh sách sản phẩm
               <Tabs defaultValue="grid" className="w-full">
                 <div className="flex justify-between items-center mb-4">
                   <TabsList>
@@ -2024,673 +2079,7 @@ export default function POSPage() {
             )}
           </div>
         </div>
-
-        {/* Cart Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 w-full justify-between">
-              {activeCart ? (
-                <div className="flex items-center gap-2">
-                  <span>{activeCart.name}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm
-                  </Badge>
-                </div>
-              ) : (
-                'Giỏ hàng chính'
-              )}
-
-              {pendingCarts.length > 4 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Icon path={mdiCart} size={0.7} />
-                      <Icon path={mdiChevronDown} size={0.7} className="ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    {pendingCarts.map((cart) => (
-                      <DropdownMenuItem
-                        key={cart.id}
-                        className="flex items-center justify-between"
-                        onClick={() => handleSwitchCart(cart.id)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className={cn(
-                            'w-2 h-2 rounded-full',
-                            cart.items.length > 0 ? 'bg-green-500' : 'bg-gray-300'
-                          )} />
-                          <span>{cart.name}</span>
-                          {cart.items.length > 0 && (
-                            <Badge variant="secondary" className="text-xs">
-                              {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
-                            </Badge>
-                          )}
-                        </div>
-                        <button
-                          className="p-1 hover:bg-red-100 rounded"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCart(cart.id);
-                          }}
-                        >
-                          <Icon path={mdiClose} size={0.4} className="text-red-500" />
-                        </button>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {cartItems.length === 0 ? (
-              <div className="text-center py-8 text-maintext">
-                <Icon path={mdiCart} size={2} className="mx-auto mb-2 text-gray-300" />
-                <p>Giỏ hàng trống</p>
-                <p className="text-sm text-maintext">Thêm sản phẩm để bắt đầu</p>
-              </div>
-            ) : (
-              <>
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-3">
-                    {cartItems.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="relative h-20 w-20 flex-shrink-0 rounded-md overflow-hidden bg-white">
-                          <img
-                            src={checkImageUrl(item.image)}
-                            alt={item.name}
-                            height={100}
-                            width={100}
-                            draggable="false"
-                            className="object-contain h-full w-full flex-shrink-0"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm text-maintext truncate text-wrap">{item.name}</h4>
-                          <p className="text-xs text-maintext">
-                            {item.colorName} / {item.sizeName}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-lg text-primary font-semibold">
-                              {formatCurrency(item.price)}
-                            </span>
-                            {item.hasDiscount && item.originalPrice && (
-                              <>
-                                <span className="text-sm text-maintext line-through">
-                                  {formatCurrency(item.originalPrice)}
-                                </span>
-                                {item.discountPercent && (
-                                  <Badge variant="destructive" className="bg-green-500 text-xs">
-                                    -{item.discountPercent}%
-                                  </Badge>
-                                )}
-                              </>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => updateCartItemQuantity(item.id, -1)}
-                            >
-                              <Icon path={mdiMinus} size={0.7} />
-                            </Button>
-                            <Input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => {
-                                const newQuantity = parseInt(e.target.value) || 0;
-                                if (newQuantity < 0) {
-                                  toast.warn('Số lượng không được âm.');
-                                  return;
-                                }
-                                if (newQuantity > item.stock) {
-                                  toast.warn(`Chỉ còn ${item.stock} sản phẩm trong kho.`);
-                                  return;
-                                }
-                                if (newQuantity === 0) {
-                                  removeCartItem(item.id);
-                                  return;
-                                }
-                                // Calculate the difference and update
-                                const difference = newQuantity - item.quantity;
-                                if (difference !== 0) {
-                                  updateCartItemQuantity(item.id, difference);
-                                }
-                              }}
-                              onBlur={(e) => {
-                                // Ensure we have a valid number on blur
-                                const value = e.target.value;
-                                if (value === '' || isNaN(parseInt(value))) {
-                                  // Reset to current quantity if invalid
-                                  e.target.value = item.quantity.toString();
-                                }
-                              }}
-                              className="w-16 h-8 text-center text-sm"
-                              min="1"
-                              max={item.stock}
-                            />
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => updateCartItemQuantity(item.id, 1)}
-                              disabled={item.quantity >= item.stock}
-                            >
-                              <Icon path={mdiPlus} size={0.7} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 bg-red-50 border border-red-500"
-                              onClick={() => removeCartItem(item.id)}
-                            >
-                              <Icon path={mdiDelete} size={0.7} />
-                            </Button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </ScrollArea>
-
-                <Separator />
-
-                {/* Voucher Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder="Nhập mã giảm giá..."
-                      value={couponCode}
-                      onChange={(e) => {
-                        if (activeCartId) {
-                          // Update coupon code in pending cart
-                          const activeCart = getActiveCart();
-                          if (activeCart) {
-                            setPendingCartDiscount(activeCartId, activeCart.appliedDiscount, activeCart.appliedVoucher, e.target.value);
-                          }
-                        } else {
-                          setCouponCode(e.target.value);
-                        }
-                      }}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="default"
-                      onClick={applyCoupon}
-                      disabled={!couponCode.trim()}
-                    >
-                      Áp dụng
-                    </Button>
-                  </div>
-                  <Button
-                    variant="link"
-                    className="text-sm text-primary mt-1 px-0"
-                    onClick={() => setShowVouchersDialog(true)}
-                  >
-                    Xem danh sách mã giảm giá
-                  </Button>
-
-                  {appliedVoucher && (
-                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex items-center gap-2">
-                        <Icon path={mdiTag} size={0.7} className="text-green-600" />
-                        <span className="text-sm font-medium text-green-800">
-                          Mã: {appliedVoucher.code}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 text-green-600 hover:text-green-800"
-                        onClick={() => {
-                          if (activeCartId) {
-                            setPendingCartDiscount(activeCartId, 0, null, '');
-                          } else {
-                            setDiscount(0);
-                            setVoucher(null);
-                            setCouponCode('');
-                          }
-                        }}
-                      >
-                        <Icon path={mdiClose} size={0.7} />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <Separator />
-
-                {/* Order Summary */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Tạm tính:</span>
-                    <span>{formatCurrency(calculateCartSubtotal())}</span>
-                  </div>
-                  {appliedDiscount > 0 && (
-                    <div className="flex justify-between text-sm text-green-600">
-                      <span>Giảm giá:</span>
-                      <span>-{formatCurrency(appliedDiscount)}</span>
-                    </div>
-                  )}
-                  <Separator />
-                  <div className="flex justify-between text-lg font-semibold">
-                    <span>Tổng cộng:</span>
-                    <span className="text-primary">{formatCurrency(calculateCartTotal())}</span>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full"
-                  onClick={handleProceedToCheckout}
-                  disabled={cartItems.length === 0}
-                >
-                  <Icon path={mdiCashRegister} size={0.7} className="mr-2" />
-                  Thanh toán ({formatCurrency(calculateCartTotal())})
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Checkout Dialog */}
-      <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
-        <DialogContent className="sm:max-w-4xl">
-          <ScrollArea className="max-h-[70vh] p-1">
-            <DialogHeader>
-              <DialogTitle>Xác nhận thanh toán</DialogTitle>
-            </DialogHeader>
-
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <label htmlFor="user-select" className="text-right text-sm text-maintext cursor-help font-semibold">
-                        Chọn khách hàng
-                      </label>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="text-center">
-                        <p>Chọn khách hàng có sẵn hoặc để trống để nhập thủ công</p>
-                        {usersData?.data?.accounts && (
-                          <p className="text-xs text-gray-400 mt-1">
-                            Có {usersData.data.accounts.length} khách hàng trong hệ thống
-                          </p>
-                        )}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <Select
-                  value={selectedUserId}
-                  onValueChange={handleUserSelect}
-                >
-                  <SelectTrigger className="col-span-3 h-12">
-                    <SelectValue placeholder={`Chọn khách hàng (${usersData?.data?.accounts?.length || 0} khách hàng)`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="guest">
-                      <div className="flex items-center gap-4 py-1">
-                        <Icon path={mdiAccount} size={0.7} className="text-gray-400" />
-                        <div className="flex flex-col items-start">
-                          <span className="text-xs text-maintext font-semibold">Khách vãng lai</span>
-                          <span className="text-xs text-maintext">Nhập thông tin thủ công</span>
-                        </div>
-                      </div>
-                    </SelectItem>
-                    {isLoadingUsers ? (
-                      <SelectItem value="loading" disabled>
-                        <div className="flex items-center gap-4 py-2">
-                          <div className="animate-spin h-4 w-4 border-2 border-blue-300 border-t-blue-600 rounded-full"></div>
-                          <span className="text-maintext">Đang tải danh sách khách hàng...</span>
-                        </div>
-                      </SelectItem>
-                    ) : usersData?.data?.accounts && usersData.data.accounts.length > 0 ? (
-                      usersData.data.accounts.map((user: IAccount) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          <div className="flex items-center gap-4 py-1">
-                            <Icon path={mdiAccount} size={0.7} className="text-primary" />
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-primary font-semibold truncate">{user.fullName}</span>
-                                {(user as any).code && (
-                                  <span className="px-2 py-0.5 text-xs font-mono bg-green-50 text-green-600 rounded border border-green-200">
-                                    {(user as any).code}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-maintext mt-0.5">
-                                {user.phoneNumber ? (
-                                  <span className="flex items-center gap-1 text-maintext">
-                                    📱 {user.phoneNumber}
-                                  </span>
-                                ) : (
-                                  <span className="flex items-center gap-1 text-maintext">
-                                    ✉️ {user.email}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-customers" disabled>
-                        <div className="flex items-center gap-4 py-2">
-                          <Icon path={mdiAccount} size={0.7} className="text-gray-400" />
-                          <div className="flex flex-col">
-                            <span className="text-maintext font-medium">Không có khách hàng nào</span>
-                            <span className="text-xs text-gray-400">Vui lòng thêm khách hàng mới</span>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="customer-name" className="text-right text-sm text-maintext font-semibold">
-                  Tên khách hàng
-                </label>
-                <Input
-                  id="customer-name"
-                  placeholder="Tên khách hàng"
-                  className="col-span-3"
-                  value={customerName}
-                  onChange={(e) => {
-                    setCustomerName(e.target.value);
-                    // Nếu người dùng nhập thủ công thì reset selected user
-                    if (selectedUserId && selectedUserId !== 'guest') {
-                      setSelectedUserId('guest');
-                    }
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="customer-phone" className="text-right text-sm text-maintext font-semibold">
-                  Số điện thoại
-                </label>
-                <Input
-                  id="customer-phone"
-                  placeholder="Số điện thoại"
-                  className="col-span-3"
-                  value={customerPhone}
-                  onChange={(e) => {
-                    setCustomerPhone(e.target.value);
-                    // Nếu người dùng nhập thủ công thì reset selected user
-                    if (selectedUserId && selectedUserId !== 'guest') {
-                      setSelectedUserId('guest');
-                    }
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="payment-method" className="text-right text-sm text-maintext font-semibold">
-                  Thanh toán
-                </label>
-                <Select
-                  value={paymentMethod}
-                  onValueChange={(value) => {
-                    setPaymentMethod(value);
-                    setTransferPaymentCompleted(false);
-                    if (value === 'transfer') {
-                      setCashReceived(calculateCartTotal().toString());
-                    } else {
-                      setCashReceived('');
-                    }
-                  }}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Chọn phương thức thanh toán" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cash">
-                      <div className="flex items-center gap-2">
-                        <Icon path={mdiCashMultiple} size={0.7} className="text-maintext" />
-                        <span>Tiền mặt</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="transfer">
-                      <div className="flex items-center gap-2">
-                        <Icon path={mdiBankTransfer} size={0.7} className="text-maintext" />
-                        <span>Chuyển khoản</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {paymentMethod === 'cash' && (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label htmlFor="cash-received" className="text-right text-sm text-maintext font-semibold">
-                    Tiền khách đưa
-                  </label>
-                  <Input
-                    id="cash-received"
-                    type="number"
-                    placeholder="Nhập số tiền khách đưa"
-                    className="col-span-3"
-                    value={cashReceived}
-                    onChange={(e) => setCashReceived(e.target.value)}
-                    min={0}
-                  />
-                </div>
-              )}
-
-              {paymentMethod === 'transfer' && (
-                <div className="grid grid-cols-1 gap-4">
-                  <div
-                    className="bg-gray-50 rounded-lg p-4 text-center"
-                    onClick={() => {
-                      if (!transferPaymentCompleted) {
-                        setTransferPaymentCompleted(true);
-                        setShowPaymentSuccessModal(true);
-                      }
-                    }}
-                    style={{ cursor: !transferPaymentCompleted ? 'pointer' : 'default' }}
-                  >
-                    <h3 className="text-lg font-semibold mb-4 text-maintext">Quét mã QR để thanh toán</h3>
-                    <div className="flex justify-center mb-4">
-                      <div className="bg-white p-4 rounded-lg shadow-sm border">
-                        <QRCodeComponent
-                          value={`BANK_TRANSFER|970415|0123456789|Clothes Shop|${calculateCartTotal()}|Thanh toan don hang ${new Date().getTime()}`}
-                          size={200}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-sm text-maintext space-y-1">
-                      <p><strong>Ngân hàng:</strong> Vietcombank</p>
-                      <p><strong>Số tài khoản:</strong> 0123456789</p>
-                      <p><strong>Chủ tài khoản:</strong> Clothes Shop</p>
-                      <p><strong>Số tiền:</strong> {formatCurrency(calculateCartTotal())}</p>
-                      <p><strong>Nội dung:</strong> Thanh toan don hang {new Date().getTime()}</p>
-                    </div>
-                    {transferPaymentCompleted && (
-                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center justify-center gap-2 text-green-700">
-                          <svg className="w-5 h-5" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          <span className="font-medium">Thanh toán thành công!</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-maintext">
-                  <span className="text-maintext text-base">Số lượng sản phẩm:</span>
-                  <span className="text-maintext text-base">{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
-                </div>
-                <div className="flex justify-between text-sm text-maintext">
-                  <span className="text-base">Tạm tính:</span>
-                  <span className="text-base">{formatCurrency(calculateCartSubtotal())}</span>
-                </div>
-                {appliedDiscount > 0 && (
-                  <div className="flex justify-between text-sm text-primary">
-                    <span>Giảm giá ({appliedVoucher?.code || 'KM'}):</span>
-                    <span>-{formatCurrency(appliedDiscount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-medium text-base pt-2 border-t border-border">
-                  <span className="text-maintext font-semibold">Tổng thanh toán:</span>
-                  <span className="text-primary font-semibold">{formatCurrency(calculateCartTotal())}</span>
-                </div>
-                {paymentMethod === 'cash' && !isNaN(parseFloat(cashReceived.toString())) && parseFloat(cashReceived.toString()) >= calculateCartTotal() && changeDue >= 0 && (
-                  <div className="flex justify-between font-medium text-base pt-2">
-                    <span className="text-maintext font-semibold">Tiền thừa trả khách:</span>
-                    <span className="text-primary font-semibold">{formatCurrency(changeDue)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <DialogFooter className='pb-4'>
-              <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>
-                Hủy
-              </Button>
-              <Button
-                onClick={handleCheckout}
-                disabled={checkoutIsLoading ||
-                  (paymentMethod === 'cash' && (cashReceived.toString() === '' || parseFloat(cashReceived.toString()) < calculateCartTotal() || isNaN(parseFloat(cashReceived.toString())))) ||
-                  (paymentMethod === 'transfer' && !transferPaymentCompleted)}
-              >
-                {checkoutIsLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Đang xử lý...
-                  </>
-                ) : (
-                  <>
-                    <Icon path={mdiCashRegister} size={0.7} className="mr-2" />
-                    Hoàn tất thanh toán
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-
-      {/* Invoice Dialog */}
-      {showInvoiceDialog && currentInvoiceData && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <InvoiceDialog
-            open={showInvoiceDialog}
-            onOpenChange={setShowInvoiceDialog}
-            invoiceData={currentInvoiceData}
-            formatCurrency={formatCurrency}
-            formatDateTimeForInvoice={formatDateTimeForInvoice}
-          />
-        </Suspense>
-      )}
-
-      {/* Vouchers Dialog */}
-      {showVouchersDialog && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <VouchersDialog
-            open={showVouchersDialog}
-            onOpenChange={setShowVouchersDialog}
-            onVoucherSelect={(code: string) => {
-              if (activeCartId) {
-                const activeCart = getActiveCart();
-                if (activeCart) {
-                  setPendingCartDiscount(activeCartId, activeCart.appliedDiscount, activeCart.appliedVoucher, code);
-                }
-              } else {
-                setCouponCode(code);
-              }
-              applyCoupon();
-            }}
-            formatCurrency={formatCurrency}
-          />
-        </Suspense>
-      )}
-
-      {/* Delete Cart Confirmation Dialog */}
-      <Dialog open={showDeleteCartDialog} onOpenChange={setShowDeleteCartDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Xác nhận xóa giỏ hàng</DialogTitle>
-            <DialogDescription>
-              {cartToDelete && (
-                <>
-                  Bạn có chắc chắn muốn xóa "{pendingCarts.find(cart => cart.id === cartToDelete)?.name}"?
-                  <br />
-                  <span className="text-red-600 font-medium">Hành động này không thể hoàn tác.</span>
-                </>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={cancelDeleteCart}>
-              Hủy
-            </Button>
-            <Button variant="destructive" onClick={confirmDeleteCart}>
-              <Icon path={mdiDelete} size={0.7} className="mr-2" />
-              Xóa giỏ hàng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Payment Success Modal */}
-      <Dialog open={showPaymentSuccessModal} onOpenChange={setShowPaymentSuccessModal}>
-        <DialogContent className="sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="text-center text-green-600">Thanh toán thành công!</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center py-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-green-600" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-maintext mb-2">Giao dịch hoàn tất</h3>
-            <p className="text-sm text-maintext text-center mb-4">
-              Chúng tôi đã nhận được thanh toán của bạn qua chuyển khoản.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 w-full border">
-              <div className="text-sm space-y-1">
-                <div className="flex justify-between">
-                  <span>Số tiền:</span>
-                  <span className="font-medium">{formatCurrency(calculateCartTotal())}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Phương thức:</span>
-                  <span className="font-medium">Chuyển khoản</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Thời gian:</span>
-                  <span className="font-medium">{new Date().toLocaleTimeString('vi-VN')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              className="w-full"
-              onClick={() => setShowPaymentSuccessModal(false)}
-            >
-              Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

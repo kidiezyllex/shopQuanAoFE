@@ -42,11 +42,11 @@ export interface IProductUpdate {
   description?: string;
   weight?: number;
   variants?: IProductVariant[];
-  status?: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IProductStatusUpdate {
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IVariantStockUpdate {

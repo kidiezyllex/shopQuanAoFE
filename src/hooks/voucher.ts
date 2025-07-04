@@ -34,6 +34,8 @@ export const useVouchers = (params: IVoucherFilter = {}): UseQueryResult<IVouche
   return useQuery<IVouchersResponse, Error>({
     queryKey: ["vouchers", params],
     queryFn: () => getAllVouchers(params),
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -42,6 +44,8 @@ export const useVoucherDetail = (voucherId: string): UseQueryResult<IVoucherResp
     queryKey: ["voucher", voucherId],
     queryFn: () => getVoucherById(voucherId),
     enabled: !!voucherId, // Chỉ fetch khi có voucherId
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -94,5 +98,7 @@ export const useAvailableVouchersForUser = (
     queryKey: ["availableVouchers", userId, params],
     queryFn: () => getAvailableVouchersForUser(userId, params),
     enabled: !!userId, // Only fetch if userId is present
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 }; 

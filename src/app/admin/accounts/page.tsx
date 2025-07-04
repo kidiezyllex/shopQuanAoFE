@@ -78,7 +78,7 @@ export default function AccountsPage() {
   const [accountToDelete, setAccountToDelete] = useState<IAccount | null>(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [accountToUpdateStatus, setAccountToUpdateStatus] = useState<IAccount | null>(null);
-  const [newStatus, setNewStatus] = useState<'HOAT_DONG' | 'KHONG_HOAT_DONG'>('HOAT_DONG');
+  const [newStatus, setNewStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
 
   const { data, isLoading, error } = useAccounts(filters);
   const deleteAccount = useDeleteAccount();
@@ -135,9 +135,9 @@ export default function AccountsPage() {
   // Get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'HOAT_DONG':
+      case 'ACTIVE':
         return <Badge className="bg-green-600 text-white hover:bg-green-700">Hoạt động</Badge>;
-      case 'KHONG_HOAT_DONG':
+      case 'INACTIVE':
         return <Badge className="bg-red-600 text-white hover:bg-red-700">Không hoạt động</Badge>;
       default:
         return <Badge className="bg-gray-500 text-white hover:bg-gray-600">{status}</Badge>;
@@ -184,7 +184,7 @@ export default function AccountsPage() {
     }
   };
 
-  const handleUpdateStatus = (account: IAccount, status: 'HOAT_DONG' | 'KHONG_HOAT_DONG') => {
+  const handleUpdateStatus = (account: IAccount, status: 'ACTIVE' | 'INACTIVE') => {
     setAccountToUpdateStatus(account);
     setNewStatus(status);
     setIsStatusDialogOpen(true);
@@ -301,8 +301,8 @@ export default function AccountsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                        <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                        <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                        <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                        <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -390,10 +390,10 @@ export default function AccountsPage() {
                                 </DropdownMenuItem>
                               </a>
                               <DropdownMenuSeparator />
-                              {account.status === 'HOAT_DONG' ? (
+                              {account.status === 'ACTIVE' ? (
                                 <DropdownMenuItem
                                   className="cursor-pointer text-maintext"
-                                  onClick={() => handleUpdateStatus(account, 'KHONG_HOAT_DONG')}
+                                  onClick={() => handleUpdateStatus(account, 'INACTIVE')}
                                 >
                                   <Icon path={mdiLock} size={0.7} className="mr-2" />
                                   <span className="text-maintext">Vô hiệu hóa</span>
@@ -401,7 +401,7 @@ export default function AccountsPage() {
                               ) : (
                                 <DropdownMenuItem
                                   className="cursor-pointer text-maintext"
-                                  onClick={() => handleUpdateStatus(account, 'HOAT_DONG')}
+                                  onClick={() => handleUpdateStatus(account, 'ACTIVE')}
                                 >
                                   <Icon path={mdiLockReset} size={0.7} className="mr-2" />
                                   <span className="text-maintext">Kích hoạt</span>
@@ -512,10 +512,10 @@ export default function AccountsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {newStatus === 'HOAT_DONG' ? 'Kích hoạt tài khoản' : 'Vô hiệu hóa tài khoản'}
+              {newStatus === 'ACTIVE' ? 'Kích hoạt tài khoản' : 'Vô hiệu hóa tài khoản'}
             </DialogTitle>
             <DialogDescription>
-              {newStatus === 'HOAT_DONG' ? (
+              {newStatus === 'ACTIVE' ? (
                 <>
                   Bạn có chắc chắn muốn kích hoạt tài khoản <span className="font-semibold">{accountToUpdateStatus?.fullName}</span>?
                   <br />
@@ -538,7 +538,7 @@ export default function AccountsPage() {
             </DialogClose>
             <Button
               type="button"
-              variant={newStatus === 'HOAT_DONG' ? 'default' : 'destructive'}
+              variant={newStatus === 'ACTIVE' ? 'default' : 'destructive'}
               onClick={confirmUpdateStatus}
               disabled={updateAccountStatus.isPending}
               className="flex items-center gap-2"
@@ -548,7 +548,7 @@ export default function AccountsPage() {
                   <Icon path={mdiLoading} size={0.7} className="animate-spin" />
                   Đang xử lý...
                 </>
-              ) : newStatus === 'HOAT_DONG' ? (
+              ) : newStatus === 'ACTIVE' ? (
                 <>
                   <Icon path={mdiCheck} size={0.7} />
                   Kích hoạt

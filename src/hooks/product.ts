@@ -39,6 +39,8 @@ export const useProducts = (params: IProductFilter = {}): UseQueryResult<IProduc
     queryFn: () => getAllProducts(params),
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -49,6 +51,8 @@ export const useProductDetail = (productId: string): UseQueryResult<IProductResp
     enabled: !!productId, 
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 };
 
@@ -117,6 +121,8 @@ export const useSearchProducts = (params: IProductSearchParams): UseQueryResult<
              !!params.maxPrice,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 }; 
 
@@ -124,6 +130,8 @@ export const useProductFilters = (): UseQueryResult<IProductFiltersResponse, Err
   return useQuery<IProductFiltersResponse, Error>({
     queryKey: ["productFilters"],
     queryFn: () => getAllFilters(),
+    refetchInterval: 4000,
+    refetchIntervalInBackground: true,
   });
 }; 
 
