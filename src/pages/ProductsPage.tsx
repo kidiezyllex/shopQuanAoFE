@@ -87,7 +87,7 @@ export default function ProductsPage() {
   const paginationParams: IProductFilter = {
     page: pagination.page,
     limit: pagination.limit,
-    status: "HOAT_DONG",
+    status: "ACTIVE",
   }
 
   const productsQuery = useProducts(paginationParams)
@@ -862,7 +862,7 @@ const ProductCard = ({ product, promotionsData, onAddToCart, onQuickView, onAddT
   )
 }
 const ProductFilters = ({ filters, onChange }: ProductFiltersProps) => {
-  const productsQuery = useProducts({ limit: 100, status: "HOAT_DONG" })
+  const productsQuery = useProducts({ limit: 100, status: "ACTIVE" })
   const products = productsQuery.data?.data.products || []
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>(
     filters.brands ? (Array.isArray(filters.brands) ? filters.brands[0] : filters.brands) : undefined,

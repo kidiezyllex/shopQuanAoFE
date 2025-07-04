@@ -244,8 +244,8 @@ export default function VouchersPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                        <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                        <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                        <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                        <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -341,9 +341,9 @@ export default function VouchersPage() {
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
                       <Badge
-                        variant={voucher.status === 'HOAT_DONG' ? 'default' : 'destructive'}
+                        variant={voucher.status === 'ACTIVE' ? 'default' : 'destructive'}
                       >
-                        {voucher.status === 'HOAT_DONG' ? 'Hoạt động' : 'Không hoạt động'}
+                        {voucher.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm text-right">

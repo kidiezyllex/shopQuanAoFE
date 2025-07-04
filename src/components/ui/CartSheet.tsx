@@ -107,7 +107,7 @@ const VouchersListDialog = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
               {vouchers.map((voucher: IVoucher) => {
                 const isExpired = new Date(voucher.endDate) < new Date();
-                const isInactive = voucher.status === 'KHONG_HOAT_DONG';
+                const isInactive = voucher.status === 'INACTIVE';
                 const isOutOfStock = voucher.quantity - voucher.usedCount <= 0;
                 const isDisabled = isExpired || isInactive || isOutOfStock;
 

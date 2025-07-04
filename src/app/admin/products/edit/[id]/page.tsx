@@ -70,7 +70,7 @@ export default function EditProductPage() {
   };
 
   const handleStatusChange = async (checked: boolean) => {
-    const newStatus = checked ? 'HOAT_DONG' : 'KHONG_HOAT_DONG';
+    const newStatus = checked ? 'ACTIVE' : 'INACTIVE';
     const payload: IProductStatusUpdate = { status: newStatus };
 
     try {
@@ -585,13 +585,13 @@ export default function EditProductPage() {
                 <div>
                   <h3 className="font-medium text-maintext">Trạng thái hoạt động</h3>
                   <p className="text-sm text-maintext">
-                    {productUpdate.status === 'HOAT_DONG'
+                    {productUpdate.status === 'ACTIVE'
                       ? 'Sản phẩm đang được hiển thị và có thể mua'
                       : 'Sản phẩm đang bị ẩn và không thể mua'}
                   </p>
                 </div>
                 <Switch
-                  checked={productUpdate.status === 'HOAT_DONG'}
+                  checked={productUpdate.status === 'ACTIVE'}
                   onCheckedChange={handleStatusChange}
                   disabled={updateProductStatus.isPending}
                   className="data-[state=checked]:bg-green-600"

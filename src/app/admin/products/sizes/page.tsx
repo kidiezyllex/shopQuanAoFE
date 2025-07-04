@@ -194,11 +194,11 @@ export default function SizesPage() {
                                                 {size.value}
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap">
-                                                <span className={`px-2 py-1 text-xs rounded-full ${size.status === 'HOAT_DONG'
+                                                <span className={`px-2 py-1 text-xs rounded-full ${size.status === 'ACTIVE'
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-red-100 text-red-800'
                                                     }`}>
-                                                    {size.status === 'HOAT_DONG' ? 'Hoạt động' : 'Không hoạt động'}
+                                                    {size.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
@@ -292,7 +292,7 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
 
     const [formData, setFormData] = useState({
         value: 0,
-        status: 'HOAT_DONG' as 'HOAT_DONG' | 'KHONG_HOAT_DONG'
+        status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
     });
 
     const [errors, setErrors] = useState({
@@ -310,7 +310,7 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
     };
 
     const handleStatusChange = (value: string) => {
-        setFormData((prev) => ({ ...prev, status: value as 'HOAT_DONG' | 'KHONG_HOAT_DONG' }));
+        setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
     };
 
     const validateForm = () => {
@@ -340,7 +340,7 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
                         queryClient.invalidateQueries({ queryKey: ['sizes'] });
                         setFormData({
                             value: 0,
-                            status: 'HOAT_DONG'
+                            status: 'ACTIVE'
                         });
                         onClose();
                     },
@@ -396,8 +396,8 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
                             <SelectValue placeholder="Chọn trạng thái" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                            <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                            <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                            <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

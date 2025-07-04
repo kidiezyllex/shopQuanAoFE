@@ -15,7 +15,7 @@ export interface IPromotion {
   products: IPromotionProduct[] | string[];
   startDate: string;
   endDate: string;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
   updatedAt: string;
 }

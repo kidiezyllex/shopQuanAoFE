@@ -1457,11 +1457,11 @@ const VouchersTab = () => {
               <Card
                 key={voucher.id}
                 className={`relative overflow-hidden shadow-lg transition-all hover:shadow-xl group
-                                ${voucher.status === 'KHONG_HOAT_DONG' || new Date(voucher.endDate) < new Date()
+                                ${voucher.status === 'INACTIVE' || new Date(voucher.endDate) < new Date()
                     ? 'bg-muted/30 border-dashed'
                     : 'bg-card border-primary/20 hover:border-primary/50'}`}
               >
-                {(voucher.status === 'KHONG_HOAT_DONG' || new Date(voucher.endDate) < new Date()) && (
+                {(voucher.status === 'INACTIVE' || new Date(voucher.endDate) < new Date()) && (
                   <div className="absolute top-3 right-3 z-10">
                     <Badge variant="destructive" className="text-xs px-2 py-1 rounded-full shadow-md">
                       {new Date(voucher.endDate) < new Date() ? 'Đã hết hạn' : 'Ngừng hoạt động'}
@@ -1469,7 +1469,7 @@ const VouchersTab = () => {
                   </div>
                 )}
                 <CardHeader className="pb-3 relative">
-                  {!(voucher.status === 'KHONG_HOAT_DONG' || new Date(voucher.endDate) < new Date()) && (
+                  {!(voucher.status === 'INACTIVE' || new Date(voucher.endDate) < new Date()) && (
                     <div className="absolute -top-4 -left-5 w-16 h-16 bg-primary/10 rounded-full transform rotate-45 group-hover:scale-110 transition-transform duration-300"></div>
                   )}
                   <div className="relative z-0">
@@ -1509,7 +1509,7 @@ const VouchersTab = () => {
                     </div>
                   )}
 
-                  {(voucher.status === 'HOAT_DONG' && new Date(voucher.endDate) >= new Date()) ? (
+                  {(voucher.status === 'ACTIVE' && new Date(voucher.endDate) >= new Date()) ? (
                     <Button
                       variant="default"
                       size="sm"

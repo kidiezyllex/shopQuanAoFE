@@ -66,7 +66,7 @@ export default function CreateOrderPage() {
   const { data: productsData } = useProducts({
     name: searchTerm,
     limit: 10,
-    status: 'HOAT_DONG'
+    status: 'ACTIVE'
   });
 
   useEffect(() => {

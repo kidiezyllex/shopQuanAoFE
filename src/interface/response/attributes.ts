@@ -1,7 +1,7 @@
 // Common attribute properties
 interface IAttributeBase {
   id: number;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
   updatedAt: string;
 }

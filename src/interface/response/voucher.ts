@@ -10,7 +10,7 @@ export interface IVoucher {
   endDate: string;
   minOrderValue: number;
   maxDiscount?: number;
-  status: 'HOAT_DONG' | 'KHONG_HOAT_DONG';
+  status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
   updatedAt: string;
   type: 'PERCENTAGE' | 'FIXED_AMOUNT';

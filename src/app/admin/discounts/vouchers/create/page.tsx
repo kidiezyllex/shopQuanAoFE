@@ -26,7 +26,7 @@ const initialVoucher: IVoucherCreate = {
   endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
   minOrderValue: 0,
   maxDiscount: undefined,
-  status: 'HOAT_DONG'
+  status: 'ACTIVE'
 };
 
 export default function CreateVoucherPage() {
@@ -386,8 +386,8 @@ export default function CreateVoucherPage() {
                     <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                    <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                    <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                    <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.status && <p className="text-red-500 text-sm">{errors.status}</p>}

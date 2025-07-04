@@ -25,8 +25,8 @@ export const calculateProductDiscount = (
 
   const applicablePromotions = activePromotions.filter(promotion => {
     
-    // Check status - handle both 'ACTIVE' and 'HOAT_DONG'
-    if (promotion.status !== 'ACTIVE' && promotion.status !== 'HOAT_DONG') {
+    // Check status - handle both 'ACTIVE' and 'ACTIVE'
+    if (promotion.status !== 'ACTIVE' && promotion.status !== 'ACTIVE') {
       return false;
     }
 
@@ -160,8 +160,8 @@ export const formatPrice = (price: number): string => {
  * Check if a promotion is currently active
  */
 export const isPromotionActive = (promotion: any): boolean => {
-  // Handle both 'ACTIVE' and 'HOAT_DONG' status
-  if (promotion.status !== 'ACTIVE' && promotion.status !== 'HOAT_DONG') return false;
+  // Handle both 'ACTIVE' and 'ACTIVE' status
+  if (promotion.status !== 'ACTIVE' && promotion.status !== 'ACTIVE') return false;
 
   const now = new Date();
   

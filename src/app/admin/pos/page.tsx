@@ -379,7 +379,7 @@ export default function POSPage() {
   const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState<boolean>(false);
   const [transferPaymentCompleted, setTransferPaymentCompleted] = useState<boolean>(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 6 });
-  const [filters, setFilters] = useState<IProductFilter>({ status: 'HOAT_DONG' });
+  const [filters, setFilters] = useState<IProductFilter>({ status: 'ACTIVE' });
   const [sortOption, setSortOption] = useState<string>('newest');
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [activeCategoryName, setActiveCategoryName] = useState<string>('Tất cả sản phẩm');
@@ -407,7 +407,7 @@ export default function POSPage() {
 
   const accountsParams = useMemo(() => ({
     role: 'CUSTOMER' as const,
-    status: 'HOAT_DONG' as const,
+    status: 'ACTIVE' as const,
     limit: 100
   }), []);
 
@@ -458,7 +458,7 @@ export default function POSPage() {
     if (!isSearching) return { keyword: '' };
     return {
       keyword: searchQuery,
-      status: 'HOAT_DONG' as const,
+      status: 'ACTIVE' as const,
       page: pagination.page,
       limit: pagination.limit,
       ...(filters.categories && { categories: filters.categories })
@@ -836,7 +836,7 @@ export default function POSPage() {
       // Manually fetch voucher data with the current coupon code
       const voucherDataResult = await getAllVouchers({ 
         code: currentCouponCode, 
-        status: 'HOAT_DONG', 
+        status: 'ACTIVE', 
         limit: 1, 
         page: 1 
       });

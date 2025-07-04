@@ -209,8 +209,8 @@ export default function PromotionsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                        <SelectItem value="HOAT_DONG">Hoạt động</SelectItem>
-                        <SelectItem value="KHONG_HOAT_DONG">Không hoạt động</SelectItem>
+                        <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                        <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

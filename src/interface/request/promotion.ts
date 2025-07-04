@@ -14,6 +14,9 @@ export interface IPromotionCreate {
   products?: string[];
   startDate: string | Date;
   endDate: string | Date;
+  productIds: string[];
+  status?: 'ACTIVE' | 'UNACTIVE';
+
 }
 
 export interface IPromotionUpdate {
@@ -24,4 +27,5 @@ export interface IPromotionUpdate {
   startDate?: string | Date;
   endDate?: string | Date;
   status?: 'ACTIVE' | 'UNACTIVE';
+  productIds?: string[];
 } 
